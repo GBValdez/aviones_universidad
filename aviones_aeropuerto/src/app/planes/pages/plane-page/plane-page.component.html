@@ -1,0 +1,11 @@
+<section class="relative h-screen overflow-x-auto">
+  <img [src]="img" alt="" class="h-full left-0 right-0 mx-auto" />
+  <button
+    class="absolute top-0"
+    (fileChange)="uploadFile($event)"
+    dtBtnUploadFile
+    typesPermitted=".jpg,.jpeg"
+  >
+    Subir archivo
+  </button>
+</section>
