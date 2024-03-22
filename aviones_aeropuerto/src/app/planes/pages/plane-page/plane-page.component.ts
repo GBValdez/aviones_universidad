@@ -14,22 +14,9 @@ export class PlanePageComponent {
   onResize(event: any) {}
 
   img: any;
-  imgBlob!: Blob;
-  wImg: number = 0;
-  hImg: number = 0;
   uploadFile(event: FileList | undefined): void {
     if (event) {
       this.img = URL.createObjectURL(event[0]);
-      const imgElement = new Image();
-      imgElement.src = this.img;
-      imgElement.onload = () => {
-        console.log('Image loaded', imgElement.width, imgElement.height);
-        const widthEquivalent =
-          (imgElement.width * window.innerHeight) / imgElement.height;
-
-        this.wImg = widthEquivalent;
-        this.hImg = window.innerHeight;
-      };
     }
   }
 }

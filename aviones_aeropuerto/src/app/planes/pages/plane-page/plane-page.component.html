@@ -1,15 +1,14 @@
-<section class="h-screen overflow-x-scroll">
-  <img
-    [src]="img"
-    class="left-0 top-0"
-    [ngStyle]="{
-      width: wImg + 'px',
-      height: hImg + 'px',
-      'max-width': wImg + 'px'
-    }"
-  />
+<section class="h-screen overflow-x-auto bg-black">
+  <div class="relative inline-block h-full">
+    <img [src]="img" class="h-full w-auto max-w-none" />
+    <div
+      class="bg-white w-[10px] h-[10px] inline-block absolute"
+      style="left: 50%; top: 50%"
+    ></div>
+  </div>
+
   <button
-    class="absolute top-0"
+    class="top-0 left-0 absolute"
     (fileChange)="uploadFile($event)"
     dtBtnUploadFile
     typesPermitted=".jpg,.jpeg"
