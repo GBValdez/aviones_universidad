@@ -1,5 +1,13 @@
-<section class="relative h-screen overflow-x-auto">
-  <img [src]="img" alt="" class="h-full left-0 right-0 mx-auto" />
+<section class="h-screen overflow-x-scroll">
+  <img
+    [src]="img"
+    class="left-0 top-0"
+    [ngStyle]="{
+      width: wImg + 'px',
+      height: hImg + 'px',
+      'max-width': wImg + 'px'
+    }"
+  />
   <button
     class="absolute top-0"
     (fileChange)="uploadFile($event)"
