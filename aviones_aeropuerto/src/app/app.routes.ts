@@ -8,4 +8,9 @@ export const routes: Routes = [
         (m) => m.PlanePageComponent
       ),
   },
+  {
+    path: '**',
+    redirectTo: 'plane',
+    pathMatch: 'full',
+  },
 ];

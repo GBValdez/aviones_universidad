@@ -60,6 +60,7 @@ export class BtnUploadFileDirective implements AfterViewInit, OnChanges {
     'application/zip': ['.zip'],
     'audio/mpeg': ['.mp3'],
     'video/mp4': ['.mp4'],
+    'image/webp': ['.webp'],
   };
 
   @Output() filesDropped: EventEmitter<FileList> = new EventEmitter<FileList>();

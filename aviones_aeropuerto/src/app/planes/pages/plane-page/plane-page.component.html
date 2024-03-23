@@ -1,18 +1,69 @@
-<section class="h-screen overflow-x-auto bg-black">
-  <div class="relative inline-block h-full">
-    <img [src]="img" class="h-full w-auto max-w-none" />
-    <div
-      class="bg-white w-[10px] h-[10px] inline-block absolute"
-      style="left: 50%; top: 50%"
-    ></div>
-  </div>
-
+<section
+  class="p-[5px] fixed top-0 left-0 h-screen bg-blue-400 w-[250px]"
+  style="z-index: 10"
+>
+  <h1>Opciones</h1>
   <button
-    class="top-0 left-0 absolute"
-    (fileChange)="uploadFile($event)"
+    class="w-full"
+    mat-raised-button
     dtBtnUploadFile
-    typesPermitted=".jpg,.jpeg"
+    (fileChange)="uploadFile($event)"
+    typesPermitted=".jpg,.jpeg,.svg"
   >
-    Subir archivo
+    Insertar imagen
   </button>
+  <h2>Secciones</h2>
+  <div></div>
+
+  <mat-checkbox #checkCasilla> Utilizar cuadricula </mat-checkbox>
+
+  @if( checkCasilla.checked ){
+  <div>
+    <mat-form-field class="w-full">
+      <mat-label>Tamaño px</mat-label>
+      <input matInput type="number" />
+    </mat-form-field>
+    <h2>Desplazamiento px</h2>
+    <div class="flex justify-between">
+      <mat-form-field class="w-[48%]">
+        <mat-label>X</mat-label>
+        <input matInput type="number" />
+      </mat-form-field>
+      <mat-form-field class="w-[48%]">
+        <mat-label>Y</mat-label>
+        <input matInput type="number" />
+      </mat-form-field>
+    </div>
+  </div>
+  }
+</section>
+<section class="h-screen overflow-x-auto bg-black">
+  <div
+    class="relative left-0 right-0 mx-auto"
+    [ngClass]="{
+      'h-full w-fit': hScreen >= wScreen,
+      'h-fit w-full': hScreen < wScreen
+    }"
+    (click)="addSeat($event)"
+  >
+    <img
+      [src]="img"
+      class="max-w-none pointer-events-none"
+      [ngClass]="{
+        'h-full w-auto': hScreen >= wScreen,
+        'h-auto w-full': hScreen < wScreen
+      }"
+    />
+    @for (seat of seats; track $index) {
+    <mat-icon
+      class="w-[10px] h-[10px] inline-block absolute translate-x-[-50%] translate-y-[-50%]"
+      [ngStyle]="{
+        left: seat.position.x + '%',
+        top: seat.position.y + '%'
+      }"
+    >
+      event_seat
+    </mat-icon>
+    }
+  </div>
 </section>
