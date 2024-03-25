@@ -23,6 +23,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatSliderModule } from '@angular/material/slider';
+
 import {
   FormBuilder,
   FormGroup,
@@ -49,6 +51,7 @@ import { DrErrorInputsDirective } from '@utils/dr-error-inputs/dr-error-inputs.d
     MatListModule,
     ReactiveFormsModule,
     FormsModule,
+    MatSliderModule,
   ],
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
@@ -71,11 +74,12 @@ export class PlanePageComponent implements AfterViewInit {
   };
 
   formDisplace: FormGroup = this.fb.group({
-    x: [1, [Validators.min(0), Validators.required, this.validatorOffset]],
-    y: [1, [Validators.min(0), Validators.required, this.validatorOffset]],
+    xDes: [0, [Validators.min(0), Validators.required, this.validatorOffset]],
+    yDes: [0, [Validators.min(0), Validators.required, this.validatorOffset]],
   });
 
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('container') container!: ElementRef<HTMLDivElement>;
   get getCanvas() {
     return this.canvas.nativeElement;
   }
@@ -85,32 +89,37 @@ export class PlanePageComponent implements AfterViewInit {
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     this.resizePlane();
+    if (this.seeGrid) this.reMakeCanvas();
   }
 
   img: any;
   wScreen: number = window.innerWidth;
   hScreen: number = window.innerHeight;
-  reMakeCanvas() {
-    setTimeout(() => {
-      const { height, width } = this.getCanvas.getBoundingClientRect();
-      console.log(height, width);
-      this.ctx.clearRect(0, 0, width, height);
-      const tam = this.form.get('sizeSeat')!.value;
-      if (tam === 0 || tam == '' || tam == null || tam == undefined) return;
-      this.ctx.lineWidth = 0.5;
-      this.ctx.beginPath();
-      for (let y = 0; y < height; y += tam / 2) {
-        this.ctx.moveTo(0, y);
-        this.ctx.lineTo(width, y);
-      }
-      for (let x = 0; x < width; x += tam) {
-        this.ctx.moveTo(x, 0);
-        this.ctx.lineTo(x, height);
-      }
-      this.ctx.strokeStyle = '#f00';
 
-      this.ctx.stroke();
-    }, 100);
+  reMakeCanvas() {
+    if (this.form.valid && this.img && this.formDisplace.valid)
+      setTimeout(() => {
+        const container = this.container.nativeElement;
+        this.getCanvas.height = container.clientHeight;
+        this.getCanvas.width = container.clientWidth;
+        const { height, width } = this.getCanvas;
+        this.ctx.clearRect(0, 0, width, height);
+        const tam = this.form.get('sizeSeat')!.value;
+        const { xDes, yDes } = this.formDisplace.value;
+        this.ctx.lineWidth = 0.5;
+        this.ctx.beginPath();
+        for (let y = -tam + yDes; y < height; y += tam) {
+          this.ctx.moveTo(0, y);
+          this.ctx.lineTo(width, y);
+        }
+        for (let x = -tam + xDes; x < width; x += tam) {
+          this.ctx.moveTo(x, 0);
+          this.ctx.lineTo(x, height);
+        }
+        this.ctx.strokeStyle = '#000000';
+
+        this.ctx.stroke();
+      }, 70);
   }
 
   resizePlane() {
@@ -130,6 +139,14 @@ export class PlanePageComponent implements AfterViewInit {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     let x = event.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
     let y = event.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
+    if (this.seeGrid) {
+      const tam = this.form.get('sizeSeat')!.value;
+      const { xDes, yDes } = this.formDisplace.value;
+      x = Math.floor(x / tam) * tam + tam / 2;
+      x += xDes;
+      y = Math.floor(y / tam) * tam + tam / 2;
+      y += yDes;
+    }
     x = (x * 100) / rect.width;
     y = (y * 100) / rect.height;
     this.seats.push({ position: { x, y }, clase_id: '1' });

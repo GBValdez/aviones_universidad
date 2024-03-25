@@ -1,6 +1,6 @@
 <section
   class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 w-[250px]"
-  style="z-index: 10"
+  style="z-index: 20"
 >
   <h1 class="text-white font-black text-3xl mb-[5px]">Opciones</h1>
   <button
@@ -39,22 +39,52 @@
   <form [formGroup]="formDisplace">
     <h2 class="text-gray-100 font-black text-xl mb-[5px]">Desplazamiento px</h2>
     <div class="flex justify-between">
-      <mat-form-field class="w-[48%]">
-        <mat-label>X</mat-label>
-        <input matInput type="number" formControlName="x" />
-      </mat-form-field>
-      <mat-form-field class="w-[48%]">
-        <mat-label>Y</mat-label>
-        <input matInput type="number" formControlName="y" />
-      </mat-form-field>
+      <div class="w-[48%]">
+        <mat-form-field class="w-full">
+          <mat-label>X</mat-label>
+          <input
+            (keydown)="reMakeCanvas()"
+            matInput
+            type="number"
+            formControlName="xDes"
+          />
+        </mat-form-field>
+        <mat-slider
+          class="w-full"
+          showTickMarks
+          discrete
+          [max]="form.get('sizeSeat')!.value - 1"
+        >
+          <input matSliderThumb formControlName="xDes" />
+        </mat-slider>
+      </div>
+      <div class="w-[48%]">
+        <mat-form-field class="w-full">
+          <mat-label>Y</mat-label>
+          <input
+            (keydown)="reMakeCanvas()"
+            matInput
+            type="number"
+            formControlName="yDes"
+          />
+        </mat-form-field>
+        <mat-slider
+          class="w-full"
+          showTickMarks
+          discrete
+          [max]="form.get('sizeSeat')!.value - 1"
+        >
+          <input matSliderThumb formControlName="yDes" />
+        </mat-slider>
+      </div>
     </div>
-    @if(formDisplace.get("x")!.hasError('offset') ||
-    formDisplace.get("y")!.hasError('offset') ) {
+    @if(formDisplace.get("xDes")!.hasError('offset') ||
+    formDisplace.get("yDes")!.hasError('offset') ) {
     <p class="text-red-500 font-black mb-[5px] text-sm">
       Ninguno de los campos puede ser mayor a al tamaño de los asientos
     </p>
-    } @if(formDisplace.get("x")!.hasError('min') ||
-    formDisplace.get("y")!.hasError('min') ) {
+    } @if(formDisplace.get("xDes")!.hasError('min') ||
+    formDisplace.get("yDes")!.hasError('min') ) {
     <p class="text-red-500 font-black mb-[5px] text-sm">
       Ninguno de los campos puede ser menor a 1
     </p>
@@ -80,6 +110,7 @@
       'h-fit w-full': hScreen < wScreen
     }"
     (click)="addSeat($event)"
+    #container
   >
     <img
       [src]="img"
@@ -90,8 +121,9 @@
       }"
     />
     <canvas
+      [ngClass]="{ visible: seeGrid, hidden: !seeGrid }"
       #canvas
-      class="absolute left-0 top-0 w-full h-full pointer-events-none"
+      class="absolute left-0 top-0 pointer-events-none"
       style="z-index: 10"
     ></canvas>
     @for (seat of seats; track $index) {
