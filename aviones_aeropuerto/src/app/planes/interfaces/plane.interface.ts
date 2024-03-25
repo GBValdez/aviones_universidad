@@ -11,3 +11,9 @@ export interface posInterface {
   x: number;
   y: number;
 }
+export interface sectionDto {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+}

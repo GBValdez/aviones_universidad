@@ -1,8 +1,8 @@
 <section
-  class="p-[5px] fixed top-0 left-0 h-screen bg-blue-400 w-[250px]"
+  class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 w-[250px]"
   style="z-index: 10"
 >
-  <h1>Opciones</h1>
+  <h1 class="text-white font-black text-3xl mb-[5px]">Opciones</h1>
   <button
     class="w-full"
     mat-raised-button
@@ -12,30 +12,65 @@
   >
     Insertar imagen
   </button>
-  <h2>Secciones</h2>
-  <div></div>
 
-  <mat-checkbox #checkCasilla> Utilizar cuadricula </mat-checkbox>
-
-  @if( checkCasilla.checked ){
-  <div>
-    <mat-form-field class="w-full">
-      <mat-label>Tamaño px</mat-label>
-      <input matInput type="number" />
+  <form [formGroup]="form">
+    <mat-form-field class="w-full mt-[10px] mb-[15px]">
+      <mat-label>Tamaño asientos px</mat-label>
+      <input
+        formControlName="sizeSeat"
+        min="1"
+        matInput
+        type="number"
+        (keydown)="reMakeCanvas()"
+      />
+      @if(form.get('sizeSeat')!.hasError('required') ) {
+      <mat-error>El campo es obligatorio</mat-error>
+      } @if(form.get('sizeSeat')!.hasError('min') ) {
+      <mat-error>El campo no puede ser menor a uno</mat-error>
+      }
     </mat-form-field>
-    <h2>Desplazamiento px</h2>
+  </form>
+
+  <mat-checkbox style="color: white" [(ngModel)]="seeGrid">
+    Utilizar cuadricula
+  </mat-checkbox>
+
+  @if( seeGrid ){
+  <form [formGroup]="formDisplace">
+    <h2 class="text-gray-100 font-black text-xl mb-[5px]">Desplazamiento px</h2>
     <div class="flex justify-between">
       <mat-form-field class="w-[48%]">
         <mat-label>X</mat-label>
-        <input matInput type="number" />
+        <input matInput type="number" formControlName="x" />
       </mat-form-field>
       <mat-form-field class="w-[48%]">
         <mat-label>Y</mat-label>
-        <input matInput type="number" />
+        <input matInput type="number" formControlName="y" />
       </mat-form-field>
     </div>
-  </div>
+    @if(formDisplace.get("x")!.hasError('offset') ||
+    formDisplace.get("y")!.hasError('offset') ) {
+    <p class="text-red-500 font-black mb-[5px] text-sm">
+      Ninguno de los campos puede ser mayor a al tamaño de los asientos
+    </p>
+    } @if(formDisplace.get("x")!.hasError('min') ||
+    formDisplace.get("y")!.hasError('min') ) {
+    <p class="text-red-500 font-black mb-[5px] text-sm">
+      Ninguno de los campos puede ser menor a 1
+    </p>
+    }
+  </form>
   }
+
+  <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
+  <ul class="bg-blue-800 py-[5px] px-[7px] rounded-lg mb-[7px]">
+    <li
+      [ngStyle]="{ 'background-color': 'blue' }"
+      class="p-[5px] cursor-pointer rounded-md text-white font-black my-[3px]"
+    >
+      Sección
+    </li>
+  </ul>
 </section>
 <section class="h-screen overflow-x-auto bg-black">
   <div
@@ -54,12 +89,20 @@
         'h-auto w-full': hScreen < wScreen
       }"
     />
+    <canvas
+      #canvas
+      class="absolute left-0 top-0 w-full h-full pointer-events-none"
+      style="z-index: 10"
+    ></canvas>
     @for (seat of seats; track $index) {
     <mat-icon
-      class="w-[10px] h-[10px] inline-block absolute translate-x-[-50%] translate-y-[-50%]"
+      class="inline-block absolute translate-x-[-50%] translate-y-[-50%] bg-blue-600"
       [ngStyle]="{
         left: seat.position.x + '%',
-        top: seat.position.y + '%'
+        top: seat.position.y + '%',
+        width: form.get('sizeSeat')!.value + 'px',
+        height: form.get('sizeSeat')!.value + 'px',
+        'font-size': form.get('sizeSeat')!.value + 'px'
       }"
     >
       event_seat
