@@ -1,5 +1,5 @@
 <section
-  class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 w-[250px]"
+  class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 w-[280px]"
   style="z-index: 20"
 >
   <h1 class="text-white font-black text-3xl mb-[5px]">Opciones</h1>
@@ -12,7 +12,35 @@
   >
     Insertar imagen
   </button>
-
+  <section></section>
+  @if (img) {
+  <div class="mt-[5px]">
+    <button
+      mat-mini-fab
+      color="light"
+      class="m-[2px]"
+      (click)="opt = 'add'"
+      [color]="opt == 'add' ? 'primary' : 'light'"
+    >
+      <mat-icon> add </mat-icon>
+    </button>
+    <button
+      mat-mini-fab
+      class="m-[2px]"
+      (click)="opt = 'move'"
+      [color]="opt == 'move' ? 'primary' : 'light'"
+    >
+      <mat-icon> open_with </mat-icon>
+    </button>
+    <button
+      mat-mini-fab
+      class="m-[2px]"
+      (click)="opt = 'delete'"
+      [color]="opt == 'delete' ? 'primary' : 'light'"
+    >
+      <mat-icon> delete </mat-icon>
+    </button>
+  </div>
   <form [formGroup]="form">
     <mat-form-field class="w-full mt-[10px] mb-[15px]">
       <mat-label>Tamaño asientos px</mat-label>
@@ -21,7 +49,7 @@
         min="1"
         matInput
         type="number"
-        (keydown)="reMakeCanvas()"
+        (keydown)="modifyTam()"
       />
       @if(form.get('sizeSeat')!.hasError('required') ) {
       <mat-error>El campo es obligatorio</mat-error>
@@ -34,8 +62,11 @@
   <mat-checkbox style="color: white" [(ngModel)]="seeGrid">
     Utilizar cuadricula
   </mat-checkbox>
-
   @if( seeGrid ){
+  <mat-checkbox style="color: white" [(ngModel)]="fitToGrid">
+    Ajustar a cuadricula
+  </mat-checkbox>
+
   <form [formGroup]="formDisplace">
     <h2 class="text-gray-100 font-black text-xl mb-[5px]">Desplazamiento px</h2>
     <div class="flex justify-between">
@@ -55,7 +86,7 @@
           discrete
           [max]="form.get('sizeSeat')!.value - 1"
         >
-          <input matSliderThumb formControlName="xDes" />
+          <input matSliderThumb (valueChange)="sliderChange('xDes', $event)" />
         </mat-slider>
       </div>
       <div class="w-[48%]">
@@ -74,7 +105,7 @@
           discrete
           [max]="form.get('sizeSeat')!.value - 1"
         >
-          <input matSliderThumb formControlName="yDes" />
+          <input matSliderThumb (valueChange)="sliderChange('yDes', $event)" />
         </mat-slider>
       </div>
     </div>
@@ -101,15 +132,19 @@
       Sección
     </li>
   </ul>
+  }
 </section>
 <section class="h-screen overflow-x-auto bg-black">
   <div
-    class="relative left-0 right-0 mx-auto"
+    class="relative left-0 right-0 mx-auto seatSection"
     [ngClass]="{
       'h-full w-fit': hScreen >= wScreen,
       'h-fit w-full': hScreen < wScreen
     }"
-    (click)="addSeat($event)"
+    (mousedown)="pressClick($event)"
+    (mouseup)="releaseClick($event)"
+    (mousemove)="addSeat($event)"
+    (mouseleave)="keepClicking = false"
     #container
   >
     <img
@@ -128,7 +163,12 @@
     ></canvas>
     @for (seat of seats; track $index) {
     <mat-icon
-      class="inline-block absolute translate-x-[-50%] translate-y-[-50%] bg-blue-600"
+      [draggable]="opt == 'move'"
+      (dragend)="drag($event, seat)"
+      (mouseenter)="deleteSeat(seat)"
+      (mousedown)="deleteMousedown($event, seat)"
+      class="inline-block absolute bg-blue-600 translate-x-[-50%] translate-y-[-50%] text-white"
+      [ngClass]="{ 'cursor-grab': opt == 'move' }"
       [ngStyle]="{
         left: seat.position.x + '%',
         top: seat.position.y + '%',

@@ -10,12 +10,13 @@ import {
   viewChild,
 } from '@angular/core';
 import {
+  posInterface,
   seatInterface,
   seatPosInterface,
   sectionDto,
 } from '@plane/interfaces/plane.interface';
 import { BtnUploadFileModule } from '@utils/btn-upload-file/btn-upload-file.module';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -34,6 +35,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { DrErrorInputsDirective } from '@utils/dr-error-inputs/dr-error-inputs.directive';
+import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
+
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -57,12 +60,41 @@ import { DrErrorInputsDirective } from '@utils/dr-error-inputs/dr-error-inputs.d
   styleUrl: './plane-page.component.scss',
 })
 export class PlanePageComponent implements AfterViewInit {
+  currentWidth: number = 0;
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    switch (event.key.toUpperCase()) {
+      case 'A':
+        this.opt = 'add';
+        break;
+      case 'S':
+        this.opt = 'move';
+        break;
+      case 'D':
+        this.opt = 'delete';
+        break;
+    }
+  }
+
+  opt: string = 'add';
+  keepClicking: boolean = false;
+
   constructor(private fb: FormBuilder) {}
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
   }
+  pressClick(event: MouseEvent) {
+    if (event.button == 0) {
+      this.addSeat(event);
+      this.keepClicking = true;
+    }
+  }
+  releaseClick(event: MouseEvent) {
+    if (event.button == 0) this.keepClicking = false;
+  }
 
   seeGrid: boolean = true;
+  fitToGrid: boolean = true;
   ctx!: CanvasRenderingContext2D;
   form: FormGroup = this.fb.group({
     sizeSeat: [10, [Validators.min(1), Validators.required]],
@@ -72,6 +104,10 @@ export class PlanePageComponent implements AfterViewInit {
     const tamPx = this.form.get('sizeSeat')?.value;
     return control.value > tamPx ? { offset: true } : null;
   };
+  modifyTam() {
+    this.formDisplace.patchValue({ xDes: 0, yDes: 0 });
+    this.reMakeCanvas();
+  }
 
   formDisplace: FormGroup = this.fb.group({
     xDes: [0, [Validators.min(0), Validators.required, this.validatorOffset]],
@@ -88,8 +124,20 @@ export class PlanePageComponent implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
+    this.resizeSeat();
     this.resizePlane();
     if (this.seeGrid) this.reMakeCanvas();
+  }
+
+  resizeSeat() {
+    if (this.form.valid) {
+      const fntSize: number = this.form.get('sizeSeat')!.value;
+      const newFntSize =
+        (fntSize * this.container.nativeElement.clientWidth) /
+        this.currentWidth;
+      this.form.get('sizeSeat')!.setValue(newFntSize);
+    }
+    this.currentWidth = this.container.nativeElement.clientWidth;
   }
 
   img: any;
@@ -132,23 +180,65 @@ export class PlanePageComponent implements AfterViewInit {
       this.img = URL.createObjectURL(event[0]);
       this.resizePlane();
       this.reMakeCanvas();
+      setTimeout(() => {
+        this.currentWidth = this.container.nativeElement.clientWidth;
+      }, 5);
     }
   }
 
+  fitAtGrid(x: number, y: number) {
+    if (!this.fitToGrid || !this.seeGrid) return { x, y };
+    const tam = this.form.get('sizeSeat')!.value;
+    const { xDes, yDes } = this.formDisplace.value;
+    x = Math.floor(x / tam) * tam + tam / 2;
+    x += xDes;
+    y = Math.floor(y / tam) * tam + tam / 2;
+    y += yDes;
+    return { x, y };
+  }
+
   addSeat(event: MouseEvent) {
-    const rect = (event.target as HTMLElement).getBoundingClientRect();
-    let x = event.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
-    let y = event.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
-    if (this.seeGrid) {
-      const tam = this.form.get('sizeSeat')!.value;
-      const { xDes, yDes } = this.formDisplace.value;
-      x = Math.floor(x / tam) * tam + tam / 2;
-      x += xDes;
-      y = Math.floor(y / tam) * tam + tam / 2;
-      y += yDes;
-    }
-    x = (x * 100) / rect.width;
-    y = (y * 100) / rect.height;
-    this.seats.push({ position: { x, y }, clase_id: '1' });
+    if (!this.keepClicking) return;
+    if (this.opt != 'add') return;
+    const pos = this.setPosition(event);
+    if (
+      this.seats.find(
+        (seat) => seat.position.x == pos.x && seat.position.y == pos.y
+      )
+    )
+      return;
+    this.seats.push({ position: this.setPosition(event), clase_id: '1' });
+  }
+
+  sliderChange(control: string, value: number) {
+    this.formDisplace.get(control)!.setValue(value);
+    this.reMakeCanvas();
+  }
+
+  drag(event: DragEvent, seat: seatPosInterface) {
+    if (this.opt != 'move') return;
+    seat.position = this.setPosition(event);
+  }
+
+  setPosition(mouse: MouseEvent): posInterface {
+    const rect = this.container.nativeElement.getBoundingClientRect();
+    let x = mouse.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
+    let y = mouse.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
+    const { x: x1, y: y1 } = this.fitAtGrid(x, y);
+    x = (x1 * 100) / this.getCanvas.width;
+    y = (y1 * 100) / this.getCanvas.height;
+    return { x, y };
+  }
+  deleteSeat(seat: seatPosInterface) {
+    if (!this.keepClicking) return;
+    this.deletingSeat(seat);
+  }
+  deletingSeat(seat: seatPosInterface) {
+    if (this.opt != 'delete') return;
+    this.seats = this.seats.filter((s) => s != seat);
+  }
+
+  deleteMousedown(event: MouseEvent, seat: seatPosInterface) {
+    if (event.button == 0) this.deletingSeat(seat);
   }
 }
