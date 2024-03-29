@@ -136,15 +136,20 @@
 </section>
 <section class="h-screen overflow-x-auto bg-black">
   <div
-    class="relative left-0 right-0 mx-auto seatSection"
+    class="relative left-0 right-0 mx-auto seatSection select-none"
     [ngClass]="{
       'h-full w-fit': hScreen >= wScreen,
-      'h-fit w-full': hScreen < wScreen
+      'h-fit w-full': hScreen < wScreen,
+      'cursor-pointer': opt == 'add'
     }"
     (mousedown)="pressClick($event)"
     (mouseup)="releaseClick($event)"
-    (mousemove)="addSeat($event)"
-    (mouseleave)="keepClicking = false"
+    (mousemove)="mouseMove($event)"
+    (mouseleave)="releaseClick($event)"
+    (touchstart)="pressTouch($event)"
+    (touchmove)="touchMove($event)"
+    (touchend)="touchEnd($event)"
+    (touchcancel)="touchEnd($event)"
     #container
   >
     <img
@@ -164,11 +169,14 @@
     @for (seat of seats; track $index) {
     <mat-icon
       [draggable]="opt == 'move'"
-      (dragend)="drag($event, seat)"
       (mouseenter)="deleteSeat(seat)"
-      (mousedown)="deleteMousedown($event, seat)"
+      (mousedown)="mousedown($event, seat)"
+      (touchstart)="touchStart(seat, $event)"
       class="inline-block absolute bg-blue-600 translate-x-[-50%] translate-y-[-50%] text-white"
-      [ngClass]="{ 'cursor-grab': opt == 'move' }"
+      [ngClass]="{
+        'cursor-grab': opt == 'move',
+        'cursor-pointer': opt == 'delete'
+      }"
       [ngStyle]="{
         left: seat.position.x + '%',
         top: seat.position.y + '%',

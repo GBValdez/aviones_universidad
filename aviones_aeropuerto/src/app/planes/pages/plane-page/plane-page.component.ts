@@ -61,6 +61,21 @@ import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
 })
 export class PlanePageComponent implements AfterViewInit {
   currentWidth: number = 0;
+  seeGrid: boolean = true;
+  fitToGrid: boolean = true;
+  ctx!: CanvasRenderingContext2D;
+  form: FormGroup = this.fb.group({
+    sizeSeat: [10, [Validators.min(1), Validators.required]],
+  });
+
+  opt: string = 'add';
+  keepClicking: boolean = false;
+  dragTouchSeat?: seatPosInterface;
+  constructor(private fb: FormBuilder) {}
+  ngAfterViewInit(): void {
+    this.ctx = this.getCanvas.getContext('2d')!;
+  }
+
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     switch (event.key.toUpperCase()) {
@@ -75,30 +90,79 @@ export class PlanePageComponent implements AfterViewInit {
         break;
     }
   }
-
-  opt: string = 'add';
-  keepClicking: boolean = false;
-
-  constructor(private fb: FormBuilder) {}
-  ngAfterViewInit(): void {
-    this.ctx = this.getCanvas.getContext('2d')!;
+  //Presionar
+  pressTouch(event: TouchEvent) {
+    this.startInteraction(event.touches[0]);
+    if (this.opt != 'move' || !this.dragTouchSeat) return;
+    event.preventDefault();
   }
+
   pressClick(event: MouseEvent) {
-    if (event.button == 0) {
-      this.addSeat(event);
-      this.keepClicking = true;
+    if (event.button == 0) this.startInteraction(event);
+  }
+
+  startInteraction(event: MouseEvent | Touch): void {
+    this.keepClicking = true;
+    this.addSeat(event);
+  }
+
+  //Mover
+  touchMove(event: TouchEvent) {
+    if (event.changedTouches && event.changedTouches.length > 0)
+      this.interactionMove(event.changedTouches[0], event);
+  }
+  mouseMove(event: MouseEvent) {
+    this.interactionMove(event, event);
+  }
+
+  interactionMove(
+    event: MouseEvent | Touch,
+    evt: MouseEvent | TouchEvent
+  ): void {
+    this.addSeat(event);
+    if (this.opt != 'move') return;
+    if (this.dragTouchSeat == undefined) return;
+    const newPos = this.setPosition(event);
+    if (
+      !this.seats.some(
+        (s) => s.position.x == newPos.x && s.position.y == newPos.y
+      )
+    )
+      this.dragTouchSeat.position = newPos;
+    evt.preventDefault();
+  }
+  //Soltar
+  releaseClick(event: MouseEvent) {
+    if (event.button == 0) this.endInteraction(event);
+  }
+
+  touchEnd(event: TouchEvent): void {
+    if (event.changedTouches && event.changedTouches.length > 0) {
+      this.endInteraction(event.changedTouches[0]);
     }
   }
-  releaseClick(event: MouseEvent) {
-    if (event.button == 0) this.keepClicking = false;
+  endInteraction(event: MouseEvent | Touch): void {
+    this.keepClicking = false;
+    if (this.opt != 'move') return;
+    if (this.dragTouchSeat == undefined) return;
+    this.dragTouchSeat.position = this.setPosition(event);
+    this.dragTouchSeat = undefined;
+  }
+  //Click o touch en silla
+  mousedown(event: MouseEvent, seat: seatPosInterface) {
+    if (event.button == 0) this.interactiveSeat(seat, event);
   }
 
-  seeGrid: boolean = true;
-  fitToGrid: boolean = true;
-  ctx!: CanvasRenderingContext2D;
-  form: FormGroup = this.fb.group({
-    sizeSeat: [10, [Validators.min(1), Validators.required]],
-  });
+  touchStart(seat: seatPosInterface, event: TouchEvent) {
+    this.interactiveSeat(seat, event);
+  }
+
+  interactiveSeat(seat: seatPosInterface, event: MouseEvent | TouchEvent) {
+    this.deletingSeat(seat);
+    if (this.opt != 'move') return;
+    this.dragTouchSeat = seat;
+    event.preventDefault();
+  }
 
   validatorOffset: ValidatorFn = (control) => {
     const tamPx = this.form.get('sizeSeat')?.value;
@@ -197,7 +261,7 @@ export class PlanePageComponent implements AfterViewInit {
     return { x, y };
   }
 
-  addSeat(event: MouseEvent) {
+  addSeat(event: MouseEvent | Touch) {
     if (!this.keepClicking) return;
     if (this.opt != 'add') return;
     const pos = this.setPosition(event);
@@ -215,12 +279,7 @@ export class PlanePageComponent implements AfterViewInit {
     this.reMakeCanvas();
   }
 
-  drag(event: DragEvent, seat: seatPosInterface) {
-    if (this.opt != 'move') return;
-    seat.position = this.setPosition(event);
-  }
-
-  setPosition(mouse: MouseEvent): posInterface {
+  setPosition(mouse: MouseEvent | Touch): posInterface {
     const rect = this.container.nativeElement.getBoundingClientRect();
     let x = mouse.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
     let y = mouse.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
@@ -236,9 +295,5 @@ export class PlanePageComponent implements AfterViewInit {
   deletingSeat(seat: seatPosInterface) {
     if (this.opt != 'delete') return;
     this.seats = this.seats.filter((s) => s != seat);
-  }
-
-  deleteMousedown(event: MouseEvent, seat: seatPosInterface) {
-    if (event.button == 0) this.deletingSeat(seat);
   }
 }
