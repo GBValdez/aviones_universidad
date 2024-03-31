@@ -34,9 +34,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { DrErrorInputsDirective } from '@utils/dr-error-inputs/dr-error-inputs.directive';
-import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -60,6 +58,7 @@ import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
   styleUrl: './plane-page.component.scss',
 })
 export class PlanePageComponent implements AfterViewInit {
+  closeSidenav: boolean = false;
   currentWidth: number = 0;
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
@@ -69,9 +68,10 @@ export class PlanePageComponent implements AfterViewInit {
   });
 
   opt: string = 'add';
+  zoom: number = 1;
   keepClicking: boolean = false;
   dragTouchSeat?: seatPosInterface;
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private matSnack: MatSnackBar) {}
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
   }
@@ -81,12 +81,37 @@ export class PlanePageComponent implements AfterViewInit {
     switch (event.key.toUpperCase()) {
       case 'A':
         this.opt = 'add';
+        this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
         break;
       case 'S':
         this.opt = 'move';
+        this.matSnack.open('Modo mover sillas', 'Ok', { duration: 2000 });
         break;
       case 'D':
         this.opt = 'delete';
+        this.matSnack.open('Modo eliminar sillas', 'Ok', { duration: 2000 });
+        break;
+      case 'Q':
+        this.zoom -= 0.1;
+        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        break;
+      case 'W':
+        this.zoom += 0.1;
+        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        break;
+      case 'E':
+        this.zoom = 1;
+        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        break;
+      case 'R':
+        this.closeSidenav = !this.closeSidenav;
+        this.matSnack.open(
+          this.closeSidenav
+            ? "'Ocultar menú lateral'"
+            : 'Mostrar barra lateral',
+          'Ok',
+          { duration: 2000 }
+        );
         break;
     }
   }
@@ -283,6 +308,8 @@ export class PlanePageComponent implements AfterViewInit {
     const rect = this.container.nativeElement.getBoundingClientRect();
     let x = mouse.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
     let y = mouse.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
+    x = x / this.zoom; // Ajusta x por el factor de zoom
+    y = y / this.zoom; // Ajusta y por el factor de zoom
     const { x: x1, y: y1 } = this.fitAtGrid(x, y);
     x = (x1 * 100) / this.getCanvas.width;
     y = (y1 * 100) / this.getCanvas.height;

@@ -1,139 +1,209 @@
 <section
-  class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 w-[280px]"
+  class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 overflow-y-auto overflow-x-visible"
   style="z-index: 20"
+  [ngClass]="{
+    'w-[280px]': !closeSidenav,
+    'w-[50px]': closeSidenav
+  }"
 >
-  <h1 class="text-white font-black text-3xl mb-[5px]">Opciones</h1>
-  <button
-    class="w-full"
-    mat-raised-button
-    dtBtnUploadFile
-    (fileChange)="uploadFile($event)"
-    typesPermitted=".jpg,.jpeg,.svg"
+  <div
+    class="flex"
+    [ngClass]="{
+      'justify-between': !closeSidenav,
+      'justify-center': closeSidenav
+    }"
   >
-    Insertar imagen
-  </button>
-  <section></section>
-  @if (img) {
-  <div class="mt-[5px]">
-    <button
-      mat-mini-fab
-      color="light"
-      class="m-[2px]"
-      (click)="opt = 'add'"
-      [color]="opt == 'add' ? 'primary' : 'light'"
-    >
-      <mat-icon> add </mat-icon>
-    </button>
-    <button
-      mat-mini-fab
-      class="m-[2px]"
-      (click)="opt = 'move'"
-      [color]="opt == 'move' ? 'primary' : 'light'"
-    >
-      <mat-icon> open_with </mat-icon>
-    </button>
-    <button
-      mat-mini-fab
-      class="m-[2px]"
-      (click)="opt = 'delete'"
-      [color]="opt == 'delete' ? 'primary' : 'light'"
-    >
-      <mat-icon> delete </mat-icon>
+    @if(!closeSidenav){
+    <h1 class="text-white font-black text-3xl mb-[5px]">Menu</h1>
+    }
+    <button mat-mini-fab color="light" (click)="closeSidenav = !closeSidenav">
+      <mat-icon> {{ closeSidenav ? "menu" : "arrow_back" }} </mat-icon>
     </button>
   </div>
-  <form [formGroup]="form">
-    <mat-form-field class="w-full mt-[10px] mb-[15px]">
-      <mat-label>Tamaño asientos px</mat-label>
-      <input
-        formControlName="sizeSeat"
-        min="1"
-        matInput
-        type="number"
-        (keydown)="modifyTam()"
-      />
-      @if(form.get('sizeSeat')!.hasError('required') ) {
-      <mat-error>El campo es obligatorio</mat-error>
-      } @if(form.get('sizeSeat')!.hasError('min') ) {
-      <mat-error>El campo no puede ser menor a uno</mat-error>
-      }
-    </mat-form-field>
-  </form>
 
-  <mat-checkbox style="color: white" [(ngModel)]="seeGrid">
-    Utilizar cuadricula
-  </mat-checkbox>
-  @if( seeGrid ){
-  <mat-checkbox style="color: white" [(ngModel)]="fitToGrid">
-    Ajustar a cuadricula
-  </mat-checkbox>
+  <section
+    [ngClass]="{
+      hidden: closeSidenav,
+    }"
+  >
+    <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Planos</h2>
 
-  <form [formGroup]="formDisplace">
-    <h2 class="text-gray-100 font-black text-xl mb-[5px]">Desplazamiento px</h2>
-    <div class="flex justify-between">
-      <div class="w-[48%]">
-        <mat-form-field class="w-full">
-          <mat-label>X</mat-label>
-          <input
-            (keydown)="reMakeCanvas()"
-            matInput
-            type="number"
-            formControlName="xDes"
-          />
-        </mat-form-field>
-        <mat-slider
-          class="w-full"
-          showTickMarks
-          discrete
-          [max]="form.get('sizeSeat')!.value - 1"
-        >
-          <input matSliderThumb (valueChange)="sliderChange('xDes', $event)" />
-        </mat-slider>
-      </div>
-      <div class="w-[48%]">
-        <mat-form-field class="w-full">
-          <mat-label>Y</mat-label>
-          <input
-            (keydown)="reMakeCanvas()"
-            matInput
-            type="number"
-            formControlName="yDes"
-          />
-        </mat-form-field>
-        <mat-slider
-          class="w-full"
-          showTickMarks
-          discrete
-          [max]="form.get('sizeSeat')!.value - 1"
-        >
-          <input matSliderThumb (valueChange)="sliderChange('yDes', $event)" />
-        </mat-slider>
-      </div>
-    </div>
-    @if(formDisplace.get("xDes")!.hasError('offset') ||
-    formDisplace.get("yDes")!.hasError('offset') ) {
-    <p class="text-red-500 font-black mb-[5px] text-sm">
-      Ninguno de los campos puede ser mayor a al tamaño de los asientos
-    </p>
-    } @if(formDisplace.get("xDes")!.hasError('min') ||
-    formDisplace.get("yDes")!.hasError('min') ) {
-    <p class="text-red-500 font-black mb-[5px] text-sm">
-      Ninguno de los campos puede ser menor a 1
-    </p>
-    }
-  </form>
-  }
-
-  <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
-  <ul class="bg-blue-800 py-[5px] px-[7px] rounded-lg mb-[7px]">
-    <li
-      [ngStyle]="{ 'background-color': 'blue' }"
-      class="p-[5px] cursor-pointer rounded-md text-white font-black my-[3px]"
+    <button
+      class="w-full"
+      mat-raised-button
+      dtBtnUploadFile
+      (fileChange)="uploadFile($event)"
+      typesPermitted=".jpg,.jpeg,.svg"
     >
-      Sección
-    </li>
-  </ul>
-  }
+      Insertar imagen
+    </button>
+    <section></section>
+    @if (img) {
+    <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Acciones</h2>
+    <div class="mt-[5px]">
+      <button
+        mat-mini-fab
+        color="light"
+        class="m-[2px]"
+        (click)="opt = 'add'"
+        [color]="opt == 'add' ? 'primary' : 'light'"
+      >
+        <mat-icon> add </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        (click)="opt = 'move'"
+        [color]="opt == 'move' ? 'primary' : 'light'"
+      >
+        <mat-icon> open_with </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        (click)="opt = 'delete'"
+        [color]="opt == 'delete' ? 'primary' : 'light'"
+      >
+        <mat-icon> delete </mat-icon>
+      </button>
+    </div>
+    <div>
+      <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Zoom</h2>
+      <button
+        (click)="zoom = zoom + 0.1"
+        mat-mini-fab
+        class="m-[2px]"
+        color="light"
+      >
+        <mat-icon> zoom_in </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        color="light"
+        (click)="zoom = zoom - 0.1"
+      >
+        <mat-icon> zoom_out </mat-icon>
+      </button>
+      <button mat-mini-fab class="m-[2px]" color="light" (click)="zoom = 1">
+        <mat-icon> refresh </mat-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form">
+      <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
+        Configuraciones
+      </h2>
+
+      <mat-form-field class="w-full mt-[10px] mb-[15px]">
+        <mat-label>Tamaño asientos px</mat-label>
+        <input
+          formControlName="sizeSeat"
+          min="1"
+          matInput
+          type="number"
+          (keydown)="modifyTam()"
+        />
+        @if(form.get('sizeSeat')!.hasError('required') ) {
+        <mat-error>El campo es obligatorio</mat-error>
+        } @if(form.get('sizeSeat')!.hasError('min') ) {
+        <mat-error>El campo no puede ser menor a uno</mat-error>
+        }
+      </mat-form-field>
+    </form>
+
+    <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
+      Cuadricula
+    </h2>
+
+    <div class="bg-white rounded-full">
+      <mat-checkbox [(ngModel)]="seeGrid"> Utilizar cuadricula </mat-checkbox>
+    </div>
+
+    @if( seeGrid ){
+    <div class="bg-white rounded-full mt-[10px]">
+      <mat-checkbox style="color: white" [(ngModel)]="fitToGrid">
+        Ajustar a cuadricula
+      </mat-checkbox>
+    </div>
+
+    <form [formGroup]="formDisplace">
+      <h3 class="mt-[5px] text-gray-100 font-black text-base mb-[5px]">
+        Desplazamiento px
+      </h3>
+      <div class="flex justify-between">
+        <div class="w-[48%]">
+          <mat-form-field class="w-full">
+            <mat-label>X</mat-label>
+            <input
+              (keydown)="reMakeCanvas()"
+              matInput
+              type="number"
+              formControlName="xDes"
+            />
+          </mat-form-field>
+          <mat-slider
+            class="w-full"
+            showTickMarks
+            discrete
+            [max]="form.get('sizeSeat')!.value - 1"
+          >
+            <input
+              matSliderThumb
+              (valueChange)="sliderChange('xDes', $event)"
+            />
+          </mat-slider>
+        </div>
+        <div class="w-[48%]">
+          <mat-form-field class="w-full">
+            <mat-label>Y</mat-label>
+            <input
+              (keydown)="reMakeCanvas()"
+              matInput
+              type="number"
+              formControlName="yDes"
+            />
+          </mat-form-field>
+          <mat-slider
+            class="w-full"
+            showTickMarks
+            discrete
+            [max]="form.get('sizeSeat')!.value - 1"
+          >
+            <input
+              matSliderThumb
+              (valueChange)="sliderChange('yDes', $event)"
+            />
+          </mat-slider>
+        </div>
+      </div>
+      @if(formDisplace.get("xDes")!.hasError('offset') ||
+      formDisplace.get("yDes")!.hasError('offset') ) {
+      <p class="text-red-500 font-black mb-[5px] text-sm">
+        Ninguno de los campos puede ser mayor a al tamaño de los asientos
+      </p>
+      } @if(formDisplace.get("xDes")!.hasError('min') ||
+      formDisplace.get("yDes")!.hasError('min') ) {
+      <p class="text-red-500 font-black mb-[5px] text-sm">
+        Ninguno de los campos puede ser menor a 1
+      </p>
+      }
+    </form>
+    }
+
+    <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
+    <ul class="bg-blue-800 py-[5px] px-[7px] rounded-lg mb-[7px]">
+      <li
+        [ngStyle]="{ 'background-color': 'blue' }"
+        class="p-[5px] cursor-pointer rounded-md text-white font-black my-[3px]"
+      >
+        Sección
+      </li>
+    </ul>
+    }
+  </section>
 </section>
+
 <section class="h-screen overflow-x-auto bg-black">
   <div
     class="relative left-0 right-0 mx-auto seatSection select-none"
@@ -151,6 +221,7 @@
     (touchend)="touchEnd($event)"
     (touchcancel)="touchEnd($event)"
     #container
+    [ngStyle]="{ transform: 'scale(' + zoom + ')' }"
   >
     <img
       [src]="img"
