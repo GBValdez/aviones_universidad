@@ -115,8 +115,9 @@
         />
         @if(form.get('sizeSeat')!.hasError('required') ) {
         <mat-error>El campo es obligatorio</mat-error>
-        } @if(form.get('sizeSeat')!.hasError('min') ) {
-        <mat-error>El campo no puede ser menor a uno</mat-error>
+        } @if(form.get('sizeSeat')!.hasError('hundred') &&
+        !form.get('sizeSeat')!.hasError('required') ) {
+        <mat-error>El campo solo debe ser un numero entre 0.01 a 100</mat-error>
         }
       </mat-form-field>
     </form>

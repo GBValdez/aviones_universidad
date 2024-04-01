@@ -61,9 +61,7 @@ export class PlanePageComponent implements AfterViewInit {
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
   ctx!: CanvasRenderingContext2D;
-  form: FormGroup = this.fb.group({
-    sizeSeat: [10, [Validators.min(1), Validators.required]],
-  });
+
   timeOutSize: any;
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
@@ -213,9 +211,19 @@ export class PlanePageComponent implements AfterViewInit {
     const tamPx = this.form.get('sizeSeat')?.value;
     return control.value > tamPx ? { offset: true } : null;
   };
+
+  validatorHundred: ValidatorFn = (control) => {
+    return control.value > 100 || control.value <= 0 ? { hundred: true } : null;
+  };
+  form: FormGroup = this.fb.group({
+    sizeSeat: [10, [this.validatorHundred, Validators.required]],
+  });
   modifyTam() {
-    this.formDisplace.patchValue({ xDes: 0, yDes: 0 });
-    this.reMakeCanvas();
+    setTimeout(() => {
+      this.formDisplace.patchValue({ xDes: 0, yDes: 0 });
+      this.reMakeCanvas();
+      this.resizeSeat();
+    }, 10);
   }
 
   formDisplace: FormGroup = this.fb.group({
@@ -242,11 +250,12 @@ export class PlanePageComponent implements AfterViewInit {
   }
 
   resizeSeat() {
-    const fntPor: number = this.form.get('sizeSeat')!.value;
-    this.sizePixelSize =
-      (fntPor / 100) * this.container.nativeElement.clientWidth;
-    console.log('size', this.sizePixelSize);
-    console.log('width', this.container.nativeElement.clientWidth);
+    this.form.updateValueAndValidity();
+    if (this.form.valid) {
+      const fntPor: number = this.form.get('sizeSeat')!.value;
+      this.sizePixelSize =
+        (fntPor / 100) * this.container.nativeElement.clientWidth;
+    }
   }
 
   img: any;
@@ -254,6 +263,7 @@ export class PlanePageComponent implements AfterViewInit {
   hScreen: number = window.innerHeight;
 
   reMakeCanvas() {
+    this.form.updateValueAndValidity();
     if (this.form.valid && this.img && this.formDisplace.valid)
       setTimeout(() => {
         const container = this.container.nativeElement;
