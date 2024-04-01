@@ -45,24 +45,33 @@
         mat-mini-fab
         color="light"
         class="m-[2px]"
-        (click)="opt = 'add'"
-        [color]="opt == 'add' ? 'primary' : 'light'"
+        (click)="opt.set('navigation')"
+        [color]="opt() == 'navigation' ? 'primary' : 'light'"
+      >
+        <mat-icon> pan_tool </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        color="light"
+        class="m-[2px]"
+        (click)="opt.set('add')"
+        [color]="opt() == 'add' ? 'primary' : 'light'"
       >
         <mat-icon> add </mat-icon>
       </button>
       <button
         mat-mini-fab
         class="m-[2px]"
-        (click)="opt = 'move'"
-        [color]="opt == 'move' ? 'primary' : 'light'"
+        (click)="opt.set('move')"
+        [color]="opt() == 'move' ? 'primary' : 'light'"
       >
         <mat-icon> open_with </mat-icon>
       </button>
       <button
         mat-mini-fab
         class="m-[2px]"
-        (click)="opt = 'delete'"
-        [color]="opt == 'delete' ? 'primary' : 'light'"
+        (click)="opt.set('delete')"
+        [color]="opt() == 'delete' ? 'primary' : 'light'"
       >
         <mat-icon> delete </mat-icon>
       </button>
@@ -70,7 +79,7 @@
     <div>
       <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Zoom</h2>
       <button
-        (click)="zoom = zoom + 0.1"
+        (click)="zoom.set(zoom() + 0.1)"
         mat-mini-fab
         class="m-[2px]"
         color="light"
@@ -81,11 +90,11 @@
         mat-mini-fab
         class="m-[2px]"
         color="light"
-        (click)="zoom = zoom - 0.1"
+        (click)="zoom.set(zoom() - 0.1)"
       >
         <mat-icon> zoom_out </mat-icon>
       </button>
-      <button mat-mini-fab class="m-[2px]" color="light" (click)="zoom = 1">
+      <button mat-mini-fab class="m-[2px]" color="light" (click)="refresh()">
         <mat-icon> refresh </mat-icon>
       </button>
     </div>
@@ -96,7 +105,7 @@
       </h2>
 
       <mat-form-field class="w-full mt-[10px] mb-[15px]">
-        <mat-label>Tamaño asientos px</mat-label>
+        <mat-label>Tamaño asientos</mat-label>
         <input
           formControlName="sizeSeat"
           min="1"
@@ -204,13 +213,14 @@
   </section>
 </section>
 
-<section class="h-screen overflow-x-auto bg-black">
+<section class="h-screen w-screen overflow-hidden bg-black">
   <div
     class="relative left-0 right-0 mx-auto seatSection select-none"
     [ngClass]="{
       'h-full w-fit': hScreen >= wScreen,
       'h-fit w-full': hScreen < wScreen,
-      'cursor-pointer': opt == 'add'
+      'cursor-pointer': opt() == 'add',
+      'cursor-grab': opt() == 'navigation'
     }"
     (mousedown)="pressClick($event)"
     (mouseup)="releaseClick($event)"
@@ -221,7 +231,17 @@
     (touchend)="touchEnd($event)"
     (touchcancel)="touchEnd($event)"
     #container
-    [ngStyle]="{ transform: 'scale(' + zoom + ')' }"
+    [ngStyle]="{
+      transform:
+        'scale(' +
+        zoom() +
+        ') ' +
+        'translate(' +
+        translatePos.x +
+        'px,' +
+        translatePos.y +
+        'px)'
+    }"
   >
     <img
       [src]="img"
@@ -239,21 +259,20 @@
     ></canvas>
     @for (seat of seats; track $index) {
     <mat-icon
-      [draggable]="opt == 'move'"
       (mouseenter)="deleteSeat(seat)"
       (mousedown)="mousedown($event, seat)"
       (touchstart)="touchStart(seat, $event)"
       class="inline-block absolute bg-blue-600 translate-x-[-50%] translate-y-[-50%] text-white"
       [ngClass]="{
-        'cursor-grab': opt == 'move',
-        'cursor-pointer': opt == 'delete'
+        'cursor-move': opt() == 'move',
+        'cursor-pointer': opt() == 'delete'
       }"
       [ngStyle]="{
         left: seat.position.x + '%',
         top: seat.position.y + '%',
-        width: form.get('sizeSeat')!.value + 'px',
-        height: form.get('sizeSeat')!.value + 'px',
-        'font-size': form.get('sizeSeat')!.value + 'px'
+        width: sizePixelSize + 'px',
+        height: sizePixelSize + 'px',
+        'font-size': sizePixelSize + 'px'
       }"
     >
       event_seat

@@ -1,22 +1,21 @@
 import { NgClass, NgStyle } from '@angular/common';
 import {
-  AfterContentInit,
   AfterViewInit,
   Component,
   ElementRef,
   HostListener,
-  OnInit,
   ViewChild,
-  viewChild,
+  WritableSignal,
+  effect,
+  signal,
 } from '@angular/core';
 import {
   posInterface,
-  seatInterface,
   seatPosInterface,
   sectionDto,
 } from '@plane/interfaces/plane.interface';
 import { BtnUploadFileModule } from '@utils/btn-upload-file/btn-upload-file.module';
-import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -59,19 +58,41 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class PlanePageComponent implements AfterViewInit {
   closeSidenav: boolean = false;
-  currentWidth: number = 0;
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
   ctx!: CanvasRenderingContext2D;
   form: FormGroup = this.fb.group({
     sizeSeat: [10, [Validators.min(1), Validators.required]],
   });
-
-  opt: string = 'add';
-  zoom: number = 1;
+  timeOutSize: any;
+  opt: WritableSignal<string> = signal('navigation');
+  zoom: WritableSignal<number> = signal(1);
   keepClicking: boolean = false;
   dragTouchSeat?: seatPosInterface;
-  constructor(private fb: FormBuilder, private matSnack: MatSnackBar) {}
+  posOrigin?: posInterface;
+  translatePos: posInterface = { x: 0, y: 0 };
+  sizePixelSize: number = 10;
+  constructor(private fb: FormBuilder, private matSnack: MatSnackBar) {
+    effect(() => {
+      switch (this.opt()) {
+        case 'add':
+          this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
+          break;
+        case 'move':
+          this.matSnack.open('Modo mover sillas', 'Ok', { duration: 2000 });
+          break;
+        case 'delete':
+          this.matSnack.open('Modo eliminar sillas', 'Ok', { duration: 2000 });
+          break;
+        case 'navigation':
+          this.matSnack.open('Modo navegación', 'Ok', { duration: 2000 });
+          break;
+      }
+    });
+    effect(() => {
+      matSnack.open(`Zoom: ${this.zoom()}`, 'Ok', { duration: 2000 });
+    });
+  }
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
   }
@@ -80,28 +101,25 @@ export class PlanePageComponent implements AfterViewInit {
   handleKeyboardEvent(event: KeyboardEvent) {
     switch (event.key.toUpperCase()) {
       case 'A':
-        this.opt = 'add';
-        this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
+        this.opt.set('navigation');
         break;
       case 'S':
-        this.opt = 'move';
-        this.matSnack.open('Modo mover sillas', 'Ok', { duration: 2000 });
+        this.opt.set('add');
         break;
       case 'D':
-        this.opt = 'delete';
-        this.matSnack.open('Modo eliminar sillas', 'Ok', { duration: 2000 });
+        this.opt.set('move');
+        break;
+      case 'F':
+        this.opt.set('delete');
         break;
       case 'Q':
-        this.zoom -= 0.1;
-        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        this.zoom.update((z) => z - 0.1);
         break;
       case 'W':
-        this.zoom += 0.1;
-        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        this.zoom.update((z) => z + 0.1);
         break;
       case 'E':
-        this.zoom = 1;
-        this.matSnack.open('Zoom ' + this.zoom, 'Ok', { duration: 2000 });
+        this.zoom.set(1);
         break;
       case 'R':
         this.closeSidenav = !this.closeSidenav;
@@ -117,9 +135,8 @@ export class PlanePageComponent implements AfterViewInit {
   }
   //Presionar
   pressTouch(event: TouchEvent) {
-    this.startInteraction(event.touches[0]);
-    if (this.opt != 'move' || !this.dragTouchSeat) return;
     event.preventDefault();
+    this.startInteraction(event.touches[0]);
   }
 
   pressClick(event: MouseEvent) {
@@ -129,6 +146,7 @@ export class PlanePageComponent implements AfterViewInit {
   startInteraction(event: MouseEvent | Touch): void {
     this.keepClicking = true;
     this.addSeat(event);
+    this.navigationStart(event);
   }
 
   //Mover
@@ -144,8 +162,10 @@ export class PlanePageComponent implements AfterViewInit {
     event: MouseEvent | Touch,
     evt: MouseEvent | TouchEvent
   ): void {
+    evt.preventDefault();
     this.addSeat(event);
-    if (this.opt != 'move') return;
+    this.navigateMove(event);
+    if (this.opt() != 'move') return;
     if (this.dragTouchSeat == undefined) return;
     const newPos = this.setPosition(event);
     if (
@@ -154,7 +174,6 @@ export class PlanePageComponent implements AfterViewInit {
       )
     )
       this.dragTouchSeat.position = newPos;
-    evt.preventDefault();
   }
   //Soltar
   releaseClick(event: MouseEvent) {
@@ -168,7 +187,8 @@ export class PlanePageComponent implements AfterViewInit {
   }
   endInteraction(event: MouseEvent | Touch): void {
     this.keepClicking = false;
-    if (this.opt != 'move') return;
+    this.navigateEnd();
+    if (this.opt() != 'move') return;
     if (this.dragTouchSeat == undefined) return;
     this.dragTouchSeat.position = this.setPosition(event);
     this.dragTouchSeat = undefined;
@@ -184,7 +204,7 @@ export class PlanePageComponent implements AfterViewInit {
 
   interactiveSeat(seat: seatPosInterface, event: MouseEvent | TouchEvent) {
     this.deletingSeat(seat);
-    if (this.opt != 'move') return;
+    if (this.opt() != 'move') return;
     this.dragTouchSeat = seat;
     event.preventDefault();
   }
@@ -213,20 +233,20 @@ export class PlanePageComponent implements AfterViewInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    this.resizeSeat();
+    if (this.timeOutSize) clearTimeout(this.timeOutSize);
     this.resizePlane();
-    if (this.seeGrid) this.reMakeCanvas();
+    this.timeOutSize = setTimeout(() => {
+      if (this.seeGrid) this.reMakeCanvas();
+      this.resizeSeat();
+    }, 20);
   }
 
   resizeSeat() {
-    if (this.form.valid) {
-      const fntSize: number = this.form.get('sizeSeat')!.value;
-      const newFntSize =
-        (fntSize * this.container.nativeElement.clientWidth) /
-        this.currentWidth;
-      this.form.get('sizeSeat')!.setValue(newFntSize);
-    }
-    this.currentWidth = this.container.nativeElement.clientWidth;
+    const fntPor: number = this.form.get('sizeSeat')!.value;
+    this.sizePixelSize =
+      (fntPor / 100) * this.container.nativeElement.clientWidth;
+    console.log('size', this.sizePixelSize);
+    console.log('width', this.container.nativeElement.clientWidth);
   }
 
   img: any;
@@ -241,7 +261,7 @@ export class PlanePageComponent implements AfterViewInit {
         this.getCanvas.width = container.clientWidth;
         const { height, width } = this.getCanvas;
         this.ctx.clearRect(0, 0, width, height);
-        const tam = this.form.get('sizeSeat')!.value;
+        const tam = (this.form.get('sizeSeat')!.value / 100) * width;
         const { xDes, yDes } = this.formDisplace.value;
         this.ctx.lineWidth = 0.5;
         this.ctx.beginPath();
@@ -267,17 +287,20 @@ export class PlanePageComponent implements AfterViewInit {
   uploadFile(event: FileList | undefined): void {
     if (event) {
       this.img = URL.createObjectURL(event[0]);
-      this.resizePlane();
-      this.reMakeCanvas();
-      setTimeout(() => {
-        this.currentWidth = this.container.nativeElement.clientWidth;
-      }, 5);
+      if (this.timeOutSize) clearTimeout(this.timeOutSize);
+      this.timeOutSize = setTimeout(() => {
+        this.resizeSeat();
+        this.resizePlane();
+        this.reMakeCanvas();
+      }, 2);
     }
   }
 
   fitAtGrid(x: number, y: number) {
     if (!this.fitToGrid || !this.seeGrid) return { x, y };
-    const tam = this.form.get('sizeSeat')!.value;
+    const container = this.container.nativeElement;
+    const tam =
+      (this.form.get('sizeSeat')!.value / 100) * container.clientWidth;
     const { xDes, yDes } = this.formDisplace.value;
     x = Math.floor(x / tam) * tam + tam / 2;
     x += xDes;
@@ -288,7 +311,7 @@ export class PlanePageComponent implements AfterViewInit {
 
   addSeat(event: MouseEvent | Touch) {
     if (!this.keepClicking) return;
-    if (this.opt != 'add') return;
+    if (this.opt() != 'add') return;
     const pos = this.setPosition(event);
     if (
       this.seats.find(
@@ -308,8 +331,8 @@ export class PlanePageComponent implements AfterViewInit {
     const rect = this.container.nativeElement.getBoundingClientRect();
     let x = mouse.pageX - rect.left - window.scrollX; // Posición relativa X dentro del elemento
     let y = mouse.pageY - rect.top - window.scrollY; // Posición relativa Y dentro del elemento
-    x = x / this.zoom; // Ajusta x por el factor de zoom
-    y = y / this.zoom; // Ajusta y por el factor de zoom
+    x = x / this.zoom(); // Ajusta x por el factor de zoom
+    y = y / this.zoom(); // Ajusta y por el factor de zoom
     const { x: x1, y: y1 } = this.fitAtGrid(x, y);
     x = (x1 * 100) / this.getCanvas.width;
     y = (y1 * 100) / this.getCanvas.height;
@@ -320,7 +343,31 @@ export class PlanePageComponent implements AfterViewInit {
     this.deletingSeat(seat);
   }
   deletingSeat(seat: seatPosInterface) {
-    if (this.opt != 'delete') return;
+    if (this.opt() != 'delete') return;
     this.seats = this.seats.filter((s) => s != seat);
+  }
+
+  navigationStart(event: MouseEvent | Touch) {
+    if (this.opt() != 'navigation') return;
+    this.posOrigin = this.setPosition(event);
+  }
+
+  navigateMove(event: MouseEvent | Touch) {
+    if (this.opt() != 'navigation' || !this.keepClicking) return;
+    if (!this.posOrigin) return;
+    const pos = this.setPosition(event);
+    this.translatePos = {
+      x: this.translatePos.x + pos.x - this.posOrigin.x,
+      y: this.translatePos.y + pos.y - this.posOrigin.y,
+    };
+  }
+  navigateEnd() {
+    if (this.opt() != 'navigation') return;
+    this.posOrigin = undefined;
+  }
+  refresh() {
+    this.zoom.set(1);
+    this.posOrigin = undefined;
+    this.translatePos = { x: 0, y: 0 };
   }
 }
