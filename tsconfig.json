@@ -7,6 +7,9 @@
     "paths": {
       "@plane/*": ["src/app/planes/*"],
       "@utils/*": ["src/app/utils/*"],
+      "@auth/*": ["src/app/auth/*"],
+      "@user/*": ["src/app/user/*"],
+      "@env/*": ["src/environments/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,
