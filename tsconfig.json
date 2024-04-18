@@ -10,6 +10,7 @@
       "@auth/*": ["src/app/auth/*"],
       "@user/*": ["src/app/user/*"],
       "@env/*": ["src/environments/*"],
+      "@section/*": ["src/app/sections/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

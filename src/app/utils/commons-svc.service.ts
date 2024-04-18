@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
 import { Observable } from 'rxjs';
+import { pagDto, pagOptions } from './commons.interface';
+import { fixedQueryParams } from './utils';
 
 // Servicio generico para la gestión de entidades
 @Injectable({
@@ -14,19 +16,51 @@ export class CommonsSvcService<dto, dtoCreation> {
   set url(url: string) {
     this.urlBase = `${environment.api}/${url}`;
   }
-  get(): Observable<dto[]> {
-    return this.http.get<dto[]>(this.urlBase);
+  private fixedQueryParams<queryParam>(opts?: pagOptions<queryParam>) {
+    if (!opts) return {};
+    let PARAMS = opts.query ? fixedQueryParams(opts.query) : {};
+    PARAMS = {
+      ...PARAMS,
+      pageSize: opts.pageSize ?? undefined,
+      pageNumber: opts.pageNumber ?? undefined,
+      all: opts.all ?? undefined,
+    };
+    return PARAMS;
   }
-  getById(id: number): Observable<dto> {
-    return this.http.get<dto>(`${this.urlBase}/${id}`);
+
+  get<queryParam>(opts?: pagOptions<queryParam>): Observable<pagDto<dto>> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.get<pagDto<dto>>(this.urlBase, { params: PARAMS });
   }
-  post(body: dtoCreation): Observable<dto> {
-    return this.http.post<dto>(this.urlBase, body);
+  getById<queryParam>(
+    id: number,
+    opts?: pagOptions<queryParam>
+  ): Observable<dto> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.get<dto>(`${this.urlBase}/${id}`, { params: PARAMS });
   }
-  put(id: number, body: dtoCreation): Observable<dto> {
-    return this.http.put<dto>(`${this.urlBase}/${id}`, body);
+  post<queryParam>(
+    body: dtoCreation,
+    opts?: pagOptions<queryParam>
+  ): Observable<dto> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.post<dto>(this.urlBase, body, { params: PARAMS });
   }
-  delete(id: number): Observable<dto> {
-    return this.http.delete<dto>(`${this.urlBase}/${id}`);
+  put<queryParam>(
+    id: number,
+    body: dtoCreation,
+    opts?: pagOptions<queryParam>
+  ): Observable<dto> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.put<dto>(`${this.urlBase}/${id}`, body, {
+      params: PARAMS,
+    });
+  }
+  delete<queryParam>(
+    id: number,
+    opts?: pagOptions<queryParam>
+  ): Observable<dto> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.delete<dto>(`${this.urlBase}/${id}`, { params: PARAMS });
   }
 }

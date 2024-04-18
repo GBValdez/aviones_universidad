@@ -34,6 +34,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SectionSelectionMenuComponent } from '@plane/components/section-selection-menu/section-selection-menu.component';
+import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -52,6 +54,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     ReactiveFormsModule,
     FormsModule,
     MatSliderModule,
+    SectionSelectionMenuComponent,
   ],
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
@@ -70,7 +73,11 @@ export class PlanePageComponent implements AfterViewInit {
   posOrigin?: posInterface;
   translatePos: posInterface = { x: 0, y: 0 };
   sizePixelSize: number = 10;
-  constructor(private fb: FormBuilder, private matSnack: MatSnackBar) {
+  constructor(
+    private fb: FormBuilder,
+    private matSnack: MatSnackBar,
+    private dialog: MatDialog
+  ) {
     effect(() => {
       switch (this.opt()) {
         case 'add':
@@ -93,6 +100,11 @@ export class PlanePageComponent implements AfterViewInit {
   }
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
+    this.dialog.open(SectionSelectionMenuComponent, {
+      width: '50%',
+      minWidth: '280px',
+      disableClose: true,
+    });
   }
 
   @HostListener('document:keydown', ['$event'])

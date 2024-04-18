@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SeatItemComponent } from './seat-item.component';
+import { SubLevelComponent } from './sub-level.component';
 
-describe('SeatItemComponent', () => {
-  let component: SeatItemComponent;
-  let fixture: ComponentFixture<SeatItemComponent>;
+describe('SubLevelComponent', () => {
+  let component: SubLevelComponent;
+  let fixture: ComponentFixture<SubLevelComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SeatItemComponent]
+      declarations: [ SubLevelComponent ]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(SeatItemComponent);
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(SubLevelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
