@@ -1,4 +1,5 @@
 import { MAT_DATE_FORMATS } from '@angular/material/core';
+import moment from 'moment';
 
 export const APP_DATE_FORMATS = {
   parse: {
@@ -16,8 +17,6 @@ export const APP_DATE_FORMATS_PROVIDER = {
   provide: MAT_DATE_FORMATS,
   useValue: APP_DATE_FORMATS,
 };
-
-import * as moment from 'moment';
 
 export const convertMomentToDate = (obj: any): any => {
   if (!obj || typeof obj !== 'object') {

@@ -64,7 +64,7 @@ export class InputAutocompleteComponent
   @Output() writingEvent: EventEmitter<string> = new EventEmitter();
   @Output() selectedEvent: EventEmitter<catalogueInterface> =
     new EventEmitter();
-  optionsFilter: any[] = [];
+  optionsFilter: catalogueInterface[] = [];
 
   showErrors() {}
   onTouch?: Function;

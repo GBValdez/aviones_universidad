@@ -18,14 +18,14 @@ export class CommonsSvcService<dto, dtoCreation> {
   }
   private fixedQueryParams<queryParam>(opts?: pagOptions<queryParam>) {
     if (!opts) return {};
-    let PARAMS = opts.query ? fixedQueryParams(opts.query) : {};
-    PARAMS = {
-      ...PARAMS,
+
+    let PARAMS = {
+      ...(opts.query ?? {}),
       pageSize: opts.pageSize ?? undefined,
       pageNumber: opts.pageNumber ?? undefined,
       all: opts.all ?? undefined,
     };
-    return PARAMS;
+    return fixedQueryParams(PARAMS);
   }
 
   get<queryParam>(opts?: pagOptions<queryParam>): Observable<pagDto<dto>> {

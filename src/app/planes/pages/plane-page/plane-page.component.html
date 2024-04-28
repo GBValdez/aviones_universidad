@@ -56,6 +56,7 @@
         class="m-[2px]"
         (click)="opt.set('add')"
         [color]="opt() == 'add' ? 'primary' : 'light'"
+        [disabled]="!secCurrent"
       >
         <mat-icon> add </mat-icon>
       </button>
@@ -76,7 +77,7 @@
         <mat-icon> delete </mat-icon>
       </button>
     </div>
-    <div>
+    <section>
       <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Zoom</h2>
       <button
         (click)="zoom.set(zoom() + 0.1)"
@@ -97,7 +98,33 @@
       <button mat-mini-fab class="m-[2px]" color="light" (click)="refresh()">
         <mat-icon> refresh </mat-icon>
       </button>
-    </div>
+    </section>
+
+    <section>
+      <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
+      <app-input-autocomplete
+        [formControl]="formSect"
+        [options]="sectIonsOpt"
+        (selectedEvent)="addSection($event)"
+      >
+        Escriba la sección que desea agregar
+      </app-input-autocomplete>
+      @if (sectionsSelected.length>0) {
+      <ul class="bg-white py-[5px] px-[7px] rounded-lg mb-[7px]">
+        @for (sect of sectionsSelected; track $index) {
+        <li
+          [ngStyle]="{ 'background-color': makeColSec($index) }"
+          class="p-[5px] cursor-pointer rounded-md text-white font-black my-[5px] flex items-center justify-between"
+        >
+          <span class="w-[80%] inline-block" (click)="secCurrent = sect">
+            {{ sect.nombre }}
+          </span>
+          <mat-icon (click)="quitSection(sect)">close</mat-icon>
+        </li>
+        }
+      </ul>
+      }
+    </section>
 
     <form [formGroup]="form">
       <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
@@ -199,18 +226,7 @@
       </p>
       }
     </form>
-    }
-
-    <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
-    <ul class="bg-blue-800 py-[5px] px-[7px] rounded-lg mb-[7px]">
-      <li
-        [ngStyle]="{ 'background-color': 'blue' }"
-        class="p-[5px] cursor-pointer rounded-md text-white font-black my-[3px]"
-      >
-        Sección
-      </li>
-    </ul>
-    }
+    } }
   </section>
 </section>
 

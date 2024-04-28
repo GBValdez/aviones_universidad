@@ -27,6 +27,7 @@ import { MatSliderModule } from '@angular/material/slider';
 
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
@@ -34,8 +35,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SectionSelectionMenuComponent } from '@plane/components/section-selection-menu/section-selection-menu.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { InputAutocompleteComponent } from '@utils/components/input-autocomplete/input-autocomplete.component';
+import { SectionsSvcService } from '@section/services/sections-svc.service';
+import { catalogueInterface } from '@utils/commons.interface';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -54,7 +58,8 @@ import { MatDialog } from '@angular/material/dialog';
     ReactiveFormsModule,
     FormsModule,
     MatSliderModule,
-    SectionSelectionMenuComponent,
+    InputAutocompleteComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
@@ -73,10 +78,15 @@ export class PlanePageComponent implements AfterViewInit {
   posOrigin?: posInterface;
   translatePos: posInterface = { x: 0, y: 0 };
   sizePixelSize: number = 10;
+  sectIonsOpt: catalogueInterface[] = [];
+  sectionsSelected: catalogueInterface[] = [];
+  formSect: FormControl = new FormControl();
+  secCurrent?: catalogueInterface;
   constructor(
     private fb: FormBuilder,
     private matSnack: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private sectionSvc: SectionsSvcService
   ) {
     effect(() => {
       switch (this.opt()) {
@@ -98,12 +108,16 @@ export class PlanePageComponent implements AfterViewInit {
       matSnack.open(`Zoom: ${this.zoom()}`, 'Ok', { duration: 2000 });
     });
   }
+
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
-    this.dialog.open(SectionSelectionMenuComponent, {
-      width: '50%',
-      minWidth: '280px',
-      disableClose: true,
+    // this.dialog.open(SectionSelectionMenuComponent, {
+    //   width: '50%',
+    //   minWidth: '280px',
+    //   disableClose: true,
+    // });
+    this.sectionSvc.get({ all: true }).subscribe((res) => {
+      this.sectIonsOpt = res.items;
     });
   }
 
@@ -114,7 +128,11 @@ export class PlanePageComponent implements AfterViewInit {
         this.opt.set('navigation');
         break;
       case 'S':
-        this.opt.set('add');
+        if (this.secCurrent) this.opt.set('add');
+        else
+          this.matSnack.open('Selecciona una sección', 'Ok', {
+            duration: 2000,
+          });
         break;
       case 'D':
         this.opt.set('move');
@@ -341,7 +359,10 @@ export class PlanePageComponent implements AfterViewInit {
       )
     )
       return;
-    this.seats.push({ position: this.setPosition(event), clase_id: '1' });
+    this.seats.push({
+      position: this.setPosition(event),
+      clase_id: this.secCurrent!.id!.toString(),
+    });
   }
 
   sliderChange(control: string, value: number) {
@@ -391,5 +412,43 @@ export class PlanePageComponent implements AfterViewInit {
     this.zoom.set(1);
     this.posOrigin = undefined;
     this.translatePos = { x: 0, y: 0 };
+  }
+
+  addSection(item: catalogueInterface) {
+    this.formSect.patchValue('');
+
+    if (this.sectionsSelected.some((el) => el.id === item.id)) {
+      Swal.fire('Error', 'La sección ya esta en la lista', 'error');
+      return;
+    }
+    this.sectionsSelected.push(item);
+  }
+
+  makeColSec(index: number) {
+    const COL = 360 / this.sectionsSelected.length;
+    return `hsl(${COL * index},100%,50%)`;
+  }
+
+  async quitSection(item: catalogueInterface) {
+    const QUESTION = await Swal.fire({
+      title: '¿Estas seguro?',
+      text: `¿Quieres eliminar la sección ${item.nombre}?. Se eliminaran todos los asientos que tenga esta sección`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si',
+      cancelButtonText: 'No',
+    });
+    if (QUESTION.isConfirmed) {
+      this.sectionsSelected = this.sectionsSelected.filter(
+        (el) => el.id !== item.id
+      );
+      if (this.sectionsSelected.length == 0) {
+        this.secCurrent = undefined;
+        this.opt.set('navigation');
+      }
+      this.seats = this.seats.filter((el) => el.clase_id !== item.id);
+    }
   }
 }
