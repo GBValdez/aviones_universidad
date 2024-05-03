@@ -63,4 +63,14 @@ export class CommonsSvcService<dto, dtoCreation> {
     const PARAMS = this.fixedQueryParams<queryParam>(opts);
     return this.http.delete<dto>(`${this.urlBase}/${id}`, { params: PARAMS });
   }
+
+  postGroup<queryParam>(
+    body: dtoCreation[],
+    opts?: pagOptions<queryParam>
+  ): Observable<dto[]> {
+    const PARAMS = this.fixedQueryParams<queryParam>(opts);
+    return this.http.post<dto[]>(`${this.urlBase}/group`, body, {
+      params: PARAMS,
+    });
+  }
 }

@@ -1,19 +1,11 @@
-export interface seatInterface {
-  position: string;
-  clase_id: string;
-}
+import { catalogueInterface } from '@utils/commons.interface';
+
 export interface seatPosInterface {
   position: posInterface;
-  clase_id: string;
+  clase: catalogueInterface;
 }
 
 export interface posInterface {
   x: number;
   y: number;
-}
-export interface sectionDto {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
 }

@@ -113,8 +113,12 @@
       <ul class="bg-white py-[5px] px-[7px] rounded-lg mb-[7px]">
         @for (sect of sectionsSelected; track $index) {
         <li
-          [ngStyle]="{ 'background-color': makeColSec($index) }"
-          class="p-[5px] cursor-pointer rounded-md text-white font-black my-[5px] flex items-center justify-between"
+          [ngStyle]="{ 'background-color': sect.descripcion }"
+          class="p-[5px] cursor-pointer text-white font-black my-[5px] flex items-center justify-between"
+          [ngClass]="{
+            'w-[95%]': sect != secCurrent,
+            'w-full': sect == secCurrent
+          }"
         >
           <span class="w-[80%] inline-block" (click)="secCurrent = sect">
             {{ sect.nombre }}
@@ -226,6 +230,9 @@
       </p>
       }
     </form>
+    <button mat-raised-button class="w-full" (click)="savePlane()">
+      Guardar
+    </button>
     } }
   </section>
 </section>
@@ -279,17 +286,18 @@
       (mouseenter)="deleteSeat(seat)"
       (mousedown)="mousedown($event, seat)"
       (touchstart)="touchStart(seat, $event)"
-      class="inline-block absolute bg-blue-600 translate-x-[-50%] translate-y-[-50%] text-white"
+      class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white"
       [ngClass]="{
         'cursor-move': opt() == 'move',
-        'cursor-pointer': opt() == 'delete'
+        'cursor-pointer': opt() == 'delete',
       }"
       [ngStyle]="{
         left: seat.position.x + '%',
         top: seat.position.y + '%',
         width: sizePixelSize + 'px',
         height: sizePixelSize + 'px',
-        'font-size': sizePixelSize + 'px'
+        'font-size': sizePixelSize + 'px',
+        'background-color': seat.clase.descripcion
       }"
     >
       event_seat

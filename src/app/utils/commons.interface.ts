@@ -1,5 +1,5 @@
 export interface catalogueInterface {
-  id?: number | string;
+  id?: number;
   nombre: string;
   descripcion: string;
 }
@@ -24,4 +24,9 @@ export interface pagOptions<t> {
   pageNumber?: number;
   query?: t;
   all?: boolean;
+}
+
+export interface localStorExp {
+  key: string;
+  exp: Date | null;
 }

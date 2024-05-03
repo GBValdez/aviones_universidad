@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnInit,
   ViewChild,
   WritableSignal,
   effect,
@@ -12,7 +13,6 @@ import {
 import {
   posInterface,
   seatPosInterface,
-  sectionDto,
 } from '@plane/interfaces/plane.interface';
 import { BtnUploadFileModule } from '@utils/btn-upload-file/btn-upload-file.module';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,6 +40,10 @@ import { InputAutocompleteComponent } from '@utils/components/input-autocomplete
 import { SectionsSvcService } from '@section/services/sections-svc.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import Swal from 'sweetalert2';
+import { LocalStorageService } from '@utils/local-storage.service';
+import { ActivatedRoute } from '@angular/router';
+import { SeatsService } from '@plane/services/seats.service';
+import { seatCreationDto } from '@plane/interfaces/seats.interface';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -64,7 +68,7 @@ import Swal from 'sweetalert2';
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
 })
-export class PlanePageComponent implements AfterViewInit {
+export class PlanePageComponent implements AfterViewInit, OnInit {
   closeSidenav: boolean = false;
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
@@ -86,7 +90,10 @@ export class PlanePageComponent implements AfterViewInit {
     private fb: FormBuilder,
     private matSnack: MatSnackBar,
     private dialog: MatDialog,
-    private sectionSvc: SectionsSvcService
+    private sectionSvc: SectionsSvcService,
+    private localStorageSvc: LocalStorageService,
+    private routerAct: ActivatedRoute,
+    private seatsSvc: SeatsService
   ) {
     effect(() => {
       switch (this.opt()) {
@@ -108,17 +115,43 @@ export class PlanePageComponent implements AfterViewInit {
       matSnack.open(`Zoom: ${this.zoom()}`, 'Ok', { duration: 2000 });
     });
   }
+  ngOnInit(): void {}
+
+  savePlane(): void {
+    if (this.seats.length == 0) {
+      Swal.fire({ title: 'Inserte asientos en el plano', icon: 'error' });
+      return;
+    }
+    if (this.form.invalid) {
+      Swal.fire({
+        title: 'El tamaño de los asientos es invalido',
+        icon: 'error',
+      });
+      return;
+    }
+    const SEATS_CREATION: seatCreationDto[] = this.seats.map((seat) => {
+      return {
+        ClaseId: seat.clase.id!,
+        AvionId: this.routerAct.snapshot.params['id']!,
+        Posicion: `${seat.position.x}|${seat.position.y}`,
+        Codigo: 'XD',
+      };
+    });
+    this.seatsSvc.postGroup(SEATS_CREATION).subscribe((res) => {
+      Swal.fire({
+        title: 'Los asientos se han guardado con éxito',
+        icon: 'success',
+      });
+    });
+  }
 
   ngAfterViewInit(): void {
     this.ctx = this.getCanvas.getContext('2d')!;
-    // this.dialog.open(SectionSelectionMenuComponent, {
-    //   width: '50%',
-    //   minWidth: '280px',
-    //   disableClose: true,
-    // });
     this.sectionSvc.get({ all: true }).subscribe((res) => {
       this.sectIonsOpt = res.items;
     });
+    const IMG = this.localStorageSvc.getItem<FileList>('imgBackPlane');
+    if (IMG) this.uploadFile(IMG);
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -200,8 +233,10 @@ export class PlanePageComponent implements AfterViewInit {
       !this.seats.some(
         (s) => s.position.x == newPos.x && s.position.y == newPos.y
       )
-    )
+    ) {
       this.dragTouchSeat.position = newPos;
+      this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
+    }
   }
   //Soltar
   releaseClick(event: MouseEvent) {
@@ -267,7 +302,6 @@ export class PlanePageComponent implements AfterViewInit {
     return this.canvas.nativeElement;
   }
   seats: seatPosInterface[] = [];
-  sections: sectionDto[] = [];
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
@@ -326,7 +360,18 @@ export class PlanePageComponent implements AfterViewInit {
 
   uploadFile(event: FileList | undefined): void {
     if (event) {
+      const reader = new FileReader();
+      const ef = this.localStorageSvc;
+      reader.onload = function (e) {
+        ef.setItem('imgBackPlane', reader.result, 0.25 / 24);
+      };
+      reader.readAsDataURL(event[0]);
       this.img = URL.createObjectURL(event[0]);
+      const SECTION_PREVIEW =
+        this.localStorageSvc.getItem<seatPosInterface[]>('seats');
+      if (SECTION_PREVIEW) {
+        this.seats = SECTION_PREVIEW;
+      }
       if (this.timeOutSize) clearTimeout(this.timeOutSize);
       this.timeOutSize = setTimeout(() => {
         this.resizeSeat();
@@ -361,8 +406,9 @@ export class PlanePageComponent implements AfterViewInit {
       return;
     this.seats.push({
       position: this.setPosition(event),
-      clase_id: this.secCurrent!.id!.toString(),
+      clase: this.secCurrent!,
     });
+    this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
 
   sliderChange(control: string, value: number) {
@@ -388,6 +434,7 @@ export class PlanePageComponent implements AfterViewInit {
   deletingSeat(seat: seatPosInterface) {
     if (this.opt() != 'delete') return;
     this.seats = this.seats.filter((s) => s != seat);
+    this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
 
   navigationStart(event: MouseEvent | Touch) {
@@ -448,7 +495,7 @@ export class PlanePageComponent implements AfterViewInit {
         this.secCurrent = undefined;
         this.opt.set('navigation');
       }
-      this.seats = this.seats.filter((el) => el.clase_id !== item.id);
+      this.seats = this.seats.filter((el) => el.clase.id !== item.id);
     }
   }
 }
