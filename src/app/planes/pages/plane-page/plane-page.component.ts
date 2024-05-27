@@ -43,7 +43,11 @@ import Swal from 'sweetalert2';
 import { LocalStorageService } from '@utils/local-storage.service';
 import { ActivatedRoute } from '@angular/router';
 import { SeatsService } from '@plane/services/seats.service';
-import { seatCreationDto } from '@plane/interfaces/seats.interface';
+import {
+  seatCreationDto,
+  seatPlaneCreation,
+} from '@plane/interfaces/seats.interface';
+import { PlaneService } from '@plane/services/plane.service';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -73,7 +77,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
   ctx!: CanvasRenderingContext2D;
-
+  idPlane: number = 0;
   timeOutSize: any;
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
@@ -93,7 +97,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     private sectionSvc: SectionsSvcService,
     private localStorageSvc: LocalStorageService,
     private routerAct: ActivatedRoute,
-    private seatsSvc: SeatsService
+    private seatsSvc: SeatsService,
+    private avionSvc: PlaneService
   ) {
     effect(() => {
       switch (this.opt()) {
@@ -132,12 +137,18 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     const SEATS_CREATION: seatCreationDto[] = this.seats.map((seat) => {
       return {
         ClaseId: seat.clase.id!,
-        AvionId: this.routerAct.snapshot.params['id']!,
-        Posicion: `${seat.position.x}|${seat.position.y}`,
-        Codigo: 'XD',
+        posicion: `${seat.position.x}|${seat.position.y}`,
+        codigo: 'XD',
       };
     });
-    this.seatsSvc.postGroup(SEATS_CREATION).subscribe((res) => {
+    const SEND_BODY: seatPlaneCreation = {
+      asientos: SEATS_CREATION,
+      sizeSeat: this.form.get('sizeSeat')!.value,
+    };
+    this.seatsSvc.saveSeats(SEND_BODY, this.idPlane).subscribe((res) => {
+      this.localStorageSvc.removeItem('seats');
+      this.localStorageSvc.removeItem('imgBackPlane');
+      this.localStorageSvc.removeItem('sizeSeat');
       Swal.fire({
         title: 'Los asientos se han guardado con éxito',
         icon: 'success',
@@ -146,6 +157,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit(): void {
+    this.idPlane = this.routerAct.snapshot.params['id'];
     this.ctx = this.getCanvas.getContext('2d')!;
     this.sectionSvc.get({ all: true }).subscribe((res) => {
       this.sectIonsOpt = res.items;
@@ -286,6 +298,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   modifyTam() {
     setTimeout(() => {
       this.formDisplace.patchValue({ xDes: 0, yDes: 0 });
+      this.localStorageSvc.setItem(
+        'sizeSeat',
+        this.form.get('sizeSeat')!.value
+      );
       this.reMakeCanvas();
       this.resizeSeat();
     }, 10);
@@ -358,7 +374,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     this.hScreen = window.innerHeight;
   }
 
-  uploadFile(event: FileList | undefined): void {
+  async uploadFile(event: FileList | undefined) {
     if (event) {
       const reader = new FileReader();
       const ef = this.localStorageSvc;
@@ -367,18 +383,76 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       };
       reader.readAsDataURL(event[0]);
       this.img = URL.createObjectURL(event[0]);
+
       const SECTION_PREVIEW =
         this.localStorageSvc.getItem<seatPosInterface[]>('seats');
-      if (SECTION_PREVIEW) {
-        this.seats = SECTION_PREVIEW;
+      const SIZE_SEAT = this.localStorageSvc.getItem<number>('sizeSeat');
+
+      if (SECTION_PREVIEW || SIZE_SEAT) {
+        const WARNING = await Swal.fire({
+          title: '¿Quieres cargar los datos temporales?',
+          text: 'Se perderán si no se guardan',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Si',
+          cancelButtonText: 'No',
+        });
+        if (WARNING.isConfirmed) {
+          this.matSnack.open('Datos temporales cargados', 'Ok', {
+            duration: 2000,
+          });
+          if (SECTION_PREVIEW) this.seats = SECTION_PREVIEW;
+          else this.getFromDBSeat();
+          if (SIZE_SEAT) this.form.get('sizeSeat')!.setValue(SIZE_SEAT);
+          else this.getFromDBSize();
+        } else {
+          this.getFromDBSeat();
+          this.getFromDBSize();
+        }
+      } else {
+        this.localStorageSvc.removeItem('seats');
+        this.localStorageSvc.removeItem('imgBackPlane');
+        this.localStorageSvc.removeItem('sizeSeat');
+
+        this.getFromDBSeat();
+        this.getFromDBSize();
       }
-      if (this.timeOutSize) clearTimeout(this.timeOutSize);
-      this.timeOutSize = setTimeout(() => {
-        this.resizeSeat();
-        this.resizePlane();
-        this.reMakeCanvas();
-      }, 2);
     }
+    if (this.timeOutSize) clearTimeout(this.timeOutSize);
+    this.timeOutSize = setTimeout(() => {
+      this.resizeSeat();
+      this.resizePlane();
+      this.reMakeCanvas();
+    }, 2);
+  }
+
+  getFromDBSeat() {
+    this.seatsSvc
+      .get({ query: { AvionId: this.idPlane }, all: true })
+      .subscribe((res) => {
+        this.matSnack.open('Datos de la ultima actualización cargados', 'Ok', {
+          duration: 2000,
+        });
+        this.seats = res.items.map((seat) => {
+          const [x, y] = seat.posicion.split('|').map(Number);
+          console.log(seat);
+          return { position: { x, y }, clase: seat.clase };
+        });
+      });
+  }
+  getFromDBSize() {
+    this.avionSvc
+      .get({
+        query: {
+          id: this.idPlane,
+        },
+        all: true,
+      })
+      .subscribe((res) => {
+        if (res.items.length == 0) return;
+        this.form.get('sizeSeat')!.setValue(res.items[0].tamAsientoPorc);
+        this.modifyTam();
+      });
   }
 
   fitAtGrid(x: number, y: number) {
