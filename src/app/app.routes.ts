@@ -11,6 +11,14 @@ export const routes: Routes = [
     canDeactivate: [planePageExitGuard],
   },
   {
+    path: 'buyTicket/:id',
+    loadComponent: () =>
+      import('@buyTicket/pages/buy-ticket/buy-ticket.component').then(
+        (m) => m.BuyTicketComponent
+      ),
+    canDeactivate: [planePageExitGuard],
+  },
+  {
     path: '**',
     redirectTo: 'plane',
     pathMatch: 'full',

@@ -14,4 +14,10 @@ export class PlaneService extends CommonsSvcService<
     super(httpClient);
     this.url = 'Avion';
   }
+
+  getImgBase() {
+    return this.httpClient.get('assets/img/avion.jpg', {
+      responseType: 'blob',
+    });
+  }
 }

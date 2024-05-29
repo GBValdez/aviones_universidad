@@ -295,6 +295,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   form: FormGroup = this.fb.group({
     sizeSeat: [10, [this.validatorHundred, Validators.required]],
   });
+
   modifyTam() {
     setTimeout(() => {
       this.formDisplace.patchValue({ xDes: 0, yDes: 0 });
