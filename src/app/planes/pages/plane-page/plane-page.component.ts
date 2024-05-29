@@ -162,8 +162,9 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     this.sectionSvc.get({ all: true }).subscribe((res) => {
       this.sectIonsOpt = res.items;
     });
-    const IMG = this.localStorageSvc.getItem<FileList>('imgBackPlane');
-    if (IMG) this.uploadFile(IMG);
+    this.avionSvc.getImgBase().subscribe((res) => {
+      this.uploadFile(res);
+    });
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -375,15 +376,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     this.hScreen = window.innerHeight;
   }
 
-  async uploadFile(event: FileList | undefined) {
+  async uploadFile(event: FileList | undefined | Blob) {
     if (event) {
-      const reader = new FileReader();
-      const ef = this.localStorageSvc;
-      reader.onload = function (e) {
-        ef.setItem('imgBackPlane', reader.result, 0.25 / 24);
-      };
-      reader.readAsDataURL(event[0]);
-      this.img = URL.createObjectURL(event[0]);
+      if (event instanceof FileList) this.img = URL.createObjectURL(event[0]);
+      else this.img = URL.createObjectURL(event);
 
       const SECTION_PREVIEW =
         this.localStorageSvc.getItem<seatPosInterface[]>('seats');
