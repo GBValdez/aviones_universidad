@@ -1,0 +1,31 @@
+<form>
+  <section class="w-full flex sm:justify-between flex-wrap">
+    <mat-form-field class="m-[5px] sm:w-[31%] w-full">
+      <mat-label>Fecha de salida</mat-label>
+      <input matInput [matDatepicker]="picker" />
+      <mat-hint>DD/MM/YYYY</mat-hint>
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field class="m-[5px] sm:w-[31%] w-full">
+      <mat-label>Aeropuerto de entrada</mat-label>
+      <mat-select>
+        <mat-option>Origen</mat-option>
+        <mat-option>Destino</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="m-[5px] sm:w-[31%] w-full">
+      <mat-label>Aeropuerto de salida</mat-label>
+      <mat-select>
+        <mat-option>Origen</mat-option>
+        <mat-option>Destino</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </section>
+  <section class="flex w-full justify-center">
+    <button mat-raised-button>Buscar vuelo</button>
+  </section>
+</form>

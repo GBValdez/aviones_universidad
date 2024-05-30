@@ -22,7 +22,7 @@ import { filter, map } from 'rxjs/operators';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { SubLevelComponent } from './components/sub-level/sub-level.component';
-import { AuthService } from '@services/auth.service';
+import { AuthService } from '@auth/services/auth.service';
 @Component({
   selector: 'app-side-menu',
   templateUrl: './side-menu.component.html',

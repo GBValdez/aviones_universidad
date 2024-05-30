@@ -6,13 +6,14 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { InterceptorService } from '@utils/interceptor.service';
 import { APP_DATE_FORMATS_PROVIDER } from '@utils/formatDate';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
 
-    importProvidersFrom(HttpClientModule),
+    importProvidersFrom(HttpClientModule, MatMomentDateModule),
     { provide: HTTP_INTERCEPTORS, useClass: InterceptorService, multi: true },
     APP_DATE_FORMATS_PROVIDER,
   ],

@@ -13,7 +13,7 @@
 nav {
   width: 300px;
   position: fixed;
-  background: rgb(75, 0, 52);
+  background: rgb(24, 24, 24);
   height: 100vh;
   overflow-y: auto;
 
@@ -57,7 +57,7 @@ h3 {
   overflow-y: auto;
   margin-top: 5px;
 }
-h4{
+h4 {
   width: 100%;
   color: white;
   text-align: center;
@@ -65,5 +65,4 @@ h4{
   font-weight: bold;
   margin-top: 5px;
   word-break: break-word;
-
 }

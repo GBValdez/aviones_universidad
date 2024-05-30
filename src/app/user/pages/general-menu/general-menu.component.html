@@ -1,0 +1,14 @@
+<app-side-menu
+  [buttons]="buttons"
+  (collapseEvent)="isCollapsed = $event"
+></app-side-menu>
+<section class="flex justify-end">
+  <section
+    class="bodyNormal min-h-screen bg-gray-900 flex justify-center pt-[30px]"
+    [ngClass]="{ nobodyCollapse: !isCollapsed }"
+  >
+    <div class="w-[80%]">
+      <router-outlet></router-outlet>
+    </div>
+  </section>
+</section>
