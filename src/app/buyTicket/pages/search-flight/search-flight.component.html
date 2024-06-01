@@ -1,31 +1,78 @@
-<form>
+<form [formGroup]="form" (ngSubmit)="foundFlight()">
   <section class="w-full flex sm:justify-between flex-wrap">
     <mat-form-field class="m-[5px] sm:w-[31%] w-full">
       <mat-label>Fecha de salida</mat-label>
-      <input matInput [matDatepicker]="picker" />
-      <mat-hint>DD/MM/YYYY</mat-hint>
+      <input formControlName="fechaSalida" matInput [matDatepicker]="picker" />
+      <mat-hint class="text-white">DD/MM/YYYY</mat-hint>
       <mat-datepicker-toggle
         matIconSuffix
         [for]="picker"
       ></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      <mat-error>El campo es requerido</mat-error>
     </mat-form-field>
     <mat-form-field class="m-[5px] sm:w-[31%] w-full">
       <mat-label>Aeropuerto de entrada</mat-label>
-      <mat-select>
-        <mat-option>Origen</mat-option>
-        <mat-option>Destino</mat-option>
+      <mat-select formControlName="origen">
+        <mat-option> -- Ninguno -- </mat-option>
+        @for (item of listAeropuerto; track $index) {
+        <mat-option [value]="item.id"
+          >{{ item.nombre }} | {{ item.pais.nombre }}</mat-option
+        >
+        }
       </mat-select>
+      <mat-error>El campo es requerido</mat-error>
     </mat-form-field>
     <mat-form-field class="m-[5px] sm:w-[31%] w-full">
       <mat-label>Aeropuerto de salida</mat-label>
-      <mat-select>
-        <mat-option>Origen</mat-option>
-        <mat-option>Destino</mat-option>
+      <mat-select formControlName="destino">
+        <mat-option> -- Ninguno -- </mat-option>
+        @for (item of listAeropuerto; track $index) {
+        <mat-option [value]="item.id"
+          >{{ item.nombre }} | {{ item.pais.nombre }}</mat-option
+        >
+        }
       </mat-select>
+      <mat-error>El campo es requerido</mat-error>
     </mat-form-field>
   </section>
   <section class="flex w-full justify-center">
     <button mat-raised-button>Buscar vuelo</button>
   </section>
 </form>
+<section class="w-full flex mt-[3px] flex-wrap">
+  @for (vuelo of vuelos; track $index) {
+  <mat-card
+    class="w-[280px] rounded-3xl m-2 cursor-pointer hover:scale-105 transition-all"
+    [routerLink]="['/user/buyTicket', vuelo.id]"
+  >
+    <mat-card-header>
+      <mat-card-title>
+        <div class="text-base font-black text-blue-950">
+          Origen:
+          {{ vuelo.aeropuertoOrigen.nombre }} |
+          {{ vuelo.aeropuertoOrigen.pais.nombre }}
+        </div>
+        <div class="text-base font-black text-blue-950">
+          Destino:
+          {{ vuelo.aeropuertoDestino.nombre }} |
+          {{ vuelo.aeropuertoDestino.pais.nombre }}
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>
+        <div class="font-black">
+          Fecha de salida:
+          <br />
+          {{ vuelo.fechaSalida | date : "dd/MM/yyyy hh:mm a" }}
+        </div>
+        <div class="font-black">
+          Fecha de llegada estimada:
+          <br />
+          {{ vuelo.fechaLlegada | date : "dd/MM/yyyy hh:mm a" }}
+        </div>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content></mat-card-content>
+  </mat-card>
+  }
+</section>

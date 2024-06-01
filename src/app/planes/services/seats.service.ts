@@ -4,8 +4,10 @@ import {
   seatCreationDto,
   seatDto,
   seatPlaneCreation,
+  seatWithPlaneDto,
 } from '@plane/interfaces/seats.interface';
 import { CommonsSvcService } from '@utils/commons-svc.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +25,12 @@ export class SeatsService extends CommonsSvcService<seatDto, seatCreationDto> {
     return this.httpClient.post<any>(
       `${this.urlBase}/saveSeats/${idPlane}`,
       seats
+    );
+  }
+
+  getByFly(id: number): Observable<seatWithPlaneDto> {
+    return this.httpClient.get<seatWithPlaneDto>(
+      `${this.urlBase}/getSeatsOfFly/${id}`
     );
   }
 }

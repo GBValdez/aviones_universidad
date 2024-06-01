@@ -1,4 +1,9 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
 import { convertMomentToDate } from './formatDate';
 
 export const fixedQueryParams = (params: any) => {
@@ -21,16 +26,6 @@ export const fixedQueryParams = (params: any) => {
   return paramsFinal;
 };
 
-// export const formIsEmptyValidator: ValidatorFn = (control) => {
-//   let isEmpty = true;
-//   Object.keys(control.value).forEach((key) => {
-//     if (control.value[key] !== null && control.value[key].trim() !== '') {
-//       isEmpty = false;
-//     }
-//   });
-//   return isEmpty ? { formIsEmpty: true } : null;
-// };
-
 export function formIsEmptyValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     let isEmpty = true;
@@ -49,4 +44,12 @@ export function formIsEmptyValidator(): ValidatorFn {
 
     return !isEmpty ? null : { formNotEmpty: true };
   };
+}
+
+export function validateFieldEmpty(form: FormGroup, key: string): boolean {
+  return (
+    form.get(key)?.value === '' ||
+    form.get(key)?.value === null ||
+    form.get(key)?.value === undefined
+  );
 }

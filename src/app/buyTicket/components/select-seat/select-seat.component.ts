@@ -5,6 +5,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnInit,
   ViewChild,
   WritableSignal,
   signal,
@@ -12,6 +13,8 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
+import { selectVueloDto } from '@buyTicket/interfaces/vuelo.interface';
+import { VueloService } from '@buyTicket/services/vuelo.service';
 import {
   posInterface,
   seatPosInterface,
@@ -26,39 +29,58 @@ import { SeatsService } from '@plane/services/seats.service';
   templateUrl: './select-seat.component.html',
   styleUrl: './select-seat.component.scss',
 })
-export class SelectSeatComponent implements AfterViewInit {
+export class SelectSeatComponent implements AfterViewInit, OnInit {
   constructor(
     private routerAct: ActivatedRoute,
     private planeService: PlaneService,
     private http: HttpClient,
-    private seatSvc: SeatsService
+    private seatSvc: SeatsService,
+    private vueloSvc: VueloService
   ) {}
-  ngAfterViewInit(): void {
-    this.idPlane = this.routerAct.snapshot.params['id'];
-    this.uploadBase();
-    this.seatSvc
-      .get({ query: { AvionId: this.idPlane }, all: true })
-      .subscribe((res) => {
-        this.seats = res.items.map((seat) => {
+  ngOnInit(): void {
+    this.vueloSvc.getSeat().subscribe((res) => {
+      if (res) {
+        // console.log(res);
+        this.seats = res.asientoDtos.map((seat) => {
           const [x, y] = seat.posicion.split('|').map(Number);
-          console.log(seat);
-          return { position: { x, y }, clase: seat.clase };
+          return {
+            position: { x, y },
+            clase: seat.clase,
+            Id: seat.id,
+            Estado: seat.estado,
+          };
         });
+      }
+      console.log('pepe', res);
+    });
+  }
 
-        this.planeService
-          .get({
-            query: {
-              id: this.idPlane,
-            },
-            all: true,
-          })
-          .subscribe((res) => {
-            if (res.items.length == 0) return;
-            this.sizeWidth = res.items[0].tamAsientoPorc;
-            this.resizeSeat();
-            // this.modifyTam();
-          });
+  sendSeat(seat: seatPosInterface) {
+    const SEAT_DTO: selectVueloDto = {
+      VueloId: this.idFly,
+      AsientoId: seat.Id!,
+    };
+    this.vueloSvc.sendSeat(SEAT_DTO);
+  }
+
+  ngAfterViewInit(): void {
+    this.idFly = this.routerAct.snapshot.params['id'];
+    this.uploadBase();
+    this.seatSvc.getByFly(this.idFly).subscribe((res) => {
+      this.seats = res.asientoDtos.map((seat) => {
+        const [x, y] = seat.posicion.split('|').map(Number);
+        console.log(seat);
+        return {
+          position: { x, y },
+          clase: seat.clase,
+          Id: seat.id,
+          Estado: seat.estado,
+        };
       });
+      console.log('a', this.seats);
+      this.sizeWidth = res.avion.tamAsientoPorc;
+      this.resizeSeat();
+    });
   }
 
   uploadBase() {
@@ -76,7 +98,7 @@ export class SelectSeatComponent implements AfterViewInit {
   sizePixelSize: number = 10;
   sizeWidth: number = 0;
   closeSidenav: boolean = false;
-  idPlane: number = 0;
+  idFly: number = 0;
   timeOutSize: any;
   posOrigin?: posInterface;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;

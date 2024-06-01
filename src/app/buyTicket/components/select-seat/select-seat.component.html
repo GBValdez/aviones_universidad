@@ -1,9 +1,9 @@
 <section
   class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 overflow-y-auto overflow-x-visible"
-  style="z-index: 20"
+  style="z-index: 20000"
   [ngClass]="{
     'w-[280px]': !closeSidenav,
-    'w-[50px]': closeSidenav
+    'w-[60px]': closeSidenav
   }"
 >
   <div
@@ -90,6 +90,8 @@
 
     @for (seat of seats; track $index) {
     <mat-icon
+      (click)="sendSeat(seat)"
+      (touchstart)="sendSeat(seat)"
       class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white cursor-pointer"
       [ngStyle]="{
         left: seat.position.x + '%',
@@ -97,10 +99,11 @@
         width: sizePixelSize + 'px',
         height: sizePixelSize + 'px',
         'font-size': sizePixelSize + 'px',
-        'background-color': seat.clase.descripcion
+        'background-color': seat.clase.descripcion,
+        opacity: seat.Estado!.id == 29 ? 0.9 : 1
       }"
     >
-      event_seat
+      {{ seat.Estado!.id == 30 ? "event_seat" : "event_busy" }}
     </mat-icon>
     }
   </div>

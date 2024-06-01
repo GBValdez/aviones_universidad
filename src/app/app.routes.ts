@@ -30,7 +30,7 @@ export const routes: Routes = [
           import('@buyTicket/pages/buy-ticket/buy-ticket.component').then(
             (m) => m.BuyTicketComponent
           ),
-        canDeactivate: [planePageExitGuard],
+        // canDeactivate: [planePageExitGuard],
       },
       {
         path: 'dashboard',

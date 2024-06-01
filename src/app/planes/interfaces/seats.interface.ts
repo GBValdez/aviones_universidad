@@ -1,4 +1,5 @@
 import { catalogueInterface } from '@utils/commons.interface';
+import { avionDto } from './avion.interface';
 
 export interface seatBaseDto {
   codigo: string;
@@ -18,4 +19,10 @@ export interface seatPlaneCreation {
 export interface seatDto extends seatBaseDto {
   id: number;
   clase: catalogueInterface;
+  estado?: catalogueInterface;
+}
+
+export interface seatWithPlaneDto {
+  avion: avionDto;
+  asientoDtos: seatDto[];
 }
