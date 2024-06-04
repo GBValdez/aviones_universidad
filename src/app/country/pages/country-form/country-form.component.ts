@@ -1,9 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { Component, Inject } from '@angular/core';
 import {
-  FormBuilder,
   FormGroup,
-  ReactiveFormsModule,
   Validators,
+  FormBuilder,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,13 +15,15 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { CatalogueFormComponent } from '@catalogues/catalogue-form/catalogue-form.component';
 import { CatalogueService } from '@catalogues/services/catalogue.service';
+import { countryDto } from '@country/interfaces/pais.interface';
+import { CountryService } from '@country/services/country.service';
 import { catalogueModal } from '@utils/commons.interface';
 import Swal from 'sweetalert2';
-import { TextFieldModule } from '@angular/cdk/text-field';
 
 @Component({
-  selector: 'app-catalogue-form',
+  selector: 'app-country-form',
   standalone: true,
   imports: [
     MatCardModule,
@@ -31,34 +34,40 @@ import { TextFieldModule } from '@angular/cdk/text-field';
     MatDialogModule,
     TextFieldModule,
   ],
-  templateUrl: './catalogue-form.component.html',
-  styleUrl: './catalogue-form.component.scss',
+  templateUrl: './country-form.component.html',
+  styleUrl: './country-form.component.scss',
 })
-export class CatalogueFormComponent implements OnInit {
-  dataCatalogue!: catalogueModal;
+export class CountryFormComponent {
+  dataItem?: countryDto;
   form: FormGroup = this.fb.group({
     nombre: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
-    descripcion: [
+    phoneCode: [
       '',
-      Validators.compose([Validators.required, Validators.maxLength(255)]),
+      Validators.compose([Validators.required, Validators.maxLength(5)]),
+    ],
+    iso3166: [
+      '',
+      Validators.compose([Validators.required, Validators.maxLength(5)]),
+    ],
+    iso4217: [
+      '',
+      Validators.compose([Validators.required, Validators.maxLength(5)]),
     ],
   });
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data: catalogueModal,
+    @Inject(MAT_DIALOG_DATA) private data: countryDto,
     private fb: FormBuilder,
-    private catalogueSvc: CatalogueService,
+    private dataSvc: CountryService,
     private dialogRef: MatDialogRef<CatalogueFormComponent>
   ) {}
+
   ngOnInit(): void {
-    this.dataCatalogue = this.data;
-    if (this.dataCatalogue.catalogue) {
-      this.form.patchValue({
-        nombre: this.dataCatalogue.catalogue.nombre,
-        descripcion: this.dataCatalogue.catalogue.descripcion,
-      });
+    this.dataItem = this.data;
+    if (this.dataItem) {
+      this.form.patchValue(this.data);
     }
   }
   cleanForm() {
@@ -73,22 +82,16 @@ export class CatalogueFormComponent implements OnInit {
         icon: 'question',
       });
       if ((await result).isConfirmed) {
-        if (this.dataCatalogue.catalogue) {
-          this.catalogueSvc
-            .update(
-              this.dataCatalogue.catalogue.id!,
-              this.dataCatalogue.typeCatalogue,
-              this.form.value
-            )
+        if (this.dataItem) {
+          this.dataSvc
+            .put(this.dataItem.id!, this.form.value)
             .subscribe((res) => {
               this.closeDialog();
             });
         } else {
-          this.catalogueSvc
-            .create(this.form.value, this.dataCatalogue.typeCatalogue)
-            .subscribe((res) => {
-              this.closeDialog();
-            });
+          this.dataSvc.post(this.form.value).subscribe((res) => {
+            this.closeDialog();
+          });
         }
       }
     }

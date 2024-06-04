@@ -1,11 +1,9 @@
-@if(dataCatalogue){
-
 <mat-card>
   <mat-card-header>
     <mat-card-title>
       <h2>
-        {{ dataCatalogue.catalogue ? "Editar" : "Crear" }}
-        {{ dataCatalogue.title }}
+        {{ dataItem ? "Editar" : "Crear" }}
+        País
       </h2>
     </mat-card-title>
   </mat-card-header>
@@ -22,16 +20,33 @@
         <mat-error> El campo es requerido </mat-error>
       </mat-form-field>
       <mat-form-field class="w-full">
-        <mat-label>Descripción</mat-label>
-        <textarea
+        <mat-label>Código de teléfono</mat-label>
+        <input
           matInput
-          placeholder="descripcion"
-          formControlName="descripcion"
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="1"
-          cdkAutosizeMaxRows="5"
-          [maxLength]="255"
-        ></textarea>
+          placeholder="Código de teléfono"
+          formControlName="phoneCode"
+          [maxLength]="5"
+        />
+        <mat-error> El campo es requerido </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Iso 3166</mat-label>
+        <input
+          matInput
+          placeholder="Iso 3166"
+          formControlName="iso3166"
+          [maxLength]="5"
+        />
+        <mat-error> El campo es requerido </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Iso 4217</mat-label>
+        <input
+          matInput
+          placeholder="Iso 4217"
+          formControlName="iso4217"
+          [maxLength]="5"
+        />
         <mat-error> El campo es requerido </mat-error>
       </mat-form-field>
       <div class="flex justify-end w-full flex-wrap">
@@ -65,4 +80,3 @@
     </form>
   </mat-card-content>
 </mat-card>
-}

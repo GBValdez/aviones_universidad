@@ -29,25 +29,52 @@ export class GeneralMenuComponent {
       show: true,
       child: [
         {
+          text: 'Aviones',
+          icon: 'airplanemode_active',
+          click: '/session/plane-home',
+          show: true,
+        },
+        {
+          text: 'Tripulación',
+          icon: 'people',
+          click: '/session/crew',
+          show: true,
+        },
+        {
+          text: 'Personal',
+          icon: 'people',
+          click: '/session/personal',
+          show: true,
+        },
+
+        {
           text: 'Reservar Vuelo',
           icon: 'flight_takeoff',
           click: '/session/searchFlight',
           show: true,
         },
+      ],
+    },
+    {
+      text: 'Catálogos',
+      icon: 'list',
+      child: [
+        ...catalogueData.map((catalogue) => {
+          return {
+            text: catalogue.title,
+            icon: 'list',
+            click: `/session/catalogue/${catalogue.name}`,
+            show: true,
+          };
+        }),
         {
-          text: 'Catálogos',
-          icon: 'list',
-          child: catalogueData.map((catalogue) => {
-            return {
-              text: catalogue.title,
-              icon: 'list',
-              click: `/session/catalogue/${catalogue.name}`,
-              show: true,
-            };
-          }),
+          text: 'Paises',
+          icon: 'flag',
+          click: '/session/catalogue/country',
           show: true,
         },
       ],
+      show: true,
     },
     {
       text: 'Cerrar sesión',

@@ -13,6 +13,8 @@
       "@section/*": ["src/app/sections/*"],
       "@buyTicket/*": ["src/app/buyTicket/*"],
       "@catalogues/*": ["src/app/catalogues/*"],
+      "@crew/*": ["src/app/crew/*"],
+      "@country/*": ["src/app/country/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

@@ -102,7 +102,40 @@ export const routes: Routes = [
         data: { isProtect: 20 },
         title: 'Avión',
       },
+      {
+        path: 'plane-home',
+        loadComponent: () =>
+          import('@plane/pages/avion-home/avion-home.component').then(
+            (m) => m.AvionHomeComponent
+          ),
+      },
+      {
+        path: 'crew',
+        loadComponent: () =>
+          import('@crew/pages/crew/crew.component').then(
+            (m) => m.CrewComponent
+          ),
+      },
+      {
+        path: 'personal',
+        loadComponent: () =>
+          import('@crew/pages/personal/personal.component').then(
+            (m) => m.PersonalComponent
+          ),
+      },
+      {
+        path: 'catalogue/country',
+        loadComponent: () =>
+          import('@country/pages/country-home/country-home.component').then(
+            (m) => m.CountryHomeComponent
+          ),
+      },
       ...CATALOGUE_ROUTE,
     ],
+  },
+  {
+    path: '**',
+    redirectTo: 'login',
+    pathMatch: 'full',
   },
 ];
