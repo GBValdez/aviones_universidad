@@ -44,7 +44,7 @@
   @for (vuelo of vuelos; track $index) {
   <mat-card
     class="w-[280px] rounded-3xl m-2 cursor-pointer hover:scale-105 transition-all"
-    [routerLink]="['/user/buyTicket', vuelo.id]"
+    [routerLink]="['/session/buyTicket', vuelo.id]"
   >
     <mat-card-header>
       <mat-card-title>

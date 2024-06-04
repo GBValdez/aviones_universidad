@@ -1,6 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@auth/services/auth.service';
 import { SideMenuComponent } from '@utils/side-menu/side-menu.component';
 import { sideMenuInterface } from '@utils/side-menu/side-menu.interface';
 
@@ -12,11 +13,13 @@ import { sideMenuInterface } from '@utils/side-menu/side-menu.interface';
   styleUrl: './general-menu.component.scss',
 })
 export class GeneralMenuComponent {
+  constructor(private auth: AuthService) {}
+
   buttons: sideMenuInterface[] = [
     {
       text: 'Dashboard',
       icon: 'dashboard',
-      click: '/user/dashboard',
+      click: '/session/dashboard',
       show: true,
     },
     {
@@ -28,12 +31,19 @@ export class GeneralMenuComponent {
         {
           text: 'Reservar Vuelo',
           icon: 'flight_takeoff',
-          click: '/user/searchFlight',
+          click: '/session/searchFlight',
           show: true,
         },
       ],
     },
-    { text: 'Logout', icon: 'logout', click: 'logout', show: true },
+    {
+      text: 'Cerrar sesión',
+      icon: 'logout',
+      click: () => {
+        this.auth.logout();
+      },
+      show: true,
+    },
   ];
   isCollapsed: boolean = true;
 }

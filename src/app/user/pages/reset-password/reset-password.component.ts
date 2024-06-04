@@ -84,7 +84,7 @@ export class ResetPasswordComponent implements OnInit {
               text: 'Tu contraseña ha sido cambiada con éxito',
               icon: 'success',
             });
-            this.router.navigate(['/home']);
+            this.router.navigate(['/login']);
           });
       }
     }

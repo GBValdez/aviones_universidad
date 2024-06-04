@@ -41,7 +41,7 @@ export class AuthService {
     if (this.hasAuth()) {
       this.localStorageSvc.removeItem('auth');
       this.authObs.next(null);
-      this.router.navigate(['/home']);
+      this.router.navigate(['/login']);
     }
   }
 }

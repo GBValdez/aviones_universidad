@@ -68,7 +68,7 @@ export class HomeComponent {
             ],
         };
         this.authService.setAuth(newUser);
-        this.router.navigate(['/books']);
+        this.router.navigate(['/session/dashboard']);
       });
       this.form.patchValue({ email: '', password: '' });
     } else {
