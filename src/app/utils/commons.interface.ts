@@ -4,7 +4,7 @@ export interface catalogueInterface {
   descripcion: string;
 }
 export interface catalogueQuery {
-  nameCont?: string;
+  nombreCont?: string;
 }
 
 export interface catalogueModal {

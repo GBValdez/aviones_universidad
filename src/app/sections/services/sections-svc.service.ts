@@ -11,6 +11,6 @@ export class SectionsSvcService extends CommonsSvcService<
 > {
   constructor(http: HttpClient) {
     super(http);
-    this.url = 'clasesSeats';
+    this.url = 'CAA';
   }
 }

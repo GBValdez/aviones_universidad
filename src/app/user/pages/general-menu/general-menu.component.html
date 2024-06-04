@@ -4,8 +4,9 @@
 ></app-side-menu>
 <section class="flex justify-end">
   <section
-    class="bodyNormal min-h-screen bg-gray-900 flex justify-center pt-[30px]"
+    class="bodyNormal min-h-screen bg-gray-900 flex justify-center pt-[30px] bg-cover bg-center"
     [ngClass]="{ nobodyCollapse: !isCollapsed }"
+    style="background-image: url(./assets/img/dashboard.webp)"
   >
     <div class="w-[80%]">
       <router-outlet></router-outlet>

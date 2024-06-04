@@ -12,6 +12,7 @@
       "@env/*": ["src/environments/*"],
       "@section/*": ["src/app/sections/*"],
       "@buyTicket/*": ["src/app/buyTicket/*"],
+      "@catalogues/*": ["src/app/catalogues/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
+import { catalogueData } from '@catalogues/catalogueData';
 import { SideMenuComponent } from '@utils/side-menu/side-menu.component';
 import { sideMenuInterface } from '@utils/side-menu/side-menu.interface';
 
@@ -23,15 +24,27 @@ export class GeneralMenuComponent {
       show: true,
     },
     {
-      text: 'Vuelos ',
+      text: 'Aerolínea ',
       icon: 'flight',
-      click: 'flights',
       show: true,
       child: [
         {
           text: 'Reservar Vuelo',
           icon: 'flight_takeoff',
           click: '/session/searchFlight',
+          show: true,
+        },
+        {
+          text: 'Catálogos',
+          icon: 'list',
+          child: catalogueData.map((catalogue) => {
+            return {
+              text: catalogue.title,
+              icon: 'list',
+              click: `/session/catalogue/${catalogue.name}`,
+              show: true,
+            };
+          }),
           show: true,
         },
       ],

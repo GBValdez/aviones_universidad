@@ -1,6 +1,28 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { AuthGuard } from '@auth/guards/auth.guard';
+import { catalogueData } from '@catalogues/catalogueData';
 import { planePageExitGuard } from '@plane/guard/plane-page-exit.guard';
+
+const createRouteCatalogue = (title: string, name: string): Route => {
+  return {
+    path: `catalogue/${name}`,
+    loadComponent: () =>
+      import(`@catalogues/catalogues-home/catalogues-home.component`).then(
+        (m) => m.CataloguesHomeComponent
+      ),
+    canActivate: [AuthGuard],
+    data: {
+      isProtect: 20,
+      // roles: ['ADMINISTRATOR'],
+      titleShow: title,
+      typeCatalogue: name,
+    },
+    title: title,
+  };
+};
+const CATALOGUE_ROUTE = catalogueData.map((catalogue) =>
+  createRouteCatalogue(catalogue.title, catalogue.name)
+);
 
 export const routes: Routes = [
   {
@@ -9,6 +31,7 @@ export const routes: Routes = [
       import('@auth/pages/home/home.component').then((m) => m.HomeComponent),
     data: { isProtect: 30 },
     canActivate: [AuthGuard],
+    title: 'Iniciar sesión',
   },
   {
     path: 'user/confirmEmail',
@@ -45,6 +68,7 @@ export const routes: Routes = [
           ),
         canActivate: [AuthGuard],
         data: { isProtect: 20 },
+        title: 'Buscar vuelo',
       },
       {
         path: 'buyTicket/:id',
@@ -55,6 +79,7 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         data: { isProtect: 20 },
         // canDeactivate: [planePageExitGuard],
+        title: 'Comprar boleto',
       },
       {
         path: 'dashboard',
@@ -64,6 +89,7 @@ export const routes: Routes = [
           ),
         canActivate: [AuthGuard],
         data: { isProtect: 20 },
+        title: 'Dashboard',
       },
       {
         path: 'plane/:id',
@@ -74,7 +100,9 @@ export const routes: Routes = [
         canDeactivate: [planePageExitGuard],
         canActivate: [AuthGuard],
         data: { isProtect: 20 },
+        title: 'Avión',
       },
+      ...CATALOGUE_ROUTE,
     ],
   },
 ];
