@@ -130,6 +130,13 @@ export const routes: Routes = [
             (m) => m.CountryHomeComponent
           ),
       },
+      {
+        path: 'airline-home',
+        loadComponent: () =>
+          import('@airline/pages/airline-home/airline-home.component').then(
+            (m) => m.AirlineHomeComponent
+          ),
+      },
       ...CATALOGUE_ROUTE,
     ],
   },

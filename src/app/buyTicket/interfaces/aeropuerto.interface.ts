@@ -1,4 +1,4 @@
-import { PaisDto } from './pais.interface';
+import { countryDto } from '@country/interfaces/pais.interface';
 
 export interface aeropuertoDto {
   id: number;
@@ -14,7 +14,7 @@ export interface aeropuertoDto {
   email: string;
   activo: boolean;
   interno: boolean;
-  pais: PaisDto;
+  pais: countryDto;
 }
 
 export interface aeropuertoCreationDto {

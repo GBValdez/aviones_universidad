@@ -1,7 +1,6 @@
 import { avionDto } from '@plane/interfaces/avion.interface';
 import { aeropuertoDto } from './aeropuerto.interface';
 import { catalogueInterface } from '@utils/commons.interface';
-import { PaisDto } from './pais.interface';
 
 export interface vueloDto {
   id: number;

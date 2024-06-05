@@ -24,6 +24,40 @@ export class GeneralMenuComponent {
       show: true,
     },
     {
+      text: 'Administrador',
+      icon: 'admin_panel_settings',
+      show: true,
+      child: [
+        {
+          text: 'Aerolíneas',
+          icon: 'flight',
+          click: '/session/airline-home',
+          show: true,
+        },
+        {
+          text: 'Catálogos',
+          icon: 'list',
+          child: [
+            ...catalogueData.map((catalogue) => {
+              return {
+                text: catalogue.title,
+                icon: 'list',
+                click: `/session/catalogue/${catalogue.name}`,
+                show: true,
+              };
+            }),
+            {
+              text: 'Paises',
+              icon: 'flag',
+              click: '/session/catalogue/country',
+              show: true,
+            },
+          ],
+          show: true,
+        },
+      ],
+    },
+    {
       text: 'Aerolínea ',
       icon: 'flight',
       show: true,
@@ -55,27 +89,7 @@ export class GeneralMenuComponent {
         },
       ],
     },
-    {
-      text: 'Catálogos',
-      icon: 'list',
-      child: [
-        ...catalogueData.map((catalogue) => {
-          return {
-            text: catalogue.title,
-            icon: 'list',
-            click: `/session/catalogue/${catalogue.name}`,
-            show: true,
-          };
-        }),
-        {
-          text: 'Paises',
-          icon: 'flag',
-          click: '/session/catalogue/country',
-          show: true,
-        },
-      ],
-      show: true,
-    },
+
     {
       text: 'Cerrar sesión',
       icon: 'logout',

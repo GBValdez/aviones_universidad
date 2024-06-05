@@ -1,10 +1,12 @@
+import { airlineDto } from '@airline/interface/airline.interface';
+import { AirlineService } from '@airline/services/airline.service';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { Component, Inject } from '@angular/core';
 import {
-  FormGroup,
-  Validators,
   FormBuilder,
+  FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -15,15 +17,14 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { CatalogueFormComponent } from '@catalogues/catalogue-form/catalogue-form.component';
-import { CatalogueService } from '@catalogues/services/catalogue.service';
+import { MatSelectModule } from '@angular/material/select';
 import { countryDto } from '@country/interfaces/pais.interface';
 import { CountryService } from '@country/services/country.service';
-import { catalogueModal } from '@utils/commons.interface';
+import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
 import Swal from 'sweetalert2';
 
 @Component({
-  selector: 'app-country-form',
+  selector: 'app-airline-form',
   standalone: true,
   imports: [
     MatCardModule,
@@ -33,45 +34,63 @@ import Swal from 'sweetalert2';
     MatFormFieldModule,
     MatDialogModule,
     TextFieldModule,
+    MatSelectModule,
+    OnlyNumberInputDirective,
   ],
-  templateUrl: './country-form.component.html',
-  styleUrl: './country-form.component.scss',
+  templateUrl: './airline-form.component.html',
+  styleUrl: './airline-form.component.scss',
 })
-export class CountryFormComponent {
-  dataItem?: countryDto;
+export class AirlineFormComponent {
+  dataItem?: airlineDto;
+  countries: countryDto[] = [];
   form: FormGroup = this.fb.group({
     nombre: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
-    phoneCode: [
+    codigo: ['', Validators.compose([Validators.required])],
+    direccion: [
       '',
-      Validators.compose([Validators.required, Validators.maxLength(5)]),
+      Validators.compose([Validators.required, Validators.maxLength(255)]),
     ],
-    iso3166: [
+    telefono: [
       '',
-      Validators.compose([Validators.required, Validators.maxLength(5)]),
+      Validators.compose([Validators.required, Validators.maxLength(10)]),
     ],
-    iso4217: [
-      '',
-      Validators.compose([Validators.required, Validators.maxLength(5)]),
-    ],
+    email: ['', Validators.compose([Validators.required, Validators.email])],
+    paisId: ['', Validators.compose([Validators.required])],
   });
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data: countryDto,
+    @Inject(MAT_DIALOG_DATA) private data: airlineDto,
     private fb: FormBuilder,
-    private dataSvc: CountryService,
-    private dialogRef: MatDialogRef<CountryFormComponent>
+    private dataSvc: AirlineService,
+    private dialogRef: MatDialogRef<AirlineFormComponent>,
+    private countrySvc: CountryService
   ) {}
 
   ngOnInit(): void {
     this.dataItem = this.data;
     if (this.dataItem) {
       this.form.patchValue(this.data);
+      this.form.patchValue({ paisId: this.dataItem.pais.id });
     }
+    this.countrySvc
+      .get({
+        all: true,
+      })
+      .subscribe((res) => {
+        this.countries = res.items;
+      });
   }
   cleanForm() {
-    this.form.patchValue({ nombre: '', descripcion: '' });
+    this.form.patchValue({
+      nombre: '',
+      codigo: '',
+      direccion: '',
+      telefono: '',
+      email: '',
+      paisId: '',
+    });
     this.form.markAllAsTouched();
   }
   async onSubmit() {

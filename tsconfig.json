@@ -15,6 +15,7 @@
       "@catalogues/*": ["src/app/catalogues/*"],
       "@crew/*": ["src/app/crew/*"],
       "@country/*": ["src/app/country/*"],
+      "@airline/*": ["src/app/airline/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,
