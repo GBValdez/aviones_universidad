@@ -37,11 +37,11 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 export class CatalogueFormComponent implements OnInit {
   dataCatalogue!: catalogueModal;
   form: FormGroup = this.fb.group({
-    nombre: [
+    name: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
-    descripcion: [
+    description: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(255)]),
     ],
@@ -56,13 +56,13 @@ export class CatalogueFormComponent implements OnInit {
     this.dataCatalogue = this.data;
     if (this.dataCatalogue.catalogue) {
       this.form.patchValue({
-        nombre: this.dataCatalogue.catalogue.nombre,
-        descripcion: this.dataCatalogue.catalogue.descripcion,
+        name: this.dataCatalogue.catalogue.name,
+        description: this.dataCatalogue.catalogue.description,
       });
     }
   }
   cleanForm() {
-    this.form.patchValue({ nombre: '', descripcion: '' });
+    this.form.patchValue({ name: '', description: '' });
   }
   async onSubmit() {
     if (this.form.valid) {

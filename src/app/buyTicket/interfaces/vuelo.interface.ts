@@ -1,5 +1,5 @@
 import { avionDto } from '@plane/interfaces/avion.interface';
-import { aeropuertoDto } from './aeropuerto.interface';
+import { aeropuertoDto } from '../../airport/interface/aeropuerto.interface';
 import { catalogueInterface } from '@utils/commons.interface';
 
 export interface vueloDto {

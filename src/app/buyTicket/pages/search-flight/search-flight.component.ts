@@ -4,8 +4,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
-import { AeropuertoService } from '@buyTicket/services/aeropuerto.service';
-import { aeropuertoDto } from '@buyTicket/interfaces/aeropuerto.interface';
+import { aeropuertoDto } from '@airport/interface/aeropuerto.interface';
 import {
   FormBuilder,
   FormGroup,
@@ -18,6 +17,7 @@ import { formIsEmptyValidator, validateFieldEmpty } from '@utils/utils';
 import { MatCardModule } from '@angular/material/card';
 import { DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AeropuertoService } from '@airport/services/aeropuerto.service';
 
 @Component({
   selector: 'app-search-flight',

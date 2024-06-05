@@ -113,7 +113,7 @@
       <ul class="bg-white py-[5px] px-[7px] rounded-lg mb-[7px]">
         @for (sect of sectionsSelected; track $index) {
         <li
-          [ngStyle]="{ 'background-color': sect.descripcion }"
+          [ngStyle]="{ 'background-color': sect.description }"
           class="p-[5px] cursor-pointer text-white font-black my-[5px] flex items-center justify-between"
           [ngClass]="{
             'w-[95%]': sect != secCurrent,
@@ -121,7 +121,7 @@
           }"
         >
           <span class="w-[80%] inline-block" (click)="secCurrent = sect">
-            {{ sect.nombre }}
+            {{ sect.name }}
           </span>
           <mat-icon (click)="quitSection(sect)">close</mat-icon>
         </li>
@@ -297,7 +297,7 @@
         width: sizePixelSize + 'px',
         height: sizePixelSize + 'px',
         'font-size': sizePixelSize + 'px',
-        'background-color': seat.clase.descripcion
+        'background-color': seat.clase.description
       }"
     >
       event_seat

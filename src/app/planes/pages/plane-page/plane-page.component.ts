@@ -135,8 +135,9 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       return;
     }
     const SEATS_CREATION: seatCreationDto[] = this.seats.map((seat) => {
+      const idClase: number = Number(seat.clase.id!);
       return {
-        ClaseId: seat.clase.id!,
+        ClaseId: idClase,
         posicion: `${seat.position.x}|${seat.position.y}`,
         codigo: 'XD',
       };
@@ -550,7 +551,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   async quitSection(item: catalogueInterface) {
     const QUESTION = await Swal.fire({
       title: '¿Estas seguro?',
-      text: `¿Quieres eliminar la sección ${item.nombre}?. Se eliminaran todos los asientos que tenga esta sección`,
+      text: `¿Quieres eliminar la sección ${item.name}?. Se eliminaran todos los asientos que tenga esta sección`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',

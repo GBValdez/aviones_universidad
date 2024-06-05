@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import {
   aeropuertoCreationDto,
   aeropuertoDto,
-} from '@buyTicket/interfaces/aeropuerto.interface';
+} from '@airport/interface/aeropuerto.interface';
 import { CommonsSvcService } from '@utils/commons-svc.service';
 
 @Injectable({

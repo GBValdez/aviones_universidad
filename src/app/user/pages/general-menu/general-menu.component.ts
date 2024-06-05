@@ -35,6 +35,18 @@ export class GeneralMenuComponent {
           show: true,
         },
         {
+          text: 'Aeropuertos',
+          icon: 'public',
+          click: '/session/airport-home',
+          show: true,
+        },
+        {
+          text: 'Usuarios',
+          icon: 'people',
+          click: '/session/user-home',
+          show: true,
+        },
+        {
           text: 'Catálogos',
           icon: 'list',
           child: [

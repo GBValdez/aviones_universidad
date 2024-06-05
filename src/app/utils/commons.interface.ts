@@ -1,10 +1,10 @@
 export interface catalogueInterface {
-  id?: number;
-  nombre: string;
-  descripcion: string;
+  id?: number | string;
+  name: string;
+  description: string;
 }
 export interface catalogueQuery {
-  nombreCont?: string;
+  nameCont?: string;
 }
 
 export interface catalogueModal {

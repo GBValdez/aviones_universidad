@@ -101,7 +101,7 @@ export class InputAutocompleteComponent
       this.writingEvent.emit(value);
       this.currentValue = value;
       const optConst: string | number | undefined = this.options.find(
-        (opt) => opt.nombre.toLowerCase() === value.toLowerCase()
+        (opt) => opt.name.toLowerCase() === value.toLowerCase()
       )?.id;
       if (optConst) {
         this.onWrite?.(optConst);
@@ -109,7 +109,7 @@ export class InputAutocompleteComponent
         this.onWrite?.('');
         if (!this.noFilter)
           this.optionsFilter = this.options.filter((opt) =>
-            opt.nombre.toLowerCase().includes(value.toLowerCase())
+            opt.name.toLowerCase().includes(value.toLowerCase())
           );
         else this.optionsFilter = this.options;
       }
@@ -117,15 +117,14 @@ export class InputAutocompleteComponent
   }
 
   displayText(option: catalogueInterface): string {
-    return option && option.nombre ? option.nombre : '';
+    return option && option.name ? option.name : '';
   }
 
   noExistOption() {
     setTimeout(async () => {
       if (this.currentValue.trim().length == 0) return;
       const opt: catalogueInterface | undefined = this.options.find(
-        (option) =>
-          option.nombre.toLowerCase() == this.currentValue.toLowerCase()
+        (option) => option.name.toLowerCase() == this.currentValue.toLowerCase()
       );
       if (!opt) {
         this.noExistOptionEvent.emit(this.currentValue);

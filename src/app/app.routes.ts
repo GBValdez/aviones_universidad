@@ -137,6 +137,30 @@ export const routes: Routes = [
             (m) => m.AirlineHomeComponent
           ),
       },
+      {
+        path: 'airport-home',
+        loadComponent: () =>
+          import('@airport/pages/airport-home/airport-home.component').then(
+            (m) => m.AirportHomeComponent
+          ),
+      },
+      {
+        path: 'user-home',
+        loadComponent: () =>
+          import('@user/pages/user-home/user-home.component').then(
+            (m) => m.UserHomeComponent
+          ),
+      },
+      {
+        path: 'user-home/edit/:userName',
+        loadComponent: () =>
+          import('@user/pages/user-edit/user-edit.component').then(
+            (m) => m.UserEditComponent
+          ),
+        title: 'Usuarios',
+        data: { isProtect: 20 },
+        canActivate: [AuthGuard],
+      },
       ...CATALOGUE_ROUTE,
     ],
   },

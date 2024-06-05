@@ -84,7 +84,7 @@ export class CataloguesHomeComponent implements OnInit {
   async deleteCatalogue(catalogue: catalogueInterface) {
     const result = await Swal.fire({
       title: '¿Estas seguro de eliminar este registro?',
-      text: `Eliminar ${catalogue.nombre}`,
+      text: `Eliminar ${catalogue.name}`,
       icon: 'warning',
       showCancelButton: true,
     });

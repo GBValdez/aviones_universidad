@@ -29,4 +29,8 @@ export const catalogueData: CatalogueRoutesInterface[] = [
     title: 'Estado de boleto',
     name: 'EB',
   },
+  {
+    title: 'Roles',
+    name: 'rol',
+  },
 ];
