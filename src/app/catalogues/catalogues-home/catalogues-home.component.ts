@@ -48,7 +48,7 @@ export class CataloguesHomeComponent implements OnInit {
   title: string = '';
   typeCatalogue: string = '';
   form: FormGroup = this.fb.group({
-    nombreCont: [''],
+    nameCont: [''],
   });
   catalogues: catalogueInterface[] = [];
   pageNumber: number = 0;
@@ -104,7 +104,7 @@ export class CataloguesHomeComponent implements OnInit {
     this.getCatalogues(this.pageNumber, this.pageSize);
   }
   cleanForm() {
-    this.form.patchValue({ nombreCont: '' });
+    this.form.patchValue({ nameCont: '' });
     this.pageNumber = 0;
     this.getCatalogues(this.pageNumber, 10);
   }

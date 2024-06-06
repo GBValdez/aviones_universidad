@@ -1,4 +1,5 @@
 import { countryDto } from '@country/interfaces/pais.interface';
+import { catalogueInterface } from '@utils/commons.interface';
 
 export interface aeropuertoDto {
   id: number;
@@ -7,7 +8,7 @@ export interface aeropuertoDto {
   nombre: string;
   ciudad: string;
   localidad: string;
-  zonaHoraria: string;
+  zonaHoraria: catalogueInterface;
   latitud: string;
   longitud: string;
   telefono: string;
@@ -23,7 +24,7 @@ export interface aeropuertoCreationDto {
   nombre: string;
   ciudad: string;
   localidad: string;
-  zonaHoraria: string;
+  zonaHorariaId: number;
   latitud: string;
   longitud: string;
   telefono: string;

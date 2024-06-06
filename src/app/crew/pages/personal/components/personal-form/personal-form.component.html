@@ -1,0 +1,113 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <h2>
+        {{ dataItem ? "Editar" : "Crear" }}
+        personal
+      </h2>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <mat-form-field class="w-full">
+        <mat-label>Nombre</mat-label>
+        <input
+          matInput
+          placeholder="Nombre"
+          formControlName="nombre"
+          [maxLength]="50"
+        />
+        <mat-error> El campo es requerido </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Fecha de nacimiento</mat-label>
+        <input matInput [matDatepicker]="picker" />
+        <mat-hint>DD/MM/YYYY</mat-hint>
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="picker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Correo</mat-label>
+        <input
+          matInput
+          placeholder="Correo"
+          formControlName="correo"
+          [maxLength]="50"
+        />
+        @if(form.get('correo')!.hasError('email')) {
+        <mat-error> El campo debe ser un correo </mat-error>
+        } @else {
+        <mat-error> El campo es requerido </mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Dirección</mat-label>
+        <input
+          matInput
+          placeholder="Dirección"
+          formControlName="direccion"
+          [maxLength]="255"
+        />
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Teléfono</mat-label>
+        <input
+          matInput
+          placeholder="Teléfono"
+          formControlName="telefono"
+          [maxLength]="10"
+          appOnlyNumberInput
+        />
+        <mat-error> El campo es requerido </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          @for (item of countries; track $index) {
+          <mat-option [value]="item.id">{{ item.nombre }}</mat-option>
+          }
+        </mat-select>
+        <mat-error> El campo es requerido </mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full">
+        <mat-label>Puesto</mat-label>
+        <mat-select formControlName="puesto">
+          @for (item of positions; track $index) {
+          <mat-option [value]="item.id">{{ item.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="flex justify-end w-full flex-wrap">
+        <button
+          mat-raised-button
+          class="ml-[5px] mt-[5px]"
+          type="button"
+          mat-dialog-close
+          color="warn"
+        >
+          Cancelar
+        </button>
+        <button
+          mat-raised-button
+          class="ml-[5px] mt-[5px]"
+          type="button"
+          (click)="cleanForm()"
+        >
+          Limpiar
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          class="ml-[5px] mt-[5px]"
+          type="submit"
+          [disabled]="form.invalid"
+        >
+          Guardar
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

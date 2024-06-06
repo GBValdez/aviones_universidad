@@ -41,6 +41,19 @@
           <mat-error> El campo es requerido </mat-error>
         </mat-form-field>
         <mat-form-field class="w-full">
+          <mat-label>Zona horaria</mat-label>
+          <mat-select
+            formControlName="zonaHorariaId"
+            placeholder="Zona Horaria"
+          >
+            @for(item of timeZoneList; track $index) {
+            <mat-option [value]="item.id">
+              {{ item.name }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="w-full">
           <mat-label>País</mat-label>
           <mat-select formControlName="paisId" placeholder="País">
             @for (item of countries; track $index) {
@@ -84,6 +97,7 @@
             placeholder="Teléfono"
             formControlName="telefono"
             [maxLength]="10"
+            appOnlyNumberInput
           />
           <mat-error> El campo es requerido </mat-error>
         </mat-form-field>

@@ -5,6 +5,7 @@ export interface catalogueInterface {
 }
 export interface catalogueQuery {
   nameCont?: string;
+  all?: boolean;
 }
 
 export interface catalogueModal {

@@ -19,7 +19,11 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { CatalogueService } from '@catalogues/services/catalogue.service';
 import { countryDto } from '@country/interfaces/pais.interface';
+import { CountryService } from '@country/services/country.service';
+import { catalogueInterface } from '@utils/commons.interface';
+import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -36,6 +40,7 @@ import Swal from 'sweetalert2';
     MatSelectModule,
     MatCheckboxModule,
     MatDialogModule,
+    OnlyNumberInputDirective,
   ],
   templateUrl: './airport-form.component.html',
   styleUrl: './airport-form.component.scss',
@@ -43,6 +48,7 @@ import Swal from 'sweetalert2';
 export class AirportFormComponent {
   dataItem?: aeropuertoDto;
   countries: countryDto[] = [];
+  timeZoneList: catalogueInterface[] = [];
   form: FormGroup = this.fb.group({
     iata: [
       '',
@@ -64,7 +70,7 @@ export class AirportFormComponent {
       '',
       Validators.compose([Validators.required, Validators.maxLength(255)]),
     ],
-    zonaHoraria: [
+    zonaHorariaId: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
@@ -83,14 +89,28 @@ export class AirportFormComponent {
     @Inject(MAT_DIALOG_DATA) private data: aeropuertoDto,
     private fb: FormBuilder,
     private dataSvc: AeropuertoService,
-    private dialogRef: MatDialogRef<AirportFormComponent>
+    private dialogRef: MatDialogRef<AirportFormComponent>,
+    private countrySvc: CountryService,
+    private catalogueSvc: CatalogueService
   ) {}
 
   ngOnInit(): void {
     this.dataItem = this.data;
     if (this.dataItem) {
+      console.log('datos item', this.dataItem);
+
       this.form.patchValue(this.data);
+      this.form.patchValue({
+        zonaHorariaId: this.dataItem.zonaHoraria.id,
+        paisId: this.dataItem.pais.id,
+      });
     }
+    this.countrySvc.get({ all: true }).subscribe((res) => {
+      this.countries = res.items;
+    });
+    this.catalogueSvc.get('ZHORARIA', 0, 0, { all: true }).subscribe((res) => {
+      this.timeZoneList = res.items;
+    });
   }
   cleanForm() {
     this.form.patchValue({ nombre: '', descripcion: '' });

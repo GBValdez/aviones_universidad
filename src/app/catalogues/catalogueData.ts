@@ -30,6 +30,10 @@ export const catalogueData: CatalogueRoutesInterface[] = [
     name: 'EB',
   },
   {
+    title: 'Zona horaria',
+    name: 'ZHORARIA',
+  },
+  {
     title: 'Roles',
     name: 'rol',
   },
