@@ -6,11 +6,20 @@ interface crewDtoBase {
 }
 
 export interface crewDtoCreation extends crewDtoBase {
-  aerolineaId: number;
+  // aerolineaId: number;
 }
 
 export interface crewDto extends crewDtoBase {
   id: number;
   aerolinea: airlineDto;
   empleados: personalDto[];
+}
+
+export interface crewPersonalDto extends crewDtoCreation {
+  piloto: number;
+  copiloto: number;
+  ingeniero: number;
+  azafata1: number;
+  azafata2: number;
+  azafata3: number;
 }

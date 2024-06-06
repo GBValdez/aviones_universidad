@@ -20,6 +20,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import { MatSelectModule } from '@angular/material/select';
+import { countryDto } from '@country/interfaces/pais.interface';
+import { catalogueInterface } from '@utils/commons.interface';
+import { CountryService } from '@country/services/country.service';
+import { CatalogueService } from '@catalogues/services/catalogue.service';
 
 @Component({
   selector: 'app-personal-form',
@@ -34,18 +39,23 @@ import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.di
     TextFieldModule,
     MatDatepickerModule,
     OnlyNumberInputDirective,
+    MatSelectModule,
+    MatDialogModule,
   ],
   templateUrl: './personal-form.component.html',
   styleUrl: './personal-form.component.scss',
 })
 export class PersonalFormComponent {
+  countries: countryDto[] = [];
+  positions: catalogueInterface[] = [];
   dataItem?: personalDto;
   form: FormGroup = this.fb.group({
     nombre: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
-    fechaNacimiento: [Validators.required],
+    userId: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9]+$')]],
+    fechaNacimiento: [null, Validators.required],
     correo: ['', Validators.compose([Validators.required, Validators.email])],
     direccion: [
       '',
@@ -55,24 +65,47 @@ export class PersonalFormComponent {
       '',
       Validators.compose([Validators.required, Validators.maxLength(10)]),
     ],
-    paisId: [Validators.required],
-    puestoId: [Validators.required],
+    paisId: [null, Validators.required],
+    puestoId: [null, Validators.required],
   });
   constructor(
     @Inject(MAT_DIALOG_DATA) private data: personalDto,
     private fb: FormBuilder,
     private dataSvc: PersonalService,
-    private dialogRef: MatDialogRef<PersonalFormComponent>
+    private dialogRef: MatDialogRef<PersonalFormComponent>,
+    private countrySvc: CountryService,
+    private catalogueSvc: CatalogueService
   ) {}
 
   ngOnInit(): void {
     this.dataItem = this.data;
     if (this.dataItem) {
       this.form.patchValue(this.data);
+      this.form.patchValue({
+        userId: this.dataItem.user.userName,
+        paisId: this.dataItem.pais.id,
+        puestoId: this.dataItem.puesto.id,
+      });
+      this.form.get('userId')?.disable();
     }
+    this.countrySvc.get({ all: true }).subscribe((res) => {
+      this.countries = res.items;
+    });
+    this.catalogueSvc.get('PUESTOS', 0, 0, { all: true }).subscribe((res) => {
+      this.positions = res.items;
+    });
   }
   cleanForm() {
-    this.form.patchValue({ nombre: '', descripcion: '' });
+    this.form.patchValue({
+      nombre: '',
+      userId: '',
+      fechaNacimiento: '',
+      correo: '',
+      direccion: '',
+      telefono: '',
+      paisId: '',
+      puestoId: '',
+    });
     this.form.markAllAsTouched();
   }
   async onSubmit() {
@@ -84,14 +117,16 @@ export class PersonalFormComponent {
         icon: 'question',
       });
       if ((await result).isConfirmed) {
+        const DATA = this.form.value;
+        DATA.fechaNacimiento = new Date(DATA.fechaNacimiento)
+          .toISOString()
+          .split('T')[0];
         if (this.dataItem) {
-          this.dataSvc
-            .put(this.dataItem.id!, this.form.value)
-            .subscribe((res) => {
-              this.closeDialog();
-            });
+          this.dataSvc.put(this.dataItem.id!, DATA).subscribe((res) => {
+            this.closeDialog();
+          });
         } else {
-          this.dataSvc.post(this.form.value).subscribe((res) => {
+          this.dataSvc.post(DATA).subscribe((res) => {
             this.closeDialog();
           });
         }
