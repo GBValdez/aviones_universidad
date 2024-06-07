@@ -69,12 +69,16 @@ export class VueloFormComponent {
         return null; // If any field is empty, we don't apply the validation
       }
 
-      const salida = fechaSalida.toDate();
+      const salida = moment.isMoment(fechaSalida)
+        ? fechaSalida.toDate()
+        : fechaSalida;
       salida.setHours(
         Number(horaSalida.split(':')[0]),
         Number(horaSalida.split(':')[1])
       );
-      const llegada = fechaLlegada.toDate();
+      const llegada = moment.isMoment(fechaLlegada)
+        ? fechaLlegada.toDate()
+        : fechaLlegada;
       llegada.setHours(
         Number(horaLlegada.split(':')[0]),
         Number(horaLlegada.split(':')[1])
@@ -146,6 +150,10 @@ export class VueloFormComponent {
     if (this.dataItem) {
       this.form.patchValue(this.data);
       this.form.patchValue({
+        fechaSalida: moment(this.dataItem.fechaSalida),
+        fechaLlegada: moment(this.dataItem.fechaLlegada),
+        horaSalida: moment(this.dataItem.fechaSalida).format('HH:mm'),
+        horaLlegada: moment(this.dataItem.fechaLlegada).format('HH:mm'),
         aeropuertoDestinoId: this.dataItem.aeropuertoDestino.id,
         aeropuertoOrigenId: this.dataItem.aeropuertoOrigen.id,
         avionId: this.dataItem.avion.id,

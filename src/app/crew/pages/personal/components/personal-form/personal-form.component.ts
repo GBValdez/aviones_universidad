@@ -26,7 +26,7 @@ import { countryDto } from '@country/interfaces/pais.interface';
 import { catalogueInterface } from '@utils/commons.interface';
 import { CountryService } from '@country/services/country.service';
 import { CatalogueService } from '@catalogues/services/catalogue.service';
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 
 @Component({
   selector: 'app-personal-form',
@@ -54,8 +54,10 @@ export class PersonalFormComponent {
   fechaNacimientoValidator(): ValidatorFn {
     return (control) => {
       if (!control.value) return null;
-      const fechaNacimiento: Moment = control.value;
-      const fechaNacimientoDate = fechaNacimiento.toDate();
+      const fechaNacimiento = control.value;
+      const fechaNacimientoDate = moment.isMoment(fechaNacimiento)
+        ? fechaNacimiento.toDate()
+        : fechaNacimiento;
       const fechaActual = new Date();
       fechaActual.setFullYear(fechaActual.getFullYear() - 18);
       return fechaNacimientoDate <= fechaActual ? null : { menorDeEdad: true };

@@ -95,22 +95,25 @@ export class CrewFormComponent {
       const COPILOTO = this.dataItem.empleados.find((x) => x.puesto.id === 84);
       const INGENIERO = this.dataItem.empleados.find((x) => x.puesto.id === 85);
       const AZAFATA1 = this.dataItem.empleados.find((x) => x.puesto.id === 86);
-      let ID_AZAFATA: number[] = [AZAFATA1!.id];
-      const AZAFATA2 = this.dataItem.empleados.find(
-        (x) => x.puesto.id === 86 && !ID_AZAFATA.includes(x.id)
-      );
-      ID_AZAFATA.push(AZAFATA2!.id);
-      const AZAFATA3 = this.dataItem.empleados.find(
-        (x) => x.puesto.id === 86 && !ID_AZAFATA.includes(x.id)
-      );
-      this.form.patchValue({
-        piloto: PILOTO?.id,
-        copiloto: COPILOTO?.id,
-        ingeniero: INGENIERO?.id,
-        azafata1: AZAFATA1?.id,
-        azafata2: AZAFATA2?.id,
-        azafata3: AZAFATA3?.id,
-      });
+
+      if (this.dataItem.empleados.length != 0) {
+        let ID_AZAFATA: number[] = [AZAFATA1!.id];
+        const AZAFATA2 = this.dataItem.empleados.find(
+          (x) => x.puesto.id === 86 && !ID_AZAFATA.includes(x.id)
+        );
+        ID_AZAFATA.push(AZAFATA2!.id);
+        const AZAFATA3 = this.dataItem.empleados.find(
+          (x) => x.puesto.id === 86 && !ID_AZAFATA.includes(x.id)
+        );
+        this.form.patchValue({
+          piloto: PILOTO?.id,
+          copiloto: COPILOTO?.id,
+          ingeniero: INGENIERO?.id,
+          azafata1: AZAFATA1?.id ?? null,
+          azafata2: AZAFATA2?.id ?? null,
+          azafata3: AZAFATA3?.id ?? null,
+        });
+      }
     }
     this.getPersonal(83, 'pilots');
     this.getPersonal(84, 'copilots');

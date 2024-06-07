@@ -73,8 +73,7 @@ export class SearchFlightComponent implements OnInit {
     this.vueloSvc
       .get({
         query: QUERY,
-        pageNumber: 1,
-        pageSize: 10,
+        all: true,
       })
       .subscribe((vuelos) => {
         this.vuelos = vuelos.items;

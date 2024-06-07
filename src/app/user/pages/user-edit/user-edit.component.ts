@@ -69,7 +69,7 @@ export class UserEditComponent implements OnInit {
   rolOpt: catalogueInterface[] = [];
 
   cancel() {
-    this.router.navigate(['/user/home']);
+    this.router.navigate(['/session/user-home']);
   }
   clean() {
     this.form.patchValue({
