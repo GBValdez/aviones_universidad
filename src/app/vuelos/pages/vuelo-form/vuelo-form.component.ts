@@ -2,10 +2,13 @@ import { aeropuertoDto } from '@airport/interface/aeropuerto.interface';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { Component, Inject } from '@angular/core';
 import {
+  AbstractControl,
   FormArray,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +29,7 @@ import { avionDto } from '@plane/interfaces/avion.interface';
 import { PlaneService } from '@plane/services/plane.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import moment, { Moment } from 'moment';
 import { destinoDto } from 'src/app/destinations/interfaces/destino.interface';
 import { DestinosService } from 'src/app/destinations/services/destinos.service';
 import Swal from 'sweetalert2';
@@ -54,18 +58,69 @@ export class VueloFormComponent {
   origen: destinoDto[] = [];
   aviones: avionDto[] = [];
   sections: catalogueInterface[] = [];
-  form: FormGroup = this.fb.group({
-    codigo: [
-      '',
-      Validators.compose([Validators.required, Validators.maxLength(50)]),
-    ],
-    fechaSalida: ['', Validators.required],
-    fechaLlegada: ['', Validators.required],
-    aeropuertoDestinoId: ['', Validators.required],
-    aeropuertoOrigenId: ['', Validators.required],
-    avionId: ['', Validators.required],
-    vueloClases: this.fb.array([]),
-  });
+  dateTimeValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const fechaSalida: Moment | undefined = control.get('fechaSalida')?.value;
+      const horaSalida: string | undefined = control.get('horaSalida')?.value;
+      const fechaLlegada: Moment | undefined =
+        control.get('fechaLlegada')?.value;
+      const horaLlegada: string | undefined = control.get('horaLlegada')?.value;
+      if (!fechaSalida || !horaSalida || !fechaLlegada || !horaLlegada) {
+        return null; // If any field is empty, we don't apply the validation
+      }
+
+      const salida = fechaSalida.toDate();
+      salida.setHours(
+        Number(horaSalida.split(':')[0]),
+        Number(horaSalida.split(':')[1])
+      );
+      const llegada = fechaLlegada.toDate();
+      llegada.setHours(
+        Number(horaLlegada.split(':')[0]),
+        Number(horaLlegada.split(':')[1])
+      );
+      const NOW = new Date();
+      if (salida < NOW || llegada < NOW) {
+        return { dateNowTimeInvalid: true };
+      }
+      return salida >= llegada ? { dateTimeInvalid: true } : null;
+    };
+  }
+
+  airportValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const origen: number | undefined =
+        control.get('aeropuertoOrigenId')?.value;
+      const destino: number | undefined = control.get(
+        'aeropuertoDestinoId'
+      )?.value;
+      if (!origen || !destino) {
+        return null;
+      }
+      return origen === destino ? { airportInvalid: true } : null;
+    };
+  }
+
+  form: FormGroup = this.fb.group(
+    {
+      codigo: [
+        '',
+        Validators.compose([Validators.required, Validators.maxLength(50)]),
+      ],
+      fechaSalida: ['', Validators.required],
+      fechaLlegada: ['', Validators.required],
+      aeropuertoDestinoId: ['', Validators.required],
+      aeropuertoOrigenId: ['', Validators.required],
+      avionId: ['', Validators.required],
+      vueloClases: this.fb.array([]),
+
+      horaSalida: ['', Validators.required],
+      horaLlegada: ['', Validators.required],
+    },
+    {
+      validators: [this.dateTimeValidator(), this.airportValidator()],
+    }
+  );
   constructor(
     @Inject(MAT_DIALOG_DATA) private data: vueloDto,
     private fb: FormBuilder,
@@ -129,7 +184,7 @@ export class VueloFormComponent {
           const PRECIO = PREVIEW ? PREVIEW.precio : 0;
           const CONTROL = this.fb.group({
             claseId: [section.id],
-            precio: [PRECIO, Validators.required],
+            precio: [PRECIO, [Validators.required, Validators.min(0.01)]],
           });
           const control = this.form.controls['vueloClases'] as FormArray;
           control.push(CONTROL);
@@ -147,6 +202,8 @@ export class VueloFormComponent {
       aeropuertoDestinoId: '',
       aeropuertoOrigenId: '',
       avionId: '',
+      horaSalida: '',
+      horaLlegada: '',
     });
     this.form.markAllAsTouched();
   }
@@ -159,14 +216,30 @@ export class VueloFormComponent {
         icon: 'question',
       });
       if ((await result).isConfirmed) {
+        const DATA = this.form.value;
+        const FECHA_SALIDA = moment.isMoment(DATA.fechaSalida)
+          ? DATA.fechaSalida.toDate()
+          : DATA.fechaSalida;
+        const FECHA_LLEGADA = moment.isMoment(DATA.fechaLlegada)
+          ? DATA.fechaLlegada.toDate()
+          : DATA.fechaLlegada;
+        FECHA_SALIDA.setHours(
+          Number(DATA.horaSalida.split(':')[0]),
+          Number(DATA.horaSalida.split(':')[1])
+        );
+        FECHA_LLEGADA.setHours(
+          Number(DATA.horaLlegada.split(':')[0]),
+          Number(DATA.horaLlegada.split(':')[1])
+        );
+        DATA.fechaSalida = FECHA_SALIDA;
+        DATA.fechaLlegada = FECHA_LLEGADA;
+        console.log('DATA', DATA);
         if (this.dataItem) {
-          this.dataSvc
-            .put(this.dataItem.id!, this.form.value)
-            .subscribe((res) => {
-              this.closeDialog();
-            });
+          this.dataSvc.put(this.dataItem.id!, DATA).subscribe((res) => {
+            this.closeDialog();
+          });
         } else {
-          this.dataSvc.post(this.form.value).subscribe((res) => {
+          this.dataSvc.post(DATA).subscribe((res) => {
             this.closeDialog();
           });
         }

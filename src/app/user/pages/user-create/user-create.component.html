@@ -6,7 +6,106 @@
   >
     <h1>Crear usuario</h1>
     <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Pasaporte</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="noPasaporte"
+        [maxlength]="50"
+      />
+      @if(form.get('noPasaporte')!.hasError('required')){
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+      } @if(form.get('noPasaporte')!.hasError('pattern')){
+      <mat-error>El pasaporte solo puede contener letras o dígitos</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
       <mat-label>Nombre</mat-label>
+      <input matInput type="text" formControlName="nombre" [maxlength]="50" />
+      <mat-error> El campo es <strong>requerido</strong> </mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Fecha Nacimiento</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="fechaNacimiento"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      @if(form.get('fechaNacimiento')!.hasError('required')){
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+      } @if(form.get('fechaNacimiento')!.hasError('menorDeEdad')){
+      <mat-error>El usuario debe ser mayor de edad</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>País</mat-label>
+      <mat-select formControlName="paisId">
+        @for (item of codigoTelefono; track $index) {
+        <mat-option [value]="item.id">
+          {{ item.nombre }}
+        </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Dirección</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="direccion"
+        [maxlength]="100"
+      />
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Código de Teléfono</mat-label>
+      <mat-select formControlName="codigoTelefono">
+        @for (item of codigoTelefono; track $index) {
+        <mat-option [value]="item.id">
+          {{ item.phoneCode }}
+        </mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Telefono</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="telefono"
+        [maxlength]="10"
+        appOnlyNumberInput
+      />
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Código de Teléfono Emergencia</mat-label>
+      <mat-select formControlName="codigoTelefonoEmergencia">
+        @for (item of codigoTelefono; track $index) {
+        <mat-option [value]="item.id">
+          {{ item.phoneCode }}
+        </mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>Telefono Emergencia</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="telefonoEmergencia"
+        [maxlength]="10"
+        appOnlyNumberInput
+      />
+      <mat-error>El campo es <strong>requerido</strong></mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full mb-[5px] mt-4">
+      <mat-label>UserName</mat-label>
       <input matInput type="text" formControlName="userName" />
       @if ( form.get('userName')!.hasError('required') ){
       <mat-error>El campo es <strong>requerido</strong></mat-error>
@@ -18,7 +117,7 @@
     </mat-form-field>
     <mat-form-field class="w-full mb-[5px]">
       <mat-label>Correo</mat-label>
-      <input matInput type="text" formControlName="email" />
+      <input matInput type="text" formControlName="correo" />
       <mat-error>El campo es <strong>requerido</strong></mat-error>
     </mat-form-field>
     <mat-form-field class="w-full mb-[5px]">
@@ -71,7 +170,7 @@
         class="ml-[3px] mb-[3px]"
         [disabled]="form.invalid"
       >
-        Crear usuario
+        Validar
       </button>
     </section>
   </form>

@@ -13,7 +13,7 @@ const createRouteCatalogue = (title: string, name: string): Route => {
     canActivate: [AuthGuard],
     data: {
       isProtect: 20,
-      // roles: ['ADMINISTRATOR'],
+      roles: ['ADMINISTRATOR'],
       titleShow: title,
       typeCatalogue: name,
     },
@@ -60,7 +60,7 @@ export const routes: Routes = [
         (m) => m.PlanePageComponent
       ),
     canActivate: [AuthGuard],
-    data: { isProtect: 20 },
+    data: { isProtect: 20, roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'] },
     title: 'Avión',
   },
   {
@@ -107,6 +107,11 @@ export const routes: Routes = [
           import('@vuelo/pages/vuelo-home/vuelo-home.component').then(
             (m) => m.VueloHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+        },
       },
       {
         path: 'plane-home',
@@ -114,6 +119,11 @@ export const routes: Routes = [
           import('@plane/pages/avion-home/avion-home.component').then(
             (m) => m.AvionHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+        },
       },
       {
         path: 'crew',
@@ -121,6 +131,11 @@ export const routes: Routes = [
           import('@crew/pages/crew/crew.component').then(
             (m) => m.CrewComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+        },
       },
       {
         path: 'personal',
@@ -128,6 +143,11 @@ export const routes: Routes = [
           import('@crew/pages/personal/personal.component').then(
             (m) => m.PersonalComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+        },
       },
       {
         path: 'catalogue/country',
@@ -135,6 +155,11 @@ export const routes: Routes = [
           import('@country/pages/country-home/country-home.component').then(
             (m) => m.CountryHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR'],
+        },
       },
       {
         path: 'airline-home',
@@ -142,6 +167,11 @@ export const routes: Routes = [
           import('@airline/pages/airline-home/airline-home.component').then(
             (m) => m.AirlineHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR'],
+        },
       },
       {
         path: 'airport-home',
@@ -149,6 +179,11 @@ export const routes: Routes = [
           import('@airport/pages/airport-home/airport-home.component').then(
             (m) => m.AirportHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR'],
+        },
       },
       {
         path: 'user-home',
@@ -156,6 +191,9 @@ export const routes: Routes = [
           import('@user/pages/user-home/user-home.component').then(
             (m) => m.UserHomeComponent
           ),
+        canActivate: [AuthGuard],
+        data: { isProtect: 20, roles: ['ADMINISTRATOR'] },
+        title: 'Usuarios',
       },
       {
         path: 'user-home/edit/:userName',
@@ -164,7 +202,7 @@ export const routes: Routes = [
             (m) => m.UserEditComponent
           ),
         title: 'Usuarios',
-        data: { isProtect: 20 },
+        data: { isProtect: 20, roles: ['ADMINISTRATOR'] },
         canActivate: [AuthGuard],
       },
       ...CATALOGUE_ROUTE,

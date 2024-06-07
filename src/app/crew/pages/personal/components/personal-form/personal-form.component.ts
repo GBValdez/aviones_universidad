@@ -4,6 +4,7 @@ import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import {
@@ -25,6 +26,7 @@ import { countryDto } from '@country/interfaces/pais.interface';
 import { catalogueInterface } from '@utils/commons.interface';
 import { CountryService } from '@country/services/country.service';
 import { CatalogueService } from '@catalogues/services/catalogue.service';
+import { Moment } from 'moment';
 
 @Component({
   selector: 'app-personal-form',
@@ -49,13 +51,26 @@ export class PersonalFormComponent {
   countries: countryDto[] = [];
   positions: catalogueInterface[] = [];
   dataItem?: personalDto;
+  fechaNacimientoValidator(): ValidatorFn {
+    return (control) => {
+      if (!control.value) return null;
+      const fechaNacimiento: Moment = control.value;
+      const fechaNacimientoDate = fechaNacimiento.toDate();
+      const fechaActual = new Date();
+      fechaActual.setFullYear(fechaActual.getFullYear() - 18);
+      return fechaNacimientoDate <= fechaActual ? null : { menorDeEdad: true };
+    };
+  }
   form: FormGroup = this.fb.group({
     nombre: [
       '',
       Validators.compose([Validators.required, Validators.maxLength(50)]),
     ],
     userId: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9]+$')]],
-    fechaNacimiento: [null, Validators.required],
+    fechaNacimiento: [
+      null,
+      [Validators.required, this.fechaNacimientoValidator()],
+    ],
     correo: ['', Validators.compose([Validators.required, Validators.email])],
     direccion: [
       '',

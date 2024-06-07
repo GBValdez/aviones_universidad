@@ -45,7 +45,11 @@
             [for]="picker"
           ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
+          @if(form.get('fechaNacimiento')!.hasError('required') ){
           <mat-error> El campo es requerido </mat-error>
+          } @if(form.get('fechaNacimiento')!.hasError('menorDeEdad') ){
+          <mat-error> El usuario debe ser mayor de edad </mat-error>
+          }
         </mat-form-field>
         <mat-form-field class="w-full">
           <mat-label>Correo</mat-label>

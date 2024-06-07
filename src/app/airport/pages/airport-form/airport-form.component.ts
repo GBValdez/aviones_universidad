@@ -113,7 +113,21 @@ export class AirportFormComponent {
     });
   }
   cleanForm() {
-    this.form.patchValue({ nombre: '', descripcion: '' });
+    this.form.patchValue({
+      iata: '',
+      oaci: '',
+      nombre: '',
+      ciudad: '',
+      localidad: '',
+      zonaHorariaId: '',
+      longitud: '',
+      latitud: '',
+      telefono: '',
+      email: '',
+      activo: true,
+      interno: true,
+      paisId: '',
+    });
     this.form.markAllAsTouched();
   }
   async onSubmit() {

@@ -27,8 +27,14 @@
           Aeropuerto Destino: {{ item.aeropuertoDestino.nombre }} |
           {{ item.aeropuertoDestino.pais.nombre }}
         </p>
-        <p>Fecha de entrada: {{ item.fechaSalida | date : "dd/MM/yyyy" }}</p>
-        <p>Fecha de salida: {{ item.fechaLlegada | date : "dd/MM/yyyy" }}</p>
+        <p>
+          Fecha de entrada:
+          {{ item.fechaSalida | date : "dd/MM/yyyy hh:mm" }}
+        </p>
+        <p>
+          Fecha de salida:
+          {{ item.fechaLlegada | date : "dd/MM/yyyy hh:mm" }}
+        </p>
         <p>Modelo Avion: {{ item.avion.modelo.name }}</p>
       </mat-card-subtitle>
     </mat-card-header>

@@ -109,7 +109,10 @@ export class DestinationsHomeComponent implements OnInit {
 
   deleteItem(item: destinoDto) {
     this.destinoSvc.delete(item.id).subscribe(() => {
-      this.destinations = this.destinations.filter((x) => x.id !== item.id);
+      // console.log('borrado', item);
+      if (item.isDestino)
+        this.destinations = this.destinations.filter((x) => x.id !== item.id);
+      else this.origins = this.origins.filter((x) => x.id !== item.id);
     });
   }
 

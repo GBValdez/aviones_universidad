@@ -85,7 +85,7 @@ export class AvionFormComponent {
         marcaId: this.data.marca.id,
         modeloId: this.data.modelo.id,
         tipoAvionId: this.data.tipoAvion.id,
-        tripulacionId: this.data.tripulaciones[0].id,
+        tripulacionId: this.data.tripulaciones[0]?.id ?? null,
       });
     }
     this.cataloguesSvc.get('MARCA_AV', 1, 1, { all: true }).subscribe((res) => {

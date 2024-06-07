@@ -42,6 +42,11 @@
           </mat-select>
           <mat-error> El campo es requerido </mat-error>
         </mat-form-field>
+        @if (form.hasError('airportInvalid')) {
+        <p class="text-red-700">
+          El aeropuerto de origen no puede ser igual al aeropuerto de destino
+        </p>
+        }
 
         <mat-form-field class="w-full">
           <mat-label>Fecha entrada - Fecha llegada</mat-label>
@@ -65,6 +70,29 @@
           <mat-date-range-picker #picker></mat-date-range-picker>
           <mat-error> El campo es requerido </mat-error>
         </mat-form-field>
+
+        <div class="flex flex-wrap justify-between">
+          <mat-form-field class="sm:w-[45%] w-full">
+            <mat-label>Hora de entrada</mat-label>
+            <input matInput type="time" formControlName="horaSalida" />
+            <mat-error> El campo es requerido </mat-error>
+          </mat-form-field>
+          <mat-form-field class="sm:w-[45%] w-full">
+            <mat-label>Hora de llegada</mat-label>
+            <input matInput type="time" formControlName="horaLlegada" />
+            <mat-error> El campo es requerido </mat-error>
+          </mat-form-field>
+        </div>
+        @if(form.hasError('dateTimeInvalid')){
+        <p class="text-red-700">
+          La fecha de salida no puede ser mayor o igual a la fecha de llegada
+        </p>
+        } @if(form.hasError('dateNowTimeInvalid')){
+        <p class="text-red-700">
+          La fecha y hora de salida no puede ser menor a la fecha actual y hora
+          actual
+        </p>
+        }
         <mat-form-field class="w-full">
           <mat-label>Avion</mat-label>
           <mat-select formControlName="avionId">
@@ -91,7 +119,12 @@
                 [maxLength]="10"
                 appOnlyNumberInput
               />
+              @if (toFormGroup(item).get("precio")?.hasError('required')) {
               <mat-error> El campo es requerido </mat-error>
+              }@else{
+              <mat-error> El precio tiene que ser mayor a 0.01 </mat-error>
+
+              }
             </mat-form-field>
           </div>
 

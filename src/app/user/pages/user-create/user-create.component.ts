@@ -1,16 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { countryDto } from '@country/interfaces/pais.interface';
+import { CountryService } from '@country/services/country.service';
 import { UserService } from '@user/services/user.service';
+import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import { Moment } from 'moment';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -23,20 +30,59 @@ import Swal from 'sweetalert2';
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
+    MatDatepickerModule,
+    OnlyNumberInputDirective,
+    MatSelectModule,
   ],
   templateUrl: './user-create.component.html',
   styleUrl: './user-create.component.scss',
 })
-export class UserCreateComponent {
+export class UserCreateComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private userSvc: UserService,
-    private dialogRef: MatDialogRef<UserCreateComponent>
+    private dialogRef: MatDialogRef<UserCreateComponent>,
+    private countrySvc: CountryService
   ) {}
+  ngOnInit(): void {
+    this.countrySvc.get({ all: true }).subscribe((res) => {
+      this.codigoTelefono = res.items;
+    });
+  }
+  codigoTelefono: countryDto[] = [];
   symbols: string = '@$!%*?&#';
+  fechaNacimientoValidator(): ValidatorFn {
+    return (control) => {
+      if (!control.value) return null;
+      const fechaNacimiento: Moment = control.value;
+      const fechaNacimientoDate = fechaNacimiento.toDate();
+      const fechaActual = new Date();
+      fechaActual.setFullYear(fechaActual.getFullYear() - 18);
+      return fechaNacimientoDate <= fechaActual ? null : { menorDeEdad: true };
+    };
+  }
 
   form: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    noPasaporte: [
+      '',
+      [
+        Validators.required,
+        Validators.pattern('^[a-zA-Z0-9]+$'),
+        Validators.maxLength(50),
+      ],
+    ],
+    nombre: ['', [Validators.required, Validators.maxLength(50)]],
+    fechaNacimiento: [
+      '',
+      [Validators.required, this.fechaNacimientoValidator()],
+    ],
+    telefono: ['', [Validators.required]],
+    telefonoEmergencia: ['', [Validators.required]],
+    direccion: ['', [Validators.required, Validators.maxLength(100)]],
+    paisId: ['', [Validators.required]],
+    codigoTelefono: ['', [Validators.required]],
+    codigoTelefonoEmergencia: ['', [Validators.required]],
+    correo: ['', [Validators.required, Validators.email]],
     password: [
       '',
       [
@@ -48,16 +94,28 @@ export class UserCreateComponent {
     ],
     userName: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9]+$')]],
   });
-  createUser() {
-    if (this.form.valid) {
-      this.userSvc.createUser(this.form.value).subscribe((res) => {
-        Swal.fire({
-          title: 'Usuario creado',
-          text: 'Se ha enviado un correo de verificación a su email para activar su cuenta de usuario en la aplicación. Por favor, revise su bandeja de entrada',
-          icon: 'success',
+
+  async createUser() {
+    const ALERT = await Swal.fire({
+      title: '¿Estas seguro de continuar?',
+      showCancelButton: true,
+      confirmButtonText: `Guardar`,
+      icon: 'question',
+    });
+    if (ALERT.isConfirmed)
+      if (this.form.valid) {
+        const DATA = this.form.value;
+        DATA.fechaNacimiento = new Date(DATA.fechaNacimiento)
+          .toISOString()
+          .split('T')[0];
+        this.userSvc.createUser(DATA).subscribe((res) => {
+          Swal.fire({
+            title: 'Usuario creado',
+            text: 'Se ha enviado un correo de verificación a su email para activar su cuenta de usuario en la aplicación. Por favor, revise su bandeja de entrada',
+            icon: 'success',
+          });
+          this.dialogRef.close();
         });
-        this.dialogRef.close();
-      });
-    } else this.form.markAllAsTouched();
+      } else this.form.markAllAsTouched();
   }
 }

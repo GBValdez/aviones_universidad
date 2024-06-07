@@ -4,8 +4,19 @@ export interface UserDto {
   isActive?: boolean;
   roles?: string[];
 }
-export interface UserCreateDto extends UserDto {
+export interface UserCreateDto {
   password: string;
+  userName: string;
+  noPasaporte: string;
+  nombre: string;
+  fechaNacimiento: Date;
+  correo: string;
+  telefono: string;
+  telefonoEmergencia: string;
+  direccion: string;
+  paisId: number;
+  codigoTelefono: number;
+  codigoTelefonoEmergencia: number;
 }
 
 export interface userQueryFilter {
