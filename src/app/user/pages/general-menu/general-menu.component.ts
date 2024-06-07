@@ -75,6 +75,12 @@ export class GeneralMenuComponent {
       show: true,
       child: [
         {
+          text: 'Vuelos',
+          icon: 'flight',
+          click: '/session/vuelo-home',
+          show: true,
+        },
+        {
           text: 'Aviones',
           icon: 'airplanemode_active',
           click: '/session/plane-home',

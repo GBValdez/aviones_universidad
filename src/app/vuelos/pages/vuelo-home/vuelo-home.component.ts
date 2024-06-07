@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { avionDto } from '@plane/interfaces/avion.interface';
-import { PlaneService } from '@plane/services/plane.service';
+import { vueloDto } from '@buyTicket/interfaces/vuelo.interface';
+import { VueloService } from '@buyTicket/services/vuelo.service';
 import Swal from 'sweetalert2';
-import { AvionFormComponent } from '../avion-form/avion-form.component';
+import { VueloFormComponent } from '../vuelo-form/vuelo-form.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -12,10 +12,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule } from '@angular/router';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-avion-home',
+  selector: 'app-vuelo-home',
   standalone: true,
   imports: [
     MatCardModule,
@@ -26,14 +26,15 @@ import { RouterModule } from '@angular/router';
     MatMenuModule,
     MatIconModule,
     MatPaginatorModule,
-    RouterModule,
+    DatePipe,
   ],
-  templateUrl: './avion-home.component.html',
-  styleUrl: './avion-home.component.scss',
+
+  templateUrl: './vuelo-home.component.html',
+  styleUrl: './vuelo-home.component.scss',
 })
-export class AvionHomeComponent {
-  constructor(private dataSvc: PlaneService, private dialog: MatDialog) {}
-  data: avionDto[] = [];
+export class VueloHomeComponent {
+  constructor(private dataSvc: VueloService, private dialog: MatDialog) {}
+  data: vueloDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
   dataSize: number = 0;
@@ -65,7 +66,7 @@ export class AvionHomeComponent {
     this.pageSize = event.pageSize;
     this.getData(this.pageNumber, this.pageSize);
   }
-  async deleteItem(catalogue: avionDto) {
+  async deleteItem(catalogue: vueloDto) {
     const result = await Swal.fire({
       title: '¿Estas seguro de eliminar este registro?',
       text: `Eliminar ${catalogue.codigo}`,
@@ -81,9 +82,9 @@ export class AvionHomeComponent {
     }
   }
 
-  openForm(item?: avionDto) {
+  openForm(item?: vueloDto) {
     this.dialog
-      .open(AvionFormComponent, {
+      .open(VueloFormComponent, {
         width: '60%',
         minWidth: '280px',
         data: item,

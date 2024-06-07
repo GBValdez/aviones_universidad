@@ -10,6 +10,7 @@ export interface vueloDto {
   aeropuertoDestino: aeropuertoDto;
   aeropuertoOrigen: aeropuertoDto;
   avion: avionDto;
+  vueloClases: vueloClaseDto[];
 }
 
 export interface vueloDtoCreation {
@@ -19,12 +20,16 @@ export interface vueloDtoCreation {
   avionId: number;
   aeropuertoOrigenId: number;
   aeropuertoDestinoId: number;
-  vueloClases: VueloClase[];
+  vueloClases: VueloClaseCreationDto[];
+}
+export interface vueloClaseDto {
+  id: number;
+  clase: catalogueInterface;
+  precio: number;
 }
 
-export interface VueloClase {
+export interface VueloClaseCreationDto {
   claseId: number;
-  vueloId: number;
   precio: number;
 }
 export interface selectVueloDto {

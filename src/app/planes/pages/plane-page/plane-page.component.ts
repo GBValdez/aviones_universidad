@@ -41,7 +41,7 @@ import { SectionsSvcService } from '@section/services/sections-svc.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import Swal from 'sweetalert2';
 import { LocalStorageService } from '@utils/local-storage.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SeatsService } from '@plane/services/seats.service';
 import {
   seatCreationDto,
@@ -68,6 +68,7 @@ import { PlaneService } from '@plane/services/plane.service';
     MatSliderModule,
     InputAutocompleteComponent,
     ReactiveFormsModule,
+    RouterModule,
   ],
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
@@ -98,7 +99,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     private localStorageSvc: LocalStorageService,
     private routerAct: ActivatedRoute,
     private seatsSvc: SeatsService,
-    private avionSvc: PlaneService
+    private avionSvc: PlaneService,
+    private router: Router
   ) {
     effect(() => {
       switch (this.opt()) {
@@ -154,6 +156,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         title: 'Los asientos se han guardado con éxito',
         icon: 'success',
       });
+      this.router.navigate(['/session/plane-home']);
     });
   }
 
@@ -344,6 +347,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   img: any;
   wScreen: number = window.innerWidth;
   hScreen: number = window.innerHeight;
+  limitSeat: number = 0;
 
   reMakeCanvas() {
     this.form.updateValueAndValidity();
@@ -449,6 +453,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       .subscribe((res) => {
         if (res.items.length == 0) return;
         this.form.get('sizeSeat')!.setValue(res.items[0].tamAsientoPorc);
+        this.limitSeat = res.items[0].capacidadPasajeros;
         this.modifyTam();
       });
   }
@@ -476,6 +481,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       )
     )
       return;
+    if (this.seats.length > this.limitSeat) {
+      Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
+      return;
+    }
     this.seats.push({
       position: this.setPosition(event),
       clase: this.secCurrent!,

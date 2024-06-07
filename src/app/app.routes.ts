@@ -54,6 +54,16 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'plane/:id',
+    loadComponent: () =>
+      import('@plane/pages/plane-page/plane-page.component').then(
+        (m) => m.PlanePageComponent
+      ),
+    canActivate: [AuthGuard],
+    data: { isProtect: 20 },
+    title: 'Avión',
+  },
+  {
     path: 'session',
     loadComponent: () =>
       import('@user/pages/general-menu/general-menu.component').then(
@@ -92,15 +102,11 @@ export const routes: Routes = [
         title: 'Dashboard',
       },
       {
-        path: 'plane/:id',
+        path: 'vuelo-home',
         loadComponent: () =>
-          import('@plane/pages/plane-page/plane-page.component').then(
-            (m) => m.PlanePageComponent
+          import('@vuelo/pages/vuelo-home/vuelo-home.component').then(
+            (m) => m.VueloHomeComponent
           ),
-        canDeactivate: [planePageExitGuard],
-        canActivate: [AuthGuard],
-        data: { isProtect: 20 },
-        title: 'Avión',
       },
       {
         path: 'plane-home',

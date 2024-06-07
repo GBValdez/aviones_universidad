@@ -7,7 +7,6 @@ export const planePageExitGuard: CanDeactivateFn<unknown> = async (
   currentState,
   nextState
 ) => {
-  alert('planePageExitGuard');
   const RES = await Swal.fire({
     title: '¿Estás seguro de salir de la página?',
     text: 'Los cambios realizados no se guardarán',
@@ -18,6 +17,5 @@ export const planePageExitGuard: CanDeactivateFn<unknown> = async (
     confirmButtonText: 'Salir',
     cancelButtonText: 'Cancelar',
   });
-  console.log('amigo');
   return RES.isConfirmed;
 };

@@ -1,7 +1,7 @@
 <section class="flex justify-between flex-wrap">
-  <h2 class="title">Aerolínea</h2>
+  <h2 class="title">Vuelo</h2>
   <button class="sm:mb-0 mb-[10px]" mat-raised-button (click)="openForm()">
-    Crear Aerolínea
+    Crear Vuelo
   </button>
 </section>
 
@@ -15,13 +15,21 @@
     <mat-card-header>
       <mat-card-title
         ><h3>
-          {{ item.nombre }}
+          {{ item.codigo }}
         </h3></mat-card-title
       >
       <mat-card-subtitle>
-        <p>Código: {{ item.codigo }}</p>
-        <p>Dirección: {{ item.direccion }}</p>
-        <p>Pais: {{ item.pais.nombre }}</p>
+        <p>
+          Aeropuerto Origen: {{ item.aeropuertoOrigen.nombre }} |
+          {{ item.aeropuertoOrigen.pais.nombre }}
+        </p>
+        <p>
+          Aeropuerto Destino: {{ item.aeropuertoDestino.nombre }} |
+          {{ item.aeropuertoDestino.pais.nombre }}
+        </p>
+        <p>Fecha de entrada: {{ item.fechaSalida | date : "dd/MM/yyyy" }}</p>
+        <p>Fecha de salida: {{ item.fechaLlegada | date : "dd/MM/yyyy" }}</p>
+        <p>Modelo Avion: {{ item.avion.modelo.name }}</p>
       </mat-card-subtitle>
     </mat-card-header>
   </mat-card>
@@ -29,10 +37,6 @@
     <button mat-menu-item (click)="openForm(item)">
       <mat-icon>edit</mat-icon>
       <span>Editar</span>
-    </button>
-    <button mat-menu-item (click)="editDestinations(item)">
-      <mat-icon>verified</mat-icon>
-      <span>Editar destinos y entradas autorizadas</span>
     </button>
 
     <button mat-menu-item (click)="deleteItem(item)">

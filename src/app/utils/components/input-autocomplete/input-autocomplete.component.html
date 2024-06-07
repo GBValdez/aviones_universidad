@@ -13,6 +13,7 @@
     #auto="matAutocomplete"
     [displayWith]="displayText"
     (optionSelected)="selected($event)"
+    style="z-index: 5000"
   >
     @for (item of optionsFilter; track item) {
     <mat-option [value]="item">{{ item.name }}</mat-option>

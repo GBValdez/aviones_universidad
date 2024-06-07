@@ -55,8 +55,8 @@ export class InterceptorService implements HttpInterceptor {
           });
         }
         if (error.error.errors) {
-          const errors: string[] = error.error.errors;
-          const message = errors.join('\n');
+          const VALUES = Object.values(error.error.errors);
+          const message = VALUES.join('\n');
 
           Swal.fire({
             icon: 'error',

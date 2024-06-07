@@ -1,7 +1,9 @@
 import { catalogueInterface } from '@utils/commons.interface';
 import { seatDto } from './seats.interface';
+import { crewDto } from '@crew/pages/crew/interface/crew.interface';
 
 export interface avionBaseDto {
+  codigo: string;
   year: string;
   serie: string;
   capacidadCarga: number;
@@ -19,6 +21,7 @@ export interface avionDto extends avionBaseDto {
   tipoAvion: catalogueInterface;
   //   vuelos: Vuelo[];
   asientos: seatDto[];
+  tripulaciones: crewDto[];
 }
 
 export interface avionCreationDto extends avionBaseDto {

@@ -22,4 +22,8 @@ export class CrewService extends CommonsSvcService<crewDto, crewDtoCreation> {
   updateCrew(data: crewPersonalDto, id: number): Observable<any> {
     return this.http.put(`${this.urlBase}/updateCrew/${id}`, data);
   }
+
+  allAndPlane(idPlane: number): Observable<crewDto[]> {
+    return this.http.get<crewDto[]>(`${this.urlBase}/allAndPlane/${idPlane}`);
+  }
 }

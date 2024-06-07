@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import { DestinationsHomeComponent } from 'src/app/destinations/pages/destinations-home/destinations-home.component';
 
 @Component({
   selector: 'app-airline-home',
@@ -26,12 +27,17 @@ import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.di
     MatMenuModule,
     MatIconModule,
     MatPaginatorModule,
+    DestinationsHomeComponent,
   ],
   templateUrl: './airline-home.component.html',
   styleUrl: './airline-home.component.scss',
 })
 export class AirlineHomeComponent {
-  constructor(private dataSvc: AirlineService, private dialog: MatDialog) {}
+  constructor(
+    private dataSvc: AirlineService,
+    private dialog: MatDialog,
+    private matDialog: MatDialog
+  ) {}
   data: airlineDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
@@ -39,6 +45,14 @@ export class AirlineHomeComponent {
 
   ngOnInit(): void {
     this.getData(this.pageNumber, this.pageSize);
+  }
+
+  editDestinations(aerolinea: airlineDto) {
+    this.matDialog.open(DestinationsHomeComponent, {
+      width: '60%',
+      minWidth: '280px',
+      data: aerolinea,
+    });
   }
 
   getData(pageNumber: number, pageSize: number) {

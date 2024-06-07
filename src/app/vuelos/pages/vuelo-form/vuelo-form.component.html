@@ -1,0 +1,132 @@
+<mat-dialog-content>
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <h2>
+          {{ dataItem ? "Editar" : "Crear" }}
+          Vuelo
+        </h2>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <mat-form-field class="w-full">
+          <mat-label>Código</mat-label>
+          <input
+            matInput
+            placeholder="Código"
+            formControlName="codigo"
+            [maxLength]="10"
+          />
+          <mat-error> El campo es requerido </mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full">
+          <mat-label>Aeropuerto Origen</mat-label>
+          <mat-select formControlName="aeropuertoOrigenId">
+            @for (item of origen; track $index) {
+            <mat-option [value]="item.aeropuerto.id">
+              {{ item.aeropuerto.nombre }}
+            </mat-option>
+            }
+          </mat-select>
+          <mat-error> El campo es requerido </mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full">
+          <mat-label>Aeropuerto Destino</mat-label>
+          <mat-select formControlName="aeropuertoDestinoId">
+            @for (item of destinos; track $index) {
+            <mat-option [value]="item.aeropuerto.id">
+              {{ item.aeropuerto.nombre }}
+            </mat-option>
+            }
+          </mat-select>
+          <mat-error> El campo es requerido </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+          <mat-label>Fecha entrada - Fecha llegada</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input
+              matStartDate
+              formControlName="fechaSalida"
+              placeholder="Fecha entrada"
+            />
+            <input
+              matEndDate
+              placeholder="Fecha salida"
+              formControlName="fechaLlegada"
+            />
+          </mat-date-range-input>
+          <mat-hint>DD/MM/YYYY – DD/MM/YYYY</mat-hint>
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+          <mat-error> El campo es requerido </mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full">
+          <mat-label>Avion</mat-label>
+          <mat-select formControlName="avionId">
+            @for (item of aviones; track $index) {
+            <mat-option [value]="item.id">
+              {{ item.codigo }}
+            </mat-option>
+            }
+          </mat-select>
+          <mat-error> El campo es requerido </mat-error>
+        </mat-form-field>
+        <section formArrayName="vueloClases">
+          <h2>Precios de los asientos</h2>
+          @for (item of formClases.controls; track $index) {
+          <div [formGroup]="toFormGroup(item)">
+            <mat-form-field class="w-full">
+              <mat-label>{{
+                showNameSectionById(toFormGroup(item).get("claseId")?.value)
+              }}</mat-label>
+              <input
+                matInput
+                placeholder="Precio Q."
+                formControlName="precio"
+                [maxLength]="10"
+                appOnlyNumberInput
+              />
+              <mat-error> El campo es requerido </mat-error>
+            </mat-form-field>
+          </div>
+
+          }
+        </section>
+
+        <div class="flex justify-end w-full flex-wrap">
+          <button
+            mat-raised-button
+            class="ml-[5px] mt-[5px]"
+            type="button"
+            mat-dialog-close
+            color="warn"
+          >
+            Cancelar
+          </button>
+          <button
+            mat-raised-button
+            class="ml-[5px] mt-[5px]"
+            type="button"
+            (click)="cleanForm()"
+          >
+            Limpiar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            class="ml-[5px] mt-[5px]"
+            type="submit"
+            [disabled]="form.invalid"
+          >
+            Guardar
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</mat-dialog-content>

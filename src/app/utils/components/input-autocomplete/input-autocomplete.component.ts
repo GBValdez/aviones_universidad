@@ -53,6 +53,7 @@ export class InputAutocompleteComponent
     if (this.noFilter)
       if (changes['options']) {
         this.optionsFilter = this.options;
+        console.log(this.optionsFilter);
       }
   }
 
@@ -96,6 +97,7 @@ export class InputAutocompleteComponent
   }
 
   filter(event: FocusEvent | Event): void {
+    console.log('filter', this.optionsFilter);
     setTimeout(() => {
       const value = (event.target as HTMLInputElement).value;
       this.writingEvent.emit(value);
