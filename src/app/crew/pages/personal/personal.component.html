@@ -1,6 +1,11 @@
 <section class="flex justify-between flex-wrap">
   <h2 class="title">Personal</h2>
-  <button class="sm:mb-0 mb-[10px]" mat-raised-button (click)="openForm()">
+  <button
+    [disabled]="!canOperation"
+    class="sm:mb-0 mb-[10px]"
+    mat-raised-button
+    (click)="openForm()"
+  >
     Crear Personal
   </button>
 </section>
@@ -29,12 +34,12 @@
     </mat-card-header>
   </mat-card>
   <mat-menu #menu="matMenu" xPosition="after">
-    <button mat-menu-item (click)="openForm(item)">
+    <button mat-menu-item [disabled]="!canOperation" (click)="openForm(item)">
       <mat-icon>edit</mat-icon>
       <span>Editar</span>
     </button>
 
-    <button mat-menu-item (click)="deleteItem(item)">
+    <button [disabled]="!canOperation" mat-menu-item (click)="deleteItem(item)">
       <mat-icon>delete</mat-icon>
       <span>Borrar</span>
     </button>

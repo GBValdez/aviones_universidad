@@ -89,7 +89,7 @@ export class GeneralMenuComponent implements OnInit {
           {
             text: 'Vuelos',
             icon: 'flight',
-            click: '/session/vuelo-home',
+            click: '/session/airline-section/vuelo-home',
             show:
               res?.roles.includes('ADMINISTRATOR_AIRLINE') ||
               res?.roles.includes('ADMINISTRATOR'),
@@ -97,7 +97,7 @@ export class GeneralMenuComponent implements OnInit {
           {
             text: 'Aviones',
             icon: 'airplanemode_active',
-            click: '/session/plane-home',
+            click: '/session/airline-section/plane-home',
             show:
               res?.roles.includes('ADMINISTRATOR_AIRLINE') ||
               res?.roles.includes('ADMINISTRATOR'),
@@ -105,7 +105,7 @@ export class GeneralMenuComponent implements OnInit {
           {
             text: 'Tripulación',
             icon: 'people',
-            click: '/session/crew',
+            click: '/session/airline-section/crew',
             show:
               res?.roles.includes('ADMINISTRATOR_AIRLINE') ||
               res?.roles.includes('ADMINISTRATOR'),
@@ -113,7 +113,7 @@ export class GeneralMenuComponent implements OnInit {
           {
             text: 'Personal',
             icon: 'people',
-            click: '/session/personal',
+            click: '/session/airline-section/personal',
             show:
               res?.roles.includes('ADMINISTRATOR_AIRLINE') ||
               res?.roles.includes('ADMINISTRATOR'),

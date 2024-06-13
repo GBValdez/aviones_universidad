@@ -49,6 +49,12 @@
       </button>
     </section>
   </section>
+  @if(!closeSidenav){
+  <button mat-raised-button color="warn" class="w-full mt-4" (click)="exit()">
+    Cancelar
+  </button>
+
+  }
 </section>
 
 <section class="h-screen w-screen overflow-hidden bg-black">
@@ -103,7 +109,7 @@
         opacity: seat.Estado!.id == 29 ? 0.9 : 1
       }"
     >
-      {{ seat.Estado!.id == 30 ? "event_seat" : "event_busy" }}
+      {{ seat.Estado!.id == 94 ? "event_seat" : "event_busy" }}
     </mat-icon>
     }
   </div>

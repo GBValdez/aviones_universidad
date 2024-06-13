@@ -1,0 +1,27 @@
+@if(isAdmin){
+<section>
+  <mat-form-field>
+    <mat-label>Infiltrarse a Aerolínea</mat-label>
+    <mat-select
+      [(ngModel)]="aerolineaCurrent"
+      (selectionChange)="selectAirline()"
+    >
+      <mat-option [value]="undefined">--Ninguna--</mat-option>
+      @for (item of airlineList; track $index) {
+      <mat-option [value]="item">{{ item.nombre }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  @if(aerolineaCurrent){
+  <h2 class="text-white font-black text-lg">
+    Infiltrado en Aerolínea: {{ aerolineaCurrent.nombre }}
+  </h2>
+  } @else {
+  <h2 class="text-white font-black text-lg">
+    No estás infiltrado en ninguna aerolínea
+  </h2>
+  }
+</section>
+}
+
+<router-outlet></router-outlet>

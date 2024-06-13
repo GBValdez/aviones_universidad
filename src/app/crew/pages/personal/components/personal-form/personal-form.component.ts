@@ -27,6 +27,7 @@ import { catalogueInterface } from '@utils/commons.interface';
 import { CountryService } from '@country/services/country.service';
 import { CatalogueService } from '@catalogues/services/catalogue.service';
 import moment, { Moment } from 'moment';
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 
 @Component({
   selector: 'app-personal-form',
@@ -91,7 +92,8 @@ export class PersonalFormComponent {
     private dataSvc: PersonalService,
     private dialogRef: MatDialogRef<PersonalFormComponent>,
     private countrySvc: CountryService,
-    private catalogueSvc: CatalogueService
+    private catalogueSvc: CatalogueService,
+    private airLineSecSvc: AirlineSectSvcService
   ) {}
 
   ngOnInit(): void {
@@ -102,6 +104,7 @@ export class PersonalFormComponent {
         userId: this.dataItem.user.userName,
         paisId: this.dataItem.pais.id,
         puestoId: this.dataItem.puesto.id,
+        fechaNacimiento: moment(this.dataItem.fechaNacimiento),
       });
       this.form.get('userId')?.disable();
     }
@@ -138,6 +141,7 @@ export class PersonalFormComponent {
         DATA.fechaNacimiento = new Date(DATA.fechaNacimiento)
           .toISOString()
           .split('T')[0];
+        DATA.aerolineaId = this.airLineSecSvc.getCurrentAirline()?.id ?? null;
         if (this.dataItem) {
           this.dataSvc.put(this.dataItem.id!, DATA).subscribe((res) => {
             this.closeDialog();

@@ -54,6 +54,7 @@ export class HomeComponent {
     if (this.form.valid) {
       this.loginSvc.login(this.form.value).subscribe((res) => {
         const decoded: any = jwtDecode(res.token);
+        console.log(decoded);
         const newUser: authUserInterface = {
           token: res.token,
           expiration: res.expiration,

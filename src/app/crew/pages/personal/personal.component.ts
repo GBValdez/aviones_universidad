@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 
 @Component({
   selector: 'app-personal',
@@ -30,14 +31,23 @@ import { MatMenuModule } from '@angular/material/menu';
   styleUrl: './personal.component.scss',
 })
 export class PersonalComponent {
-  constructor(private dataSvc: PersonalService, private dialog: MatDialog) {}
+  constructor(
+    private dataSvc: PersonalService,
+    private dialog: MatDialog,
+    private airLineSecSvc: AirlineSectSvcService
+  ) {}
   data: personalDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
   dataSize: number = 0;
-
+  canOperation: boolean = false;
   ngOnInit(): void {
+    this.canOperation = this.airLineSecSvc.canOperation();
     this.getData(this.pageNumber, this.pageSize);
+    this.airLineSecSvc.getCurrentAirlineObservable().subscribe((res) => {
+      this.canOperation = this.airLineSecSvc.canOperation();
+      this.getData(this.pageNumber, this.pageSize);
+    });
   }
 
   getData(pageNumber: number, pageSize: number) {
@@ -45,6 +55,9 @@ export class PersonalComponent {
       .get({
         pageNumber: pageNumber + 1,
         pageSize,
+        query: {
+          AerolineaId: this.airLineSecSvc.getCurrentAirline()?.id,
+        },
       })
       .subscribe((res) => {
         if (res.total > 0) {

@@ -18,6 +18,7 @@
       "@airline/*": ["src/app/airline/*"],
       "@airport/*": ["src/app/airport/*"],
       "@vuelo/*": ["src/app/vuelos/*"],
+      "@airlineSection/*": ["src/app/airline-section/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

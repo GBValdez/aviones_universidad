@@ -102,52 +102,61 @@ export const routes: Routes = [
         title: 'Dashboard',
       },
       {
-        path: 'vuelo-home',
+        path: 'airline-section',
         loadComponent: () =>
-          import('@vuelo/pages/vuelo-home/vuelo-home.component').then(
-            (m) => m.VueloHomeComponent
-          ),
-        canActivate: [AuthGuard],
-        data: {
-          isProtect: 20,
-          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
-        },
-      },
-      {
-        path: 'plane-home',
-        loadComponent: () =>
-          import('@plane/pages/avion-home/avion-home.component').then(
-            (m) => m.AvionHomeComponent
-          ),
-        canActivate: [AuthGuard],
-        data: {
-          isProtect: 20,
-          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
-        },
-      },
-      {
-        path: 'crew',
-        loadComponent: () =>
-          import('@crew/pages/crew/crew.component').then(
-            (m) => m.CrewComponent
-          ),
-        canActivate: [AuthGuard],
-        data: {
-          isProtect: 20,
-          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
-        },
-      },
-      {
-        path: 'personal',
-        loadComponent: () =>
-          import('@crew/pages/personal/personal.component').then(
-            (m) => m.PersonalComponent
-          ),
-        canActivate: [AuthGuard],
-        data: {
-          isProtect: 20,
-          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
-        },
+          import(
+            '@airlineSection/airline-section/airline-section.component'
+          ).then((m) => m.AirlineSectionComponent),
+        children: [
+          {
+            path: 'vuelo-home',
+            loadComponent: () =>
+              import('@vuelo/pages/vuelo-home/vuelo-home.component').then(
+                (m) => m.VueloHomeComponent
+              ),
+            canActivate: [AuthGuard],
+            data: {
+              isProtect: 20,
+              roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+            },
+          },
+          {
+            path: 'plane-home',
+            loadComponent: () =>
+              import('@plane/pages/avion-home/avion-home.component').then(
+                (m) => m.AvionHomeComponent
+              ),
+            canActivate: [AuthGuard],
+            data: {
+              isProtect: 20,
+              roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+            },
+          },
+          {
+            path: 'crew',
+            loadComponent: () =>
+              import('@crew/pages/crew/crew.component').then(
+                (m) => m.CrewComponent
+              ),
+            canActivate: [AuthGuard],
+            data: {
+              isProtect: 20,
+              roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+            },
+          },
+          {
+            path: 'personal',
+            loadComponent: () =>
+              import('@crew/pages/personal/personal.component').then(
+                (m) => m.PersonalComponent
+              ),
+            canActivate: [AuthGuard],
+            data: {
+              isProtect: 20,
+              roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+            },
+          },
+        ],
       },
       {
         path: 'catalogue/country',
