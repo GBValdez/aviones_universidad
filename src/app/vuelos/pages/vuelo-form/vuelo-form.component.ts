@@ -1,3 +1,4 @@
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 import { aeropuertoDto } from '@airport/interface/aeropuerto.interface';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { Component, Inject } from '@angular/core';
@@ -132,7 +133,8 @@ export class VueloFormComponent {
     private dialogRef: MatDialogRef<VueloFormComponent>,
     private destinosSvc: DestinosService,
     private avionSvc: PlaneService,
-    private catalogueSvc: CatalogueService
+    private catalogueSvc: CatalogueService,
+    private airLineSecSvc: AirlineSectSvcService
   ) {}
 
   get formClases(): FormArray {
@@ -163,7 +165,7 @@ export class VueloFormComponent {
       .get({
         all: true,
         query: {
-          aerolineaId: 1,
+          aerolineaId: this.airLineSecSvc.getCurrentAirline()?.id,
         },
       })
       .subscribe((res) => {
@@ -174,7 +176,7 @@ export class VueloFormComponent {
       .get({
         all: true,
         query: {
-          aerolineaId: 1,
+          aerolineaId: this.airLineSecSvc.getCurrentAirline()?.id,
         },
       })
       .subscribe((res) => {

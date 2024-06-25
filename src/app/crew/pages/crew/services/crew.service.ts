@@ -7,6 +7,7 @@ import {
 } from '../interface/crew.interface';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { fixedQueryParams } from '@utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -23,7 +24,13 @@ export class CrewService extends CommonsSvcService<crewDto, crewDtoCreation> {
     return this.http.put(`${this.urlBase}/updateCrew/${id}`, data);
   }
 
-  allAndPlane(idPlane: number): Observable<crewDto[]> {
-    return this.http.get<crewDto[]>(`${this.urlBase}/allAndPlane/${idPlane}`);
+  allAndPlane(
+    idPlane: number,
+    AerolineaId: number | undefined
+  ): Observable<crewDto[]> {
+    const DATA = fixedQueryParams({ AerolineaId });
+    return this.http.get<crewDto[]>(`${this.urlBase}/allAndPlane/${idPlane}`, {
+      params: DATA,
+    });
   }
 }

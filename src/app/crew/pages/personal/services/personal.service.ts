@@ -6,6 +6,7 @@ import {
 } from '../interface/personal.interface';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { fixedQueryParams } from '@utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -18,9 +19,15 @@ export class PersonalService extends CommonsSvcService<
     super(http);
     this.url = 'employee';
   }
-  getAllAndCrew(idCrew: number, idPuesto: number): Observable<personalDto[]> {
+  getAllAndCrew(
+    idCrew: number,
+    PuestoId: number,
+    AerolineaId: number | null
+  ): Observable<personalDto[]> {
+    const QUERY = fixedQueryParams({ PuestoId, AerolineaId });
     return this.http.get<personalDto[]>(
-      `${this.urlBase}/AllAndCrew/${idCrew}/${idPuesto}`
+      `${this.urlBase}/AllAndCrew/${idCrew}`,
+      { params: QUERY }
     );
   }
 }

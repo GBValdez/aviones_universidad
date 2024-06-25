@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { PersonalService } from './services/personal.service';
 import { MatDialog } from '@angular/material/dialog';
 import { personalDto } from './interface/personal.interface';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
+import { Observable, Subscription } from 'rxjs';
+import { airlineDto } from '@airline/interface/airline.interface';
 
 @Component({
   selector: 'app-personal',
@@ -30,24 +32,30 @@ import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.s
   templateUrl: './personal.component.html',
   styleUrl: './personal.component.scss',
 })
-export class PersonalComponent {
+export class PersonalComponent implements OnDestroy {
   constructor(
     private dataSvc: PersonalService,
     private dialog: MatDialog,
     private airLineSecSvc: AirlineSectSvcService
   ) {}
+  ngOnDestroy(): void {
+    this.obs.unsubscribe();
+  }
   data: personalDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
   dataSize: number = 0;
   canOperation: boolean = false;
+  obs!: Subscription;
   ngOnInit(): void {
     this.canOperation = this.airLineSecSvc.canOperation();
     this.getData(this.pageNumber, this.pageSize);
-    this.airLineSecSvc.getCurrentAirlineObservable().subscribe((res) => {
-      this.canOperation = this.airLineSecSvc.canOperation();
-      this.getData(this.pageNumber, this.pageSize);
-    });
+    this.obs = this.airLineSecSvc
+      .getCurrentAirlineObservable()
+      .subscribe((res) => {
+        this.canOperation = this.airLineSecSvc.canOperation();
+        this.getData(this.pageNumber, this.pageSize);
+      });
   }
 
   getData(pageNumber: number, pageSize: number) {

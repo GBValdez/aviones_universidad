@@ -24,6 +24,7 @@ import { personalDto } from '@crew/pages/personal/interface/personal.interface';
 import { MatSelectModule } from '@angular/material/select';
 import { PersonalService } from '@crew/pages/personal/services/personal.service';
 import { Observable } from 'rxjs';
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 
 @Component({
   selector: 'app-crew-form',
@@ -84,7 +85,8 @@ export class CrewFormComponent {
     private fb: FormBuilder,
     private dataSvc: CrewService,
     private dialogRef: MatDialogRef<CrewFormComponent>,
-    private personalSvc: PersonalService
+    private personalSvc: PersonalService,
+    private airLineSecSvc: AirlineSectSvcService
   ) {}
 
   ngOnInit(): void {
@@ -123,7 +125,11 @@ export class CrewFormComponent {
 
   getPersonal(puestoId: number, personal: string): void {
     this.personalSvc
-      .getAllAndCrew(this.dataItem?.id ?? -1, puestoId)
+      .getAllAndCrew(
+        this.dataItem?.id ?? -1,
+        puestoId,
+        this.airLineSecSvc.getCurrentAirline()?.id ?? null
+      )
       .subscribe((res) => {
         console.log(res);
         const REFERENCE = this as any;
@@ -152,14 +158,14 @@ export class CrewFormComponent {
         icon: 'question',
       });
       if ((await result).isConfirmed) {
+        const DATA = this.form.value;
+        DATA.aerolineaId = this.airLineSecSvc.getCurrentAirline()?.id ?? null;
         if (this.dataItem) {
-          this.dataSvc
-            .updateCrew(this.form.value, this.dataItem.id!)
-            .subscribe((res) => {
-              this.closeDialog();
-            });
+          this.dataSvc.updateCrew(DATA, this.dataItem.id!).subscribe((res) => {
+            this.closeDialog();
+          });
         } else {
-          this.dataSvc.createCrew(this.form.value).subscribe((res) => {
+          this.dataSvc.createCrew(DATA).subscribe((res) => {
             this.closeDialog();
           });
         }

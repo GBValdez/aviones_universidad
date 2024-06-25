@@ -1,3 +1,4 @@
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { Component, Inject } from '@angular/core';
 import {
@@ -74,7 +75,8 @@ export class AvionFormComponent {
     private dataSvc: PlaneService,
     private dialogRef: MatDialogRef<AvionFormComponent>,
     private cataloguesSvc: CatalogueService,
-    private crewSvc: CrewService
+    private crewSvc: CrewService,
+    private airLineSecSvc: AirlineSectSvcService
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +102,10 @@ export class AvionFormComponent {
       this.tiposAvion = res.items;
     });
     this.crewSvc
-      .allAndPlane(this.dataItem ? this.dataItem.id : -1)
+      .allAndPlane(
+        this.dataItem ? this.dataItem.id : -1,
+        this.airLineSecSvc.getCurrentAirline()?.id
+      )
       .subscribe((res) => {
         this.crews = res;
       });
@@ -129,14 +134,14 @@ export class AvionFormComponent {
         icon: 'question',
       });
       if ((await result).isConfirmed) {
+        const DATA = this.form.value;
+        DATA.AerolineaId = this.airLineSecSvc.getCurrentAirline()?.id;
         if (this.dataItem) {
-          this.dataSvc
-            .put(this.dataItem.id!, this.form.value)
-            .subscribe((res) => {
-              this.closeDialog();
-            });
+          this.dataSvc.put(this.dataItem.id!, DATA).subscribe((res) => {
+            this.closeDialog();
+          });
         } else {
-          this.dataSvc.post(this.form.value).subscribe((res) => {
+          this.dataSvc.post(DATA).subscribe((res) => {
             this.closeDialog();
           });
         }

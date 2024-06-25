@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { vueloDto } from '@buyTicket/interfaces/vuelo.interface';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 
 @Component({
   selector: 'app-vuelo-home',
@@ -32,22 +34,39 @@ import { DatePipe } from '@angular/common';
   templateUrl: './vuelo-home.component.html',
   styleUrl: './vuelo-home.component.scss',
 })
-export class VueloHomeComponent {
-  constructor(private dataSvc: VueloService, private dialog: MatDialog) {}
+export class VueloHomeComponent implements OnDestroy {
+  constructor(
+    private dataSvc: VueloService,
+    private dialog: MatDialog,
+    private airLineSecSvc: AirlineSectSvcService
+  ) {}
   data: vueloDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
   dataSize: number = 0;
-
+  canOperation: boolean = false;
+  suscription!: Subscription;
   ngOnInit(): void {
+    this.canOperation = this.airLineSecSvc.canOperation();
     this.getData(this.pageNumber, this.pageSize);
+    this.suscription = this.airLineSecSvc
+      .getCurrentAirlineObservable()
+      .subscribe((res) => {
+        this.canOperation = this.airLineSecSvc.canOperation();
+        this.getData(this.pageNumber, this.pageSize);
+      });
   }
-
+  ngOnDestroy(): void {
+    this.suscription.unsubscribe();
+  }
   getData(pageNumber: number, pageSize: number) {
     this.dataSvc
       .get({
         pageNumber: pageNumber + 1,
         pageSize,
+        query: {
+          AerolineaId: this.airLineSecSvc.getCurrentAirline()?.id,
+        },
       })
       .subscribe((res) => {
         if (res.total > 0) {

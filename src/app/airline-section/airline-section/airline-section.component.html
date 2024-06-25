@@ -3,7 +3,7 @@
   <mat-form-field>
     <mat-label>Infiltrarse a Aerolínea</mat-label>
     <mat-select
-      [(ngModel)]="aerolineaCurrent"
+      [(value)]="aerolineaCurrent"
       (selectionChange)="selectAirline()"
     >
       <mat-option [value]="undefined">--Ninguna--</mat-option>

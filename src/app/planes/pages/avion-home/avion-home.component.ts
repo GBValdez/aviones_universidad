@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { avionDto } from '@plane/interfaces/avion.interface';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 
 @Component({
   selector: 'app-avion-home',
@@ -31,15 +33,30 @@ import { RouterModule } from '@angular/router';
   templateUrl: './avion-home.component.html',
   styleUrl: './avion-home.component.scss',
 })
-export class AvionHomeComponent {
-  constructor(private dataSvc: PlaneService, private dialog: MatDialog) {}
+export class AvionHomeComponent implements OnDestroy {
+  constructor(
+    private dataSvc: PlaneService,
+    private dialog: MatDialog,
+    private airLineSecSvc: AirlineSectSvcService
+  ) {}
+  ngOnDestroy(): void {
+    this.suscription.unsubscribe();
+  }
   data: avionDto[] = [];
   pageNumber: number = 0;
   pageSize: number = 10;
   dataSize: number = 0;
-
+  canOperation: boolean = false;
+  suscription!: Subscription;
   ngOnInit(): void {
+    this.canOperation = this.airLineSecSvc.canOperation();
     this.getData(this.pageNumber, this.pageSize);
+    this.suscription = this.airLineSecSvc
+      .getCurrentAirlineObservable()
+      .subscribe((res) => {
+        this.canOperation = this.airLineSecSvc.canOperation();
+        this.getData(this.pageNumber, this.pageSize);
+      });
   }
 
   getData(pageNumber: number, pageSize: number) {
@@ -47,6 +64,9 @@ export class AvionHomeComponent {
       .get({
         pageNumber: pageNumber + 1,
         pageSize,
+        query: {
+          AerolineaId: this.airLineSecSvc.getCurrentAirline()?.id,
+        },
       })
       .subscribe((res) => {
         if (res.total > 0) {

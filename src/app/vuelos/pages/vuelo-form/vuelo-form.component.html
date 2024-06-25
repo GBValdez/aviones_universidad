@@ -23,7 +23,12 @@
         <mat-form-field class="w-full">
           <mat-label>Aeropuerto Origen</mat-label>
           <mat-select formControlName="aeropuertoOrigenId">
-            @for (item of origen; track $index) {
+            @if (origen.length === 0) {
+            <mat-option [disabled]="true" [value]="null"
+              >No tiene asignados aeropuertos de origen. Por favor comunicarse
+              con el administrador</mat-option
+            >
+            } @for (item of origen; track $index) {
             <mat-option [value]="item.aeropuerto.id">
               {{ item.aeropuerto.nombre }}
             </mat-option>
@@ -34,7 +39,12 @@
         <mat-form-field class="w-full">
           <mat-label>Aeropuerto Destino</mat-label>
           <mat-select formControlName="aeropuertoDestinoId">
-            @for (item of destinos; track $index) {
+            @if (destinos.length === 0) {
+            <mat-option [disabled]="true" [value]="null"
+              >No tiene asignados aeropuertos de destino. Por favor comunicarse
+              con el administrador</mat-option
+            >
+            } @for (item of destinos; track $index) {
             <mat-option [value]="item.aeropuerto.id">
               {{ item.aeropuerto.nombre }}
             </mat-option>
@@ -96,7 +106,11 @@
         <mat-form-field class="w-full">
           <mat-label>Avion</mat-label>
           <mat-select formControlName="avionId">
-            @for (item of aviones; track $index) {
+            @if (aviones.length === 0) {
+            <mat-option [disabled]="true" [value]="null"
+              >No hay aviones registrados</mat-option
+            >
+            } @for (item of aviones; track $index) {
             <mat-option [value]="item.id">
               {{ item.codigo }}
             </mat-option>

@@ -1,6 +1,11 @@
 <section class="flex justify-between flex-wrap">
   <h2 class="title">Avion</h2>
-  <button class="sm:mb-0 mb-[10px]" mat-raised-button (click)="openForm()">
+  <button
+    [disabled]="!canOperation"
+    class="sm:mb-0 mb-[10px]"
+    mat-raised-button
+    (click)="openForm()"
+  >
     Crear Avion
   </button>
 </section>
@@ -28,16 +33,20 @@
     </mat-card-header>
   </mat-card>
   <mat-menu #menu="matMenu" xPosition="after">
-    <button mat-menu-item (click)="openForm(item)">
+    <button [disabled]="!canOperation" mat-menu-item (click)="openForm(item)">
       <mat-icon>edit</mat-icon>
       <span>Editar</span>
     </button>
-    <button mat-menu-item [routerLink]="'/plane/' + item.id">
+    <button
+      [disabled]="!canOperation"
+      mat-menu-item
+      [routerLink]="'/plane/' + item.id"
+    >
       <mat-icon> event_seat </mat-icon>
       <span>Editar asientos</span>
     </button>
 
-    <button mat-menu-item (click)="deleteItem(item)">
+    <button [disabled]="!canOperation" mat-menu-item (click)="deleteItem(item)">
       <mat-icon>delete</mat-icon>
       <span>Borrar</span>
     </button>

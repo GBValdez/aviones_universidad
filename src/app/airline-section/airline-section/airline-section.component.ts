@@ -27,15 +27,19 @@ export class AirlineSectionComponent implements OnInit {
   isAdmin: boolean = false;
   airlineList: airlineDto[] = [];
   ngOnInit(): void {
-    if (this.airlineSecSvc.getCurrentAirline()) {
-      this.aerolineaCurrent = this.airlineSecSvc.getCurrentAirline();
-    }
     this.authSvc.getObservable().subscribe((res) => {
       this.isAdmin = this.authSvc.hasRoles(['ADMINISTRATOR']);
     });
     this.isAdmin = this.authSvc.hasRoles(['ADMINISTRATOR']);
     this.airlineSvc.get({ all: true }).subscribe((res) => {
       this.airlineList = res.items;
+      if (this.airlineSecSvc.getCurrentAirline() != undefined) {
+        const airline = this.airlineSecSvc.getCurrentAirline();
+        const INDEX: number = this.airlineList.findIndex(
+          (x) => x.id == airline?.id
+        );
+        if (INDEX != -1) this.aerolineaCurrent = this.airlineList[INDEX];
+      }
     });
   }
   selectAirline() {
