@@ -33,4 +33,8 @@ export class SeatsService extends CommonsSvcService<seatDto, seatCreationDto> {
       `${this.urlBase}/getSeatsOfFly/${id}`
     );
   }
+
+  canEditSeats(id: number): Observable<any> {
+    return this.httpClient.get<any>(`${this.urlBase}/canEditSeats/${id}`);
+  }
 }

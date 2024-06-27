@@ -37,11 +37,7 @@
       <mat-icon>edit</mat-icon>
       <span>Editar</span>
     </button>
-    <button
-      [disabled]="!canOperation"
-      mat-menu-item
-      [routerLink]="'/plane/' + item.id"
-    >
+    <button [disabled]="!canOperation" mat-menu-item (click)="goEditSeat(item)">
       <mat-icon> event_seat </mat-icon>
       <span>Editar asientos</span>
     </button>

@@ -158,7 +158,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         title: 'Los asientos se han guardado con éxito',
         icon: 'success',
       });
-      this.router.navigate(['/session/plane-home']);
+      this.router.navigate(['/session/airline-section/plane-home']);
     });
   }
 
@@ -482,7 +482,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       )
     )
       return;
-    if (this.seats.length > this.thisPlane.capacidadPasajeros) {
+    if (this.seats.length >= this.thisPlane.capacidadPasajeros) {
       Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
       return;
     }

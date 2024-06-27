@@ -12,9 +12,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
+import { SeatsService } from '@plane/services/seats.service';
 
 @Component({
   selector: 'app-avion-home',
@@ -37,7 +38,9 @@ export class AvionHomeComponent implements OnDestroy {
   constructor(
     private dataSvc: PlaneService,
     private dialog: MatDialog,
-    private airLineSecSvc: AirlineSectSvcService
+    private airLineSecSvc: AirlineSectSvcService,
+    private seatSvc: SeatsService,
+    private router: Router
   ) {}
   ngOnDestroy(): void {
     this.suscription.unsubscribe();
@@ -99,6 +102,12 @@ export class AvionHomeComponent implements OnDestroy {
         this.getData(this.pageNumber, this.pageSize);
       });
     }
+  }
+
+  goEditSeat(item: avionDto): void {
+    this.seatSvc.canEditSeats(item.id!).subscribe((res) => {
+      this.router.navigate(['/plane', item.id]);
+    });
   }
 
   openForm(item?: avionDto) {
