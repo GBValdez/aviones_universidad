@@ -34,11 +34,11 @@
         </p>
         <p>
           Fecha de entrada:
-          {{ item.fechaSalida | date : "dd/MM/yyyy hh:mm" }}
+          {{ item.fechaSalida | date : "dd/MM/yyyy hh:mm a" }}
         </p>
         <p>
           Fecha de salida:
-          {{ item.fechaLlegada | date : "dd/MM/yyyy hh:mm" }}
+          {{ item.fechaLlegada | date : "dd/MM/yyyy hh:mm a" }}
         </p>
         <p>Modelo Avion: {{ item.avion.modelo.name }}</p>
       </mat-card-subtitle>

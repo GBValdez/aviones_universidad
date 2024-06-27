@@ -77,7 +77,7 @@ export const routes: Routes = [
             (m) => m.SearchFlightComponent
           ),
         canActivate: [AuthGuard],
-        data: { isProtect: 20 },
+        data: { isProtect: 20, roles: ['userNormal'] },
         title: 'Buscar vuelo',
       },
       {
@@ -87,7 +87,7 @@ export const routes: Routes = [
             (m) => m.BuyTicketComponent
           ),
         canActivate: [AuthGuard],
-        data: { isProtect: 20 },
+        data: { isProtect: 20, roles: ['userNormal'] },
         // canDeactivate: [planePageExitGuard],
         title: 'Comprar boleto',
       },

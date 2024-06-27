@@ -6,6 +6,7 @@ import { AuthService } from '@auth/services/auth.service';
 import { catalogueData } from '@catalogues/catalogueData';
 import { SideMenuComponent } from '@utils/side-menu/side-menu.component';
 import { sideMenuInterface } from '@utils/side-menu/side-menu.interface';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-general-menu',
@@ -123,7 +124,7 @@ export class GeneralMenuComponent implements OnInit {
             text: 'Reservar Vuelo',
             icon: 'flight_takeoff',
             click: '/session/searchFlight',
-            show: true,
+            show: res?.roles.includes('userNormal'),
           },
         ],
       },
@@ -131,8 +132,15 @@ export class GeneralMenuComponent implements OnInit {
       {
         text: 'Cerrar sesión',
         icon: 'logout',
-        click: () => {
-          this.auth.logout();
+        click: async () => {
+          const RES = await Swal.fire({
+            title: '¿Estás seguro de cerrar sesión?',
+            showCancelButton: true,
+            confirmButtonText: 'Cerrar sesión',
+            cancelButtonText: 'Cancelar',
+            icon: 'question',
+          });
+          if (RES.isConfirmed) this.auth.logout();
         },
         show: true,
       },

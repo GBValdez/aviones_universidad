@@ -30,6 +30,7 @@ import { avionDto } from '@plane/interfaces/avion.interface';
 import { PlaneService } from '@plane/services/plane.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
 import moment, { Moment } from 'moment';
 import { destinoDto } from 'src/app/destinations/interfaces/destino.interface';
 import { DestinosService } from 'src/app/destinations/services/destinos.service';

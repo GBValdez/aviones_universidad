@@ -27,10 +27,11 @@ export class AirlineSectionComponent implements OnInit {
   isAdmin: boolean = false;
   airlineList: airlineDto[] = [];
   ngOnInit(): void {
-    this.authSvc.getObservable().subscribe((res) => {
-      this.isAdmin = this.authSvc.hasRoles(['ADMINISTRATOR']);
-    });
     this.isAdmin = this.authSvc.hasRoles(['ADMINISTRATOR']);
+    if (this.isAdmin) this.getAirlines();
+  }
+
+  getAirlines() {
     this.airlineSvc.get({ all: true }).subscribe((res) => {
       this.airlineList = res.items;
       if (this.airlineSecSvc.getCurrentAirline() != undefined) {

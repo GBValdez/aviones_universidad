@@ -48,6 +48,7 @@ import {
   seatPlaneCreation,
 } from '@plane/interfaces/seats.interface';
 import { PlaneService } from '@plane/services/plane.service';
+import { avionDto } from '@plane/interfaces/avion.interface';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -78,7 +79,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
   ctx!: CanvasRenderingContext2D;
-  idPlane: number = 0;
+  thisPlane!: avionDto;
+  idPlane!: number;
   timeOutSize: any;
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
@@ -347,7 +349,6 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   img: any;
   wScreen: number = window.innerWidth;
   hScreen: number = window.innerHeight;
-  limitSeat: number = 0;
 
   reMakeCanvas() {
     this.form.updateValueAndValidity();
@@ -453,7 +454,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       .subscribe((res) => {
         if (res.items.length == 0) return;
         this.form.get('sizeSeat')!.setValue(res.items[0].tamAsientoPorc);
-        this.limitSeat = res.items[0].capacidadPasajeros;
+        this.thisPlane = res.items[0];
         this.modifyTam();
       });
   }
@@ -481,7 +482,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       )
     )
       return;
-    if (this.seats.length > this.limitSeat) {
+    if (this.seats.length > this.thisPlane.capacidadPasajeros) {
       Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
       return;
     }

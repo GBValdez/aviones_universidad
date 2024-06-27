@@ -15,6 +15,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { DatePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
+import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
 
 @Component({
   selector: 'app-vuelo-home',
@@ -29,8 +30,9 @@ import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.s
     MatIconModule,
     MatPaginatorModule,
     DatePipe,
+    LocalTimezonePipe,
   ],
-
+  providers: [LocalTimezonePipe],
   templateUrl: './vuelo-home.component.html',
   styleUrl: './vuelo-home.component.scss',
 })
@@ -38,7 +40,8 @@ export class VueloHomeComponent implements OnDestroy {
   constructor(
     private dataSvc: VueloService,
     private dialog: MatDialog,
-    private airLineSecSvc: AirlineSectSvcService
+    private airLineSecSvc: AirlineSectSvcService,
+    private localTimezonePipe: LocalTimezonePipe
   ) {}
   data: vueloDto[] = [];
   pageNumber: number = 0;
@@ -71,6 +74,14 @@ export class VueloHomeComponent implements OnDestroy {
       .subscribe((res) => {
         if (res.total > 0) {
           this.data = res.items;
+          this.data.forEach((item) => {
+            item.fechaSalida = new Date(
+              this.localTimezonePipe.transform(item.fechaSalida.toString())
+            );
+            item.fechaLlegada = new Date(
+              this.localTimezonePipe.transform(item.fechaLlegada.toString())
+            );
+          });
           this.dataSize = res.total;
         } else {
           this.data = [];

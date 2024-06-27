@@ -27,6 +27,11 @@
     }"
   >
     <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Planos</h2>
+    @if(thisPlane){
+    <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
+      {{ thisPlane.codigo }}
+    </h2>
+    }
 
     <!-- <button
       class="w-full"
