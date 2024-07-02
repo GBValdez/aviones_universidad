@@ -9,8 +9,10 @@ import { CommonsSvcService } from '@utils/commons-svc.service';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '@env/environment';
-import { seatDto, seatWithPlaneDto } from '@plane/interfaces/seats.interface';
+import { boletoDto, seatDto, seatWithPlaneDto } from '@plane/interfaces/seats.interface';
 import { AuthService } from '@auth/services/auth.service';
+import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 @Injectable({
   providedIn: 'root',
 })
@@ -18,7 +20,7 @@ export class VueloService extends CommonsSvcService<
   vueloDto,
   vueloDtoCreation
 > {
-  constructor(http: HttpClient, private authSvc: AuthService) {
+  constructor(http: HttpClient, private authSvc: AuthService,private router:Router) {
     super(http);
     this.url = 'Vuelo';
     this.hubConnection = new HubConnectionBuilder()
@@ -35,17 +37,20 @@ export class VueloService extends CommonsSvcService<
     return this.hubConnection.start().catch((err) => console.error(err));
   }
   public addReceiveSeatSelection() {
-    this.hubConnection.on('ReceiveSeatSelection', (seats: seatWithPlaneDto) => {
-      this.seatSubject.next(seats);
-      console.log('AmigoBoliviano', seats);
+    this.hubConnection.on('ReceiveSeatSelection', (tickets: boletoDto[]) => {
+      this.seatSubject.next(tickets);
+    });
+    this.hubConnection.on("ErrorMessage", (message: string) => {
+      Swal.fire('Error', message, 'error');
+      this.router.navigate(['/session/searchFlight']);
     });
   }
 
   onReceiveSeatSelection(callback: (seats: seatWithPlaneDto) => void) {}
 
   private hubConnection!: HubConnection;
-  private seatSubject: BehaviorSubject<seatWithPlaneDto | null> =
-    new BehaviorSubject<seatWithPlaneDto | null>(null);
+  private seatSubject: BehaviorSubject<boletoDto[] | null> =
+    new BehaviorSubject<boletoDto[] | null>(null);
 
   public getSeat() {
     return this.seatSubject.asObservable();

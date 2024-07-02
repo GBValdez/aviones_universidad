@@ -13,8 +13,13 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
-import { selectVueloDto } from '@buyTicket/interfaces/vuelo.interface';
+import { AuthService } from '@auth/services/auth.service';
+import {
+  selectVueloDto,
+  vueloClaseDto,
+} from '@buyTicket/interfaces/vuelo.interface';
 import { VueloService } from '@buyTicket/services/vuelo.service';
 import {
   posInterface,
@@ -26,7 +31,7 @@ import { SeatsService } from '@plane/services/seats.service';
 @Component({
   selector: 'app-select-seat',
   standalone: true,
-  imports: [NgClass, MatIconModule, MatButtonModule, NgStyle],
+  imports: [NgClass, MatIconModule, MatButtonModule, NgStyle, MatTooltipModule],
   templateUrl: './select-seat.component.html',
   styleUrl: './select-seat.component.scss',
 })
@@ -37,7 +42,8 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
     private http: HttpClient,
     private seatSvc: SeatsService,
     private vueloSvc: VueloService,
-    private router: Router
+    private router: Router,
+    private authSvc: AuthService
   ) {}
   ngOnDestroy(): void {
     this.vueloSvc.leaveGroup(this.idFly);
@@ -49,6 +55,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.clientId = this.authSvc.getAuth()?.clientId || 0;
     this.vueloSvc.startConnection().then(() => {
       this.vueloSvc.joinGroup(this.idFly);
       this.vueloSvc.addReceiveSeatSelection();
@@ -57,21 +64,24 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.vueloSvc.getSeat().subscribe((res) => {
       if (res) {
-        // console.log(res);
-        this.seats = res.asientoDtos.map((seat) => {
-          const [x, y] = seat.posicion.split('|').map(Number);
-          return {
-            position: { x, y },
-            clase: seat.clase,
-            Id: seat.id,
-            Estado: seat.estado,
-          };
+        this.seats.forEach((seat) => {
+          const ticket = res.find((t) => t.asientoId == seat.Id);
+          if (ticket) {
+            seat.Estado = ticket.estadoBoleto;
+            seat.clienteId = ticket.clienteId;
+            return;
+          }
+          seat.Estado = { id: 94, name: 'Libre', description: 'Libre' };
         });
+        this.mySeats = this.seats.filter(
+          (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
+        );
       }
     });
   }
 
   sendSeat(seat: seatPosInterface) {
+    if (seat.Estado?.id == 93 && seat.clienteId != this.clientId) return;
     const SEAT_DTO: selectVueloDto = {
       VueloId: this.idFly,
       AsientoId: seat.Id!,
@@ -83,6 +93,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
   ngAfterViewInit(): void {
     this.uploadBase();
     this.seatSvc.getByFly(this.idFly).subscribe((res) => {
+      this.clasesList = res.classList;
       this.seats = res.asientoDtos.map((seat) => {
         const [x, y] = seat.posicion.split('|').map(Number);
         // console.log(seat);
@@ -91,9 +102,12 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
           clase: seat.clase,
           Id: seat.id,
           Estado: seat.estado,
+          Codigo: seat.codigo,
         };
       });
-      console.log('a', this.seats);
+      this.mySeats = this.seats.filter(
+        (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
+      );
       this.sizeWidth = res.avion.tamAsientoPorc;
       this.resizeSeat();
     });
@@ -105,22 +119,33 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
       this.uploadFile(res);
     });
   }
-
+  clasesList: vueloClaseDto[] = [];
   wScreen: number = window.innerWidth;
   hScreen: number = window.innerHeight;
   zoom: WritableSignal<number> = signal(1);
   translatePos: posInterface = { x: 0, y: 0 };
   seats: seatPosInterface[] = [];
+  mySeats: seatPosInterface[] = [];
   sizePixelSize: number = 10;
   sizeWidth: number = 0;
   closeSidenav: boolean = false;
   idFly: number = 0;
   timeOutSize: any;
   posOrigin?: posInterface;
+  clientId: number = 0;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   img: any = null;
   keepClicking: boolean = false;
+  getPrice(seat: seatPosInterface): number {
+    return (
+      this.clasesList.find((c) => c.clase.id == seat.clase.id)?.precio || 0
+    );
+  }
+
+  getTotal(): number {
+    return this.mySeats.reduce((acc, seat) => acc + this.getPrice(seat), 0);
+  }
   async uploadFile(event: Blob) {
     if (event) {
       this.img = URL.createObjectURL(event);

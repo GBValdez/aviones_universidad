@@ -4,4 +4,5 @@ export interface authUserInterface {
   expiration: Date;
   roles: string[];
   userName: string;
+  clientId?: number;
 }

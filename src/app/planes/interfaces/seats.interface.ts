@@ -1,5 +1,6 @@
 import { catalogueInterface } from '@utils/commons.interface';
 import { avionDto } from './avion.interface';
+import { vueloClaseDto, vueloDto } from '@buyTicket/interfaces/vuelo.interface';
 
 export interface seatBaseDto {
   codigo: string;
@@ -25,4 +26,16 @@ export interface seatDto extends seatBaseDto {
 export interface seatWithPlaneDto {
   avion: avionDto;
   asientoDtos: seatDto[];
+  classList: vueloClaseDto[];
+}
+
+export interface boletoDto {
+  cantidadMaletasAdquiridas: number;
+  cantidadMaletasPresentadas: number;
+  asientoId: number;
+  clienteId?: number;
+  asiento?: seatDto;
+  // cliente: clientedto;
+  estadoBoleto: catalogueInterface;
+  vuelo?: vueloDto;
 }

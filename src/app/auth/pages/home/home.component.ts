@@ -54,7 +54,7 @@ export class HomeComponent {
     if (this.form.valid) {
       this.loginSvc.login(this.form.value).subscribe((res) => {
         const decoded: any = jwtDecode(res.token);
-        console.log(decoded);
+        // console.log(decoded);
         const newUser: authUserInterface = {
           token: res.token,
           expiration: res.expiration,
@@ -67,7 +67,9 @@ export class HomeComponent {
             decoded[
               'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
             ],
+          clientId: decoded.clienteId,
         };
+        console.log(newUser);
         this.authService.setAuth(newUser);
         this.router.navigate(['/session/dashboard']);
       });

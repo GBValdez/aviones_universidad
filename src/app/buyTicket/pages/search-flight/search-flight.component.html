@@ -41,9 +41,10 @@
   </section>
 </form>
 <section class="w-full flex mt-[3px] flex-wrap">
-  @for (vuelo of vuelos; track $index) {
+  @for (vuelo of vuelos; track vuelo.id) {
   <mat-card
     class="w-[280px] rounded-3xl m-2 cursor-pointer hover:scale-105 transition-all"
+    [ngClass]="{ 'disableCard': vuelo.fechaSalida<=currentDate ,'pointer-events-none':vuelo.fechaSalida<=currentDate}"
     [routerLink]="['/session/buyTicket', vuelo.id]"
   >
     <mat-card-header>
@@ -70,6 +71,17 @@
           <br />
           {{ vuelo.fechaLlegada | date : "dd/MM/yyyy hh:mm a" }}
         </div>
+        @if(vuelo.fechaSalida<=currentDate){
+          <div class="font-black">
+            Vuelo no disponible
+           </div>
+        }
+        @if(vuelo.fechaSalida>currentDate){
+          <div class="font-black">
+            Vuelo disponible
+           </div>
+        }
+        
       </mat-card-subtitle>
     </mat-card-header>
     <mat-card-content></mat-card-content>

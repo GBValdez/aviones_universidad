@@ -48,6 +48,89 @@
         <mat-icon> refresh </mat-icon>
       </button>
     </section>
+    <section>
+      <h2 class="mt-[5px] text-xl mb-[5px] font-black text-white">
+        Tipo de asiento
+      </h2>
+      @for(clase of clasesList; track clase.id){
+      <div class="flex items-center mb-2">
+        <span
+          class="w-[20px] h-[20px] inline-block rounded-full mr-[5px]"
+          [ngStyle]="{
+            'background-color': clase.clase.description
+          }"
+        ></span>
+        <div class="flex justify-between text-white font-black infoClassAvion">
+          <span>
+            {{ clase.clase.name }}
+          </span>
+          <span> Q{{ clase.precio }} </span>
+        </div>
+      </div>
+      }
+    </section>
+    <section class="text-white font-black">
+      <h2 class="mt-[5px] text-xl mb-[5px]">Mis asientos</h2>
+      @if(mySeats.length == 0) {
+      <div class="text-gray-400">No tienes asientos seleccionados</div>
+      } @if(mySeats.length > 0) {
+      <table>
+        @for (item of mySeats; track $index) {
+        <tr>
+          <td class="text-left pr-[10px] pt-[5px]">{{ item.Codigo }}</td>
+          <td class="text-left pr-[10px] pt-[5px]">{{ item.clase.name }}</td>
+          <td class="text-left pr-[10px] pt-[5px]">Q{{ getPrice(item) }}</td>
+
+          <td class="text-left pr-[10px] pt-[5px]">
+            <div
+              class="bg-white flex justify-center items-center rounded-full p-[2px]"
+              [matTooltip]="item.Estado?.id == 93 ? 'Apartado' : 'Comprado'"
+            >
+              <mat-icon class="text-black">
+                {{
+                  item.Estado?.id == 93
+                    ? "airline_seat_recline_normal"
+                    : "check_circle"
+                }}
+              </mat-icon>
+            </div>
+          </td>
+        </tr>
+        }
+        <tr>
+          <td></td>
+          <td>Total:</td>
+          <td>Q{{ getTotal() }}</td>
+          <td></td>
+        </tr>
+      </table>
+      }
+      <!-- <section>
+        @if(mySeats.length == 0) {
+        <div class="text-gray-400">No tienes asientos seleccionados</div>
+        } @for (item of mySeats; track $index) {
+        <div class="text-sm">
+          {{ item.Codigo }} -
+          {{ item.Estado?.id == 93 ? "Apartado" : "Comprado" }}
+        </div>
+        }
+      </section> -->
+    </section>
+    <section class="text-white">
+      <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Iconos</h2>
+      <div class="flex my-2 items-center">
+        <mat-icon class="mr-2">event_seat</mat-icon>
+        <p>Asiento libre</p>
+      </div>
+      <div class="flex my-2 items-center">
+        <mat-icon class="mr-2">airline_seat_recline_normal</mat-icon>
+        <p>Asiento ocupado por usted mismo</p>
+      </div>
+      <div class="flex my-2 items-center">
+        <mat-icon class="mr-2">block</mat-icon>
+        <p>Asiento no disponible</p>
+      </div>
+    </section>
   </section>
   @if(!closeSidenav){
   <button mat-raised-button color="warn" class="w-full mt-4" (click)="exit()">
@@ -98,6 +181,7 @@
     <mat-icon
       (click)="sendSeat(seat)"
       (touchstart)="sendSeat(seat)"
+      [matTooltip]="seat.Codigo! + ' - ' + seat.Estado?.name"
       class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white cursor-pointer"
       [ngStyle]="{
         left: seat.position.x + '%',
@@ -109,7 +193,13 @@
         opacity: seat.Estado!.id == 29 ? 0.9 : 1
       }"
     >
-      {{ seat.Estado!.id == 94 ? "event_seat" : "event_busy" }}
+      {{
+        seat.Estado!.id == 94
+          ? "event_seat"
+          : seat.clienteId == this.clientId
+          ? "airline_seat_recline_normal"
+          : "block"
+      }}
     </mat-icon>
     }
   </div>

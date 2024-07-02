@@ -15,9 +15,10 @@ import { VueloService } from '@buyTicket/services/vuelo.service';
 import { vueloDto } from '@buyTicket/interfaces/vuelo.interface';
 import { formIsEmptyValidator, validateFieldEmpty } from '@utils/utils';
 import { MatCardModule } from '@angular/material/card';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AeropuertoService } from '@airport/services/aeropuerto.service';
+import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
 
 @Component({
   selector: 'app-search-flight',
@@ -32,7 +33,10 @@ import { AeropuertoService } from '@airport/services/aeropuerto.service';
     MatCardModule,
     DatePipe,
     RouterModule,
+    NgClass,
   ],
+    providers: [LocalTimezonePipe]
+  ,
   templateUrl: './search-flight.component.html',
   styleUrl: './search-flight.component.scss',
 })
@@ -40,8 +44,10 @@ export class SearchFlightComponent implements OnInit {
   constructor(
     private aeropuertoSvc: AeropuertoService,
     private fb: FormBuilder,
-    private vueloSvc: VueloService
+    private vueloSvc: VueloService,
+    private localTimezonePipe: LocalTimezonePipe,
   ) {}
+  currentDate = new Date();
   ngOnInit(): void {
     this.aeropuertoSvc.get({ all: true }).subscribe((aeropuertos) => {
       this.listAeropuerto = aeropuertos.items;
@@ -77,6 +83,11 @@ export class SearchFlightComponent implements OnInit {
       })
       .subscribe((vuelos) => {
         this.vuelos = vuelos.items;
+        vuelos.items.forEach((vuelo) => {
+          vuelo.fechaLlegada = new Date(this.localTimezonePipe.transform(vuelo.fechaLlegada.toString()));
+          vuelo.fechaSalida = new Date(this.localTimezonePipe.transform(vuelo.fechaSalida.toString()));
+
+        });
       });
   }
 }
