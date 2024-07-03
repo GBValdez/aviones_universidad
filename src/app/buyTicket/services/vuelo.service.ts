@@ -9,7 +9,11 @@ import { CommonsSvcService } from '@utils/commons-svc.service';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '@env/environment';
-import { boletoDto, seatDto, seatWithPlaneDto } from '@plane/interfaces/seats.interface';
+import {
+  boletoDto,
+  seatDto,
+  seatWithPlaneDto,
+} from '@plane/interfaces/seats.interface';
 import { AuthService } from '@auth/services/auth.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
@@ -20,7 +24,11 @@ export class VueloService extends CommonsSvcService<
   vueloDto,
   vueloDtoCreation
 > {
-  constructor(http: HttpClient, private authSvc: AuthService,private router:Router) {
+  constructor(
+    http: HttpClient,
+    private authSvc: AuthService,
+    private router: Router
+  ) {
     super(http);
     this.url = 'Vuelo';
     this.hubConnection = new HubConnectionBuilder()
@@ -40,7 +48,7 @@ export class VueloService extends CommonsSvcService<
     this.hubConnection.on('ReceiveSeatSelection', (tickets: boletoDto[]) => {
       this.seatSubject.next(tickets);
     });
-    this.hubConnection.on("ErrorMessage", (message: string) => {
+    this.hubConnection.on('ErrorMessage', (message: string) => {
       Swal.fire('Error', message, 'error');
       this.router.navigate(['/session/searchFlight']);
     });
@@ -60,6 +68,13 @@ export class VueloService extends CommonsSvcService<
     this.hubConnection
       .invoke('SendSeatSelections', seat.AsientoId + '', seat.VueloId + '')
       .then(() => console.log('Enviado'))
+      .catch((err) => console.error(err));
+  }
+
+  vacateSeats(vueloId: number, seatId: number[], callback: () => void) {
+    this.hubConnection
+      .invoke('VacateSeats', vueloId + '', seatId.toString())
+      .then(callback)
       .catch((err) => console.error(err));
   }
   joinGroup(id: number) {

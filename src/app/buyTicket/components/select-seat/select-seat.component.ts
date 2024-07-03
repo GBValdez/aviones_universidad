@@ -11,9 +11,11 @@ import {
   WritableSignal,
   signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 import {
@@ -22,16 +24,29 @@ import {
 } from '@buyTicket/interfaces/vuelo.interface';
 import { VueloService } from '@buyTicket/services/vuelo.service';
 import {
+  modalFinishSeatInterface,
+  mySeatPosInterface,
   posInterface,
   seatPosInterface,
 } from '@plane/interfaces/plane.interface';
 import { PlaneService } from '@plane/services/plane.service';
 import { SeatsService } from '@plane/services/seats.service';
+import { SelctFinishModalComponent } from '../selct-finish-modal/selct-finish-modal.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-select-seat',
   standalone: true,
-  imports: [NgClass, MatIconModule, MatButtonModule, NgStyle, MatTooltipModule],
+  imports: [
+    NgClass,
+    MatIconModule,
+    MatButtonModule,
+    NgStyle,
+    MatTooltipModule,
+    MatCheckboxModule,
+    FormsModule,
+    SelctFinishModalComponent,
+  ],
   templateUrl: './select-seat.component.html',
   styleUrl: './select-seat.component.scss',
 })
@@ -43,10 +58,14 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
     private seatSvc: SeatsService,
     private vueloSvc: VueloService,
     private router: Router,
-    private authSvc: AuthService
+    private authSvc: AuthService,
+    private matDialog: MatDialog
   ) {}
   ngOnDestroy(): void {
     this.vueloSvc.leaveGroup(this.idFly);
+    if (this.intervalToolTip) {
+      clearTimeout(this.intervalToolTip);
+    }
   }
 
   exit() {
@@ -76,12 +95,56 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
         this.mySeats = this.seats.filter(
           (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
         );
+        this.mySeats.forEach((seat) => {
+          seat.checked = false;
+        });
       }
     });
   }
 
+  validOption(): boolean {
+    return this.mySeats.some((seat) => seat.checked);
+  }
+
+  vacateSeat(): void {
+    const seatsId: number[] = this.mySeats
+      .filter((seat) => seat.checked)
+      .map((s) => s.Id!);
+    this.vueloSvc.vacateSeats(this.idFly, seatsId, () => {
+      this.mySeats = this.mySeats.filter(
+        (seat) => seat.checked == undefined || seat.checked == false
+      );
+    });
+  }
+
+  intervalToolTip: any = null;
+  showTooltip() {
+    this.mySeats.forEach((seat) => {
+      if (seat.checked) {
+        seat.tooltip?.show();
+      }
+    });
+    if (this.intervalToolTip) {
+      clearTimeout(this.intervalToolTip);
+      this.intervalToolTip = null;
+    }
+
+    this.intervalToolTip = setTimeout(() => {
+      this.mySeats.forEach((seat) => {
+        seat.tooltip?.hide();
+      });
+    }, 2000);
+  }
+
+  addTooltip(seat: seatPosInterface, tooltip: MatTooltip) {
+    seat.tooltip = tooltip;
+    // console.log('tooltip');
+  }
+
   sendSeat(seat: seatPosInterface) {
+    // console.log('myseats', this.mySeats);
     if (seat.Estado?.id == 93 && seat.clienteId != this.clientId) return;
+    if (seat.Estado?.id == 92) return;
     const SEAT_DTO: selectVueloDto = {
       VueloId: this.idFly,
       AsientoId: seat.Id!,
@@ -125,7 +188,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
   zoom: WritableSignal<number> = signal(1);
   translatePos: posInterface = { x: 0, y: 0 };
   seats: seatPosInterface[] = [];
-  mySeats: seatPosInterface[] = [];
+  mySeats: mySeatPosInterface[] = [];
   sizePixelSize: number = 10;
   sizeWidth: number = 0;
   closeSidenav: boolean = false;
@@ -251,5 +314,16 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
   resizeSeat() {
     this.sizePixelSize =
       (this.sizeWidth / 100) * this.container.nativeElement.clientWidth;
+  }
+  finishSelect() {
+    const data: modalFinishSeatInterface = {
+      mySeats: this.mySeats.filter((seat) => seat.Estado?.id == 93),
+      clases: this.clasesList,
+    };
+    this.matDialog.open(SelctFinishModalComponent, {
+      data,
+      width: '50%',
+      minWidth: '280px',
+    });
   }
 }

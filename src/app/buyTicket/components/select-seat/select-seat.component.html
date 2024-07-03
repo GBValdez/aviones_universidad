@@ -74,6 +74,30 @@
       @if(mySeats.length == 0) {
       <div class="text-gray-400">No tienes asientos seleccionados</div>
       } @if(mySeats.length > 0) {
+      <div>
+        <p class="text-xs mb-[5px]">
+          Nota: Los check no afectan a la compra, unicamente afecta a las
+          siguientes 2 opciones.
+        </p>
+        <button
+          mat-raised-button
+          class="mb-[3px]"
+          color="accent"
+          (click)="vacateSeat()"
+          [disabled]="!validOption()"
+        >
+          Desocupar asientos
+        </button>
+        <button
+          mat-raised-button
+          class="mb-[3px]"
+          color="accent"
+          (click)="showTooltip()"
+          [disabled]="!validOption()"
+        >
+          Mostrar solo estos asientos
+        </button>
+      </div>
       <table>
         @for (item of mySeats; track $index) {
         <tr>
@@ -95,15 +119,33 @@
               </mat-icon>
             </div>
           </td>
+          <td>
+            <input
+              type="checkbox"
+              [(ngModel)]="item.checked"
+              class="w-[20px] h-[20px] bg-white rounded-[5px] checked:bg-emerald-600"
+            />
+          </td>
         </tr>
         }
-        <tr>
+        <tr class="border-t-2">
           <td></td>
           <td>Total:</td>
           <td>Q{{ getTotal() }}</td>
           <td></td>
+          <td></td>
         </tr>
       </table>
+
+      <div>
+        <button
+          class="w-full mt-[5px]"
+          mat-raised-button
+          (click)="finishSelect()"
+        >
+          Finalizar compra
+        </button>
+      </div>
       }
       <!-- <section>
         @if(mySeats.length == 0) {
@@ -133,7 +175,12 @@
     </section>
   </section>
   @if(!closeSidenav){
-  <button mat-raised-button color="warn" class="w-full mt-4" (click)="exit()">
+  <button
+    mat-raised-button
+    color="warn"
+    class="w-full mt-4 mb-[20px]"
+    (click)="exit()"
+  >
     Cancelar
   </button>
 
@@ -182,7 +229,9 @@
       (click)="sendSeat(seat)"
       (touchstart)="sendSeat(seat)"
       [matTooltip]="seat.Codigo! + ' - ' + seat.Estado?.name"
+      [matTooltipPosition]="'right'"
       class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white cursor-pointer"
+      #tooltip="matTooltip"
       [ngStyle]="{
         left: seat.position.x + '%',
         top: seat.position.y + '%',
@@ -193,6 +242,8 @@
         opacity: seat.Estado!.id == 29 ? 0.9 : 1
       }"
     >
+      {{ addTooltip(seat, tooltip) }}
+
       {{
         seat.Estado!.id == 94
           ? "event_seat"
