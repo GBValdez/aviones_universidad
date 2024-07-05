@@ -121,7 +121,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
     );
 
     if (seatsId.length == 0) {
-      Swal.fire(
+      await Swal.fire(
         'Error',
         'No hay ningun asiento apartado seleccionado',
         'error'
@@ -129,7 +129,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
     if (SEATS.some((seat) => seat.Estado?.id == 92))
-      Swal.fire(
+      await Swal.fire(
         'Advertencia',
         'Solo se desocuparan los asientos apartados , en los pagados no surtirá ningún efecto',
         'warning'
