@@ -1,6 +1,6 @@
 <section
   class="p-[10px] fixed top-0 left-0 h-screen bg-blue-950 overflow-y-auto overflow-x-visible"
-  style="z-index: 20000"
+  style="z-index: 20"
   [ngClass]="{
     'w-[280px]': !closeSidenav,
     'w-[60px]': closeSidenav
@@ -69,6 +69,7 @@
       </div>
       }
     </section>
+
     <section class="text-white font-black">
       <h2 class="mt-[5px] text-xl mb-[5px]">Mis asientos</h2>
       @if(mySeats.length == 0) {
@@ -79,26 +80,42 @@
           Nota: Los check no afectan a la compra, unicamente afecta a las
           siguientes 2 opciones.
         </p>
+        <section>
+          <button
+            class="mb-[5px]"
+            color="accent"
+            mat-raised-button
+            [mat-menu-trigger-for]="visualizeOpt"
+          >
+            Opciones de visualización
+          </button>
+          <mat-menu #visualizeOpt="matMenu">
+            <button mat-menu-item (click)="modeVisualization = 0">
+              Visualizar todos los asientos
+            </button>
+            <button mat-menu-item (click)="modeVisualization = 1">
+              Visualizar solo asientos disponibles
+            </button>
+            <button
+              mat-menu-item
+              (click)="showTooltip()"
+              [disabled]="!validOption()"
+            >
+              Visualizar asientos seleccionados
+            </button>
+          </mat-menu>
+        </section>
         <button
           mat-raised-button
-          class="mb-[3px]"
+          class="mb-[5px]"
           color="accent"
           (click)="vacateSeat()"
           [disabled]="!validOption()"
         >
           Desocupar asientos
         </button>
-        <button
-          mat-raised-button
-          class="mb-[3px]"
-          color="accent"
-          (click)="showTooltip()"
-          [disabled]="!validOption()"
-        >
-          Mostrar solo estos asientos
-        </button>
       </div>
-      <table>
+      <table class="overflow-x-auto">
         @for (item of mySeats; track $index) {
         <tr>
           <td class="text-left pr-[10px] pt-[5px]">{{ item.Codigo }}</td>
@@ -142,6 +159,7 @@
           class="w-full mt-[5px]"
           mat-raised-button
           (click)="finishSelect()"
+          [disabled]="!canFinailize()"
         >
           Finalizar compra
         </button>
@@ -164,13 +182,18 @@
         <mat-icon class="mr-2">event_seat</mat-icon>
         <p>Asiento libre</p>
       </div>
-      <div class="flex my-2 items-center">
-        <mat-icon class="mr-2">airline_seat_recline_normal</mat-icon>
-        <p>Asiento ocupado por usted mismo</p>
-      </div>
+
       <div class="flex my-2 items-center">
         <mat-icon class="mr-2">block</mat-icon>
         <p>Asiento no disponible</p>
+      </div>
+      <div class="flex my-2 items-center">
+        <mat-icon class="mr-2">airline_seat_recline_normal</mat-icon>
+        <p>Asiento apartado por usted mismo</p>
+      </div>
+      <div class="flex my-2 items-center">
+        <mat-icon class="mr-2">check_circle</mat-icon>
+        <p>Asiento comprado por usted mismo</p>
       </div>
     </section>
   </section>
@@ -230,7 +253,14 @@
       (touchstart)="sendSeat(seat)"
       [matTooltip]="seat.Codigo! + ' - ' + seat.Estado?.name"
       [matTooltipPosition]="'right'"
-      class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white cursor-pointer"
+      class="inline-block absolute translate-x-[-50%] translate-y-[-50%] text-white"
+      [ngClass]="{
+        'cursor-pointer': [
+          'event_seat',
+          'airline_seat_recline_normal'
+        ].includes(getIcon(seat)),
+        'cursor-not-allowed': ['check_circle', 'block'].includes(getIcon(seat))
+      }"
       #tooltip="matTooltip"
       [ngStyle]="{
         left: seat.position.x + '%',
@@ -239,18 +269,12 @@
         height: sizePixelSize + 'px',
         'font-size': sizePixelSize + 'px',
         'background-color': seat.clase.description,
-        opacity: seat.Estado!.id == 29 ? 0.9 : 1
+        opacity: getOpacity(seat)
       }"
     >
       {{ addTooltip(seat, tooltip) }}
 
-      {{
-        seat.Estado!.id == 94
-          ? "event_seat"
-          : seat.clienteId == this.clientId
-          ? "airline_seat_recline_normal"
-          : "block"
-      }}
+      {{ getIcon(seat) }}
     </mat-icon>
     }
   </div>

@@ -23,4 +23,10 @@ export interface posInterface {
 export interface modalFinishSeatInterface {
   mySeats: mySeatPosInterface[];
   clases: vueloClaseDto[];
+  idVuelo: number;
+}
+
+export interface paySeatInterface {
+  vueloId: number;
+  seats: number[];
 }

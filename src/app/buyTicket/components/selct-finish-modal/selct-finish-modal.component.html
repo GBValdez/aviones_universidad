@@ -52,6 +52,20 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
+      <h2 class="font-black text-right">Total: {{ getTotalPrice() }}</h2>
+      <section class="flex justify-center flex-wrap">
+        <button mat-raised-button mat-dialog-close class="mx-1 mt-1">
+          Cancelar
+        </button>
+        <button
+          (click)="pay()"
+          mat-raised-button
+          color="primary"
+          class="mx-1 mt-1"
+        >
+          Imitar pago
+        </button>
+      </section>
     </mat-card-content>
   </mat-card>
 </mat-dialog-content>

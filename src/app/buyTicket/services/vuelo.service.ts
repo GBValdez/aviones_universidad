@@ -17,6 +17,7 @@ import {
 import { AuthService } from '@auth/services/auth.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { paySeatInterface } from '@plane/interfaces/plane.interface';
 @Injectable({
   providedIn: 'root',
 })
@@ -88,5 +89,17 @@ export class VueloService extends CommonsSvcService<
     this.hubConnection
       .invoke('LeaveGroup', id + '')
       .catch((err) => console.error(err));
+  }
+
+  payFly(id: number, seats: number[], callback: () => void) {
+    this.hubConnection
+      .invoke('PaySeats', id + '', seats.toString())
+      .then(callback)
+      .catch((err) => console.error(err));
+    // const DATA: paySeatInterface = {
+    //   vueloId: id,
+    //   seats: seats,
+    // };
+    // return this.http.post<any>(`${this.urlBase}/paySeats`, DATA);
   }
 }

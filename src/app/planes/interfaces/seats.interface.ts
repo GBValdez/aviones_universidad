@@ -20,13 +20,13 @@ export interface seatPlaneCreation {
 export interface seatDto extends seatBaseDto {
   id: number;
   clase: catalogueInterface;
-  estado?: catalogueInterface;
 }
 
 export interface seatWithPlaneDto {
   avion: avionDto;
   asientoDtos: seatDto[];
   classList: vueloClaseDto[];
+  boletos: boletoDto[];
 }
 
 export interface boletoDto {

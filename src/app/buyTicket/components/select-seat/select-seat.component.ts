@@ -33,6 +33,9 @@ import { PlaneService } from '@plane/services/plane.service';
 import { SeatsService } from '@plane/services/seats.service';
 import { SelctFinishModalComponent } from '../selct-finish-modal/selct-finish-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { boletoDto } from '@plane/interfaces/seats.interface';
+import Swal from 'sweetalert2';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-select-seat',
@@ -46,6 +49,7 @@ import { MatDialog } from '@angular/material/dialog';
     MatCheckboxModule,
     FormsModule,
     SelctFinishModalComponent,
+    MatMenuModule,
   ],
   templateUrl: './select-seat.component.html',
   styleUrl: './select-seat.component.scss',
@@ -83,22 +87,25 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.vueloSvc.getSeat().subscribe((res) => {
       if (res) {
-        this.seats.forEach((seat) => {
-          const ticket = res.find((t) => t.asientoId == seat.Id);
-          if (ticket) {
-            seat.Estado = ticket.estadoBoleto;
-            seat.clienteId = ticket.clienteId;
-            return;
-          }
-          seat.Estado = { id: 94, name: 'Libre', description: 'Libre' };
-        });
-        this.mySeats = this.seats.filter(
-          (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
-        );
-        this.mySeats.forEach((seat) => {
-          seat.checked = false;
-        });
+        this.makeListSeats(res);
       }
+    });
+  }
+  makeListSeats(tickets: boletoDto[]): void {
+    this.seats.forEach((seat) => {
+      const ticket = tickets.find((t) => t.asientoId == seat.Id);
+      if (ticket) {
+        seat.Estado = ticket.estadoBoleto;
+        seat.clienteId = ticket.clienteId;
+        return;
+      }
+      seat.Estado = { id: 94, name: 'Libre', description: 'Libre' };
+    });
+    this.mySeats = this.seats.filter(
+      (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
+    );
+    this.mySeats.forEach((seat) => {
+      seat.checked = false;
     });
   }
 
@@ -106,10 +113,36 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
     return this.mySeats.some((seat) => seat.checked);
   }
 
-  vacateSeat(): void {
-    const seatsId: number[] = this.mySeats
-      .filter((seat) => seat.checked)
-      .map((s) => s.Id!);
+  async vacateSeat() {
+    const SEATS = this.mySeats.filter((seat) => seat.checked);
+
+    const seatsId: number[] = SEATS.filter((seat) => seat.Estado?.id == 93).map(
+      (seat) => seat.Id!
+    );
+
+    if (seatsId.length == 0) {
+      Swal.fire(
+        'Error',
+        'No hay ningun asiento apartado seleccionado',
+        'error'
+      );
+      return;
+    }
+    if (SEATS.some((seat) => seat.Estado?.id == 92))
+      Swal.fire(
+        'Advertencia',
+        'Solo se desocuparan los asientos apartados , en los pagados no surtirá ningún efecto',
+        'warning'
+      );
+
+    const RES = await Swal.fire({
+      title: '¿Desea desocupar los asientos seleccionados?',
+      showCancelButton: true,
+      confirmButtonText: 'Desocupar',
+      cancelButtonText: 'Cancelar',
+      icon: 'question',
+    });
+    if (!RES.isConfirmed) return;
     this.vueloSvc.vacateSeats(this.idFly, seatsId, () => {
       this.mySeats = this.mySeats.filter(
         (seat) => seat.checked == undefined || seat.checked == false
@@ -119,6 +152,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
 
   intervalToolTip: any = null;
   showTooltip() {
+    this.modeVisualization = 2;
     this.mySeats.forEach((seat) => {
       if (seat.checked) {
         seat.tooltip?.show();
@@ -164,13 +198,10 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
           position: { x, y },
           clase: seat.clase,
           Id: seat.id,
-          Estado: seat.estado,
           Codigo: seat.codigo,
         };
       });
-      this.mySeats = this.seats.filter(
-        (seat) => seat.clienteId == this.clientId && seat.Estado?.id != 94
-      );
+      this.makeListSeats(res.boletos);
       this.sizeWidth = res.avion.tamAsientoPorc;
       this.resizeSeat();
     });
@@ -196,6 +227,7 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
   timeOutSize: any;
   posOrigin?: posInterface;
   clientId: number = 0;
+  modeVisualization: number = 0;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   img: any = null;
@@ -319,11 +351,42 @@ export class SelectSeatComponent implements AfterViewInit, OnInit, OnDestroy {
     const data: modalFinishSeatInterface = {
       mySeats: this.mySeats.filter((seat) => seat.Estado?.id == 93),
       clases: this.clasesList,
+      idVuelo: this.idFly,
     };
     this.matDialog.open(SelctFinishModalComponent, {
       data,
       width: '50%',
       minWidth: '280px',
     });
+  }
+  getIcon(seat: seatPosInterface): string {
+    if (seat.Estado?.id == 94) return 'event_seat';
+    if (seat.Estado?.id == 93 && seat.clienteId == this.clientId)
+      return 'airline_seat_recline_normal';
+    if (seat.Estado?.id == 92 && seat.clienteId == this.clientId)
+      return 'check_circle';
+    return 'block';
+  }
+
+  canFinailize(): boolean {
+    return this.mySeats.some((seat) => seat.Estado?.id == 93);
+  }
+
+  getOpacity(seat: seatPosInterface): number {
+    switch (this.modeVisualization) {
+      case 0:
+        return 1;
+        break;
+      case 1:
+        return seat.Estado?.id == 94 ? 1 : 0.5;
+        break;
+      case 2:
+        const SEAT = this.mySeats.find((s) => s.Id == seat.Id);
+        return SEAT?.checked ? 1 : 0.5;
+        break;
+      default:
+        return 1;
+        break;
+    }
   }
 }
