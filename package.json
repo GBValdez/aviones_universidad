@@ -23,6 +23,7 @@
     "@angular/router": "^17.1.0",
     "@microsoft/signalr": "^8.0.0",
     "@types/crypto-js": "^4.2.2",
+    "@zxing/ngx-scanner": "^18.0.0",
     "crypto-js": "^4.2.0",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",

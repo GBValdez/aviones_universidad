@@ -126,6 +126,18 @@ export class GeneralMenuComponent implements OnInit {
             click: '/session/searchFlight',
             show: res?.roles.includes('userNormal'),
           },
+          {
+            text: 'Mis Vuelos',
+            icon: 'flight',
+            click: '/session/my-tickets',
+            show: res?.roles.includes('userNormal'),
+          },
+          {
+            text: 'Abordar Vuelo',
+            icon: 'flight_land',
+            click: '/session/tackle-ticket',
+            show: res?.roles.includes('userNormal'),
+          },
         ],
       },
 

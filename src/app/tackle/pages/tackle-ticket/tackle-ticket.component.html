@@ -1,0 +1,10 @@
+<h2 class="text-white font-black text-2xl">Escaneando boleto</h2>
+<section class="rounded-[10px] overflow-hidden">
+  <zxing-scanner
+    #scanner
+    (camerasFound)="onCamerasFound($event)"
+    (scanSuccess)="handleQrCodeResult($event)"
+    class="h-[80vh] flipCamera"
+  >
+  </zxing-scanner>
+</section>

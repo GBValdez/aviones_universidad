@@ -7,7 +7,7 @@ import {
 } from '@buyTicket/interfaces/vuelo.interface';
 import { CommonsSvcService } from '@utils/commons-svc.service';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import {
   boletoDto,
@@ -96,10 +96,9 @@ export class VueloService extends CommonsSvcService<
       .invoke('PaySeats', id + '', seats.toString())
       .then(callback)
       .catch((err) => console.error(err));
-    // const DATA: paySeatInterface = {
-    //   vueloId: id,
-    //   seats: seats,
-    // };
-    // return this.http.post<any>(`${this.urlBase}/paySeats`, DATA);
+  }
+
+  getMyFlies(): Observable<vueloDto[]> {
+    return this.http.get<vueloDto[]>(this.urlBase + '/getMyFlies');
   }
 }

@@ -19,6 +19,7 @@
       "@airport/*": ["src/app/airport/*"],
       "@vuelo/*": ["src/app/vuelos/*"],
       "@airlineSection/*": ["src/app/airline-section/*"],
+      "@tackleTicket/*": ["src/app/tackle/*"],
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,
