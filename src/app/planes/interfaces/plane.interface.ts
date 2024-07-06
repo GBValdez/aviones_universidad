@@ -30,3 +30,12 @@ export interface paySeatInterface {
   vueloId: number;
   seats: number[];
 }
+
+export interface configSeatPlane {
+  showTooltipText?: (seat: seatPosInterface) => string;
+  blockSeat?: (seat: seatPosInterface) => boolean;
+  opacitySeat?: (seat: seatPosInterface) => number;
+  getIcon: (seat: seatPosInterface) => string | string;
+  sizeWidth: number;
+  img: string;
+}

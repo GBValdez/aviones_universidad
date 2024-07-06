@@ -74,6 +74,16 @@ export const routes: Routes = [
     // canDeactivate: [planePageExitGuard],
     title: 'Comprar boleto',
   },
+  {
+    path: 'my-tickets/:id',
+    loadComponent: () =>
+      import('@buyTicket/pages/my-tickets/my-tickets.component').then(
+        (m) => m.MyTicketsComponent
+      ),
+    canActivate: [AuthGuard],
+    data: { isProtect: 20, roles: ['userNormal'] },
+    title: 'Mis boletos',
+  },
 
   {
     path: 'session',
@@ -92,16 +102,7 @@ export const routes: Routes = [
         data: { isProtect: 20, roles: ['userNormal'] },
         title: 'Mis vuelos',
       },
-      {
-        path: 'my-tickets/:id',
-        loadComponent: () =>
-          import('@buyTicket/pages/my-tickets/my-tickets.component').then(
-            (m) => m.MyTicketsComponent
-          ),
-        canActivate: [AuthGuard],
-        data: { isProtect: 20, roles: ['userNormal'] },
-        title: 'Mis boletos',
-      },
+
       {
         path: 'tackle-ticket',
         loadComponent: () =>

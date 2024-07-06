@@ -7,7 +7,7 @@
       disableCard: vuelo.fechaSalida <= currentDate,
       'pointer-events-none': vuelo.fechaSalida <= currentDate
     }"
-    [routerLink]="['/session/my-tickets', vuelo.id]"
+    [routerLink]="['/my-tickets', vuelo.id]"
   >
     <mat-card-header>
       <mat-card-title>
