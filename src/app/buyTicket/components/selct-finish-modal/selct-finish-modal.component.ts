@@ -54,9 +54,18 @@ export class SelctFinishModalComponent {
     });
     if (RES.isConfirmed) {
       const seats = this.data.mySeats.map((x) => x.Id!);
-      this.vueloSvc.payFly(this.data.idVuelo, seats, () => {
-        Swal.fire('Pago exitoso', 'Pago realizado con éxito', 'success');
+      this.vueloSvc.payFly(this.data.idVuelo, seats, async () => {
+        await Swal.fire('Pago exitoso', 'Pago realizado con éxito', 'success');
+        this.router.navigate(['/my-tickets', this.data.idVuelo]);
         this.dialogRef.close();
+        await Swal.fire({
+          title: 'Nota',
+          text: "Puede descargar sus boletos presionando el botón 'Acciones' y luego 'Descargar boleto'",
+          icon: 'info',
+          timer: 7000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+        });
       });
     }
   }

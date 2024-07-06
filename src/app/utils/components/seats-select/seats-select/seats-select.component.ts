@@ -67,9 +67,22 @@ export class SeatsSelectComponent implements AfterViewInit, OnChanges {
   @Output() clickSeat: EventEmitter<seatPosInterface> =
     new EventEmitter<seatPosInterface>();
 
+  @ViewChild('container') container!: ElementRef<HTMLDivElement>;
+  wScreen: number = window.innerWidth;
+  hScreen: number = window.innerHeight;
+  zoom: WritableSignal<number> = signal(1);
+  translatePos: posInterface = { x: 0, y: 0 };
+  sizePixelSize: number = 10;
+  closeSidenav: boolean = false;
+  timeOutSize: any;
+  posOrigin?: posInterface;
+  keepClicking: boolean = false;
+
   constructor(private planeService: PlaneService) {}
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['config']) this.resizeSeat();
+    if (changes['config']) {
+      this.resizeFull();
+    }
   }
 
   showToolTipText(seat: seatPosInterface): string {
@@ -78,7 +91,11 @@ export class SeatsSelectComponent implements AfterViewInit, OnChanges {
   }
 
   blockSeat(seat: seatPosInterface): boolean {
-    if (this.config!.blockSeat) return this.config!.blockSeat(seat);
+    if (this.config!.blockSeat) {
+      if (typeof this.config!.blockSeat === 'function')
+        return this.config!.blockSeat(seat);
+      return this.config!.blockSeat;
+    }
     return false;
   }
 
@@ -100,21 +117,9 @@ export class SeatsSelectComponent implements AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit(): void {
-    this.resizePlane();
-    this.resizeSeat();
+    if (!this.config) return;
+    this.resizeFull();
   }
-
-  wScreen: number = window.innerWidth;
-  hScreen: number = window.innerHeight;
-  zoom: WritableSignal<number> = signal(1);
-  translatePos: posInterface = { x: 0, y: 0 };
-  sizePixelSize: number = 10;
-  closeSidenav: boolean = false;
-  timeOutSize: any;
-  posOrigin?: posInterface;
-  @ViewChild('container') container!: ElementRef<HTMLDivElement>;
-
-  keepClicking: boolean = false;
 
   resizePlane() {
     this.wScreen = window.innerWidth;
@@ -180,9 +185,7 @@ export class SeatsSelectComponent implements AfterViewInit, OnChanges {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    if (this.timeOutSize) clearTimeout(this.timeOutSize);
-    this.resizePlane();
-    this.resizeSeat();
+    this.resizeFull();
   }
   setPosition(mouse: MouseEvent | Touch): posInterface {
     const rect = this.container.nativeElement.getBoundingClientRect();
@@ -211,5 +214,15 @@ export class SeatsSelectComponent implements AfterViewInit, OnChanges {
     this.sizePixelSize =
       (this.config?.sizeWidth! / 100) *
       this.container.nativeElement.clientWidth;
+  }
+
+  resizeFull() {
+    if (this.timeOutSize) clearTimeout(this.timeOutSize);
+    this.timeOutSize = setTimeout(() => {
+      this.resizePlane();
+      this.timeOutSize = setTimeout(() => {
+        this.resizeSeat();
+      }, 3);
+    }, 5);
   }
 }

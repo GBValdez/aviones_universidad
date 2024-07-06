@@ -33,9 +33,9 @@ export interface paySeatInterface {
 
 export interface configSeatPlane {
   showTooltipText?: (seat: seatPosInterface) => string;
-  blockSeat?: (seat: seatPosInterface) => boolean;
+  blockSeat?: boolean | ((seat: seatPosInterface) => boolean);
   opacitySeat?: (seat: seatPosInterface) => number;
-  getIcon: (seat: seatPosInterface) => string | string;
+  getIcon: ((seat: seatPosInterface) => string) | string;
   sizeWidth: number;
   img: string;
 }

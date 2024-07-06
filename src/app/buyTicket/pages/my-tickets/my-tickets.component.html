@@ -1,1 +1,85 @@
-<app-seats-select [config]="config" [seats]="seats"></app-seats-select>
+<app-seats-select [config]="config" [seats]="seats">
+  <section>
+    <h2 class="mt-[5px] text-xl mb-[5px] font-black text-white">
+      Tipo de asiento
+    </h2>
+    @for(clase of clasesList; track clase.id){
+    <div class="flex items-center mb-2">
+      <span
+        class="w-[20px] h-[20px] inline-block rounded-full mr-[5px]"
+        [ngStyle]="{
+          'background-color': clase.clase.description
+        }"
+      ></span>
+      <div class="flex justify-between text-white font-black infoClassAvion">
+        <span>
+          {{ clase.clase.name }}
+        </span>
+        <span> Q{{ clase.precio }} </span>
+      </div>
+    </div>
+    }
+  </section>
+  <section class="text-white font-black">
+    <h2 class="mt-[5px] text-xl mb-[5px]">Mis asientos</h2>
+    @if(mySeats.length == 0) {
+    <div class="text-gray-400">No tienes asientos seleccionados</div>
+    } @if(mySeats.length > 0) {
+    <div></div>
+    <table class="overflow-x-auto w-full">
+      @for (item of mySeats; track $index) {
+      <tr>
+        <td class="text-left pr-[10px] pt-[5px]">{{ item.Codigo }}</td>
+        <td class="text-left pr-[10px] pt-[5px]">{{ item.clase.name }}</td>
+        <td class="text-left pr-[10px] pt-[5px]">Q{{ getPrice(item) }}</td>
+
+        <td>
+          <input
+            type="checkbox"
+            [(ngModel)]="item.checked"
+            class="w-[20px] h-[20px] bg-white rounded-[5px] checked:bg-emerald-600"
+          />
+        </td>
+      </tr>
+      }
+      <tr class="border-t-2">
+        <td></td>
+        <td>Total:</td>
+        <td>Q{{ getTotal() }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    <section>
+      <button
+        class="mt-[5px] w-full"
+        color="accent"
+        mat-raised-button
+        [mat-menu-trigger-for]="visualizeOpt"
+      >
+        Acciones
+      </button>
+      <mat-menu #visualizeOpt="matMenu">
+        <button mat-menu-item (click)="modeVisualization = 0">
+          Visualizar todos los asientos comprados
+        </button>
+        <button mat-menu-item (click)="modeVisualization = 1">
+          Visualizar asientos seleccionados
+        </button>
+        <button mat-menu-item (click)="downloadTicket()">
+          Descargar boleto
+        </button>
+      </mat-menu>
+      <button
+        mat-raised-button
+        color="warn"
+        class="w-full mt-[10px]"
+        routerLink="/session/my-tickets"
+      >
+        Cerrar
+      </button>
+    </section>
+
+    }
+  </section>
+</app-seats-select>
