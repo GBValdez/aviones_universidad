@@ -1,1 +1,152 @@
-<app-select-seat></app-select-seat>
+<app-seats-select
+  [config]="config"
+  [seats]="seats"
+  (clickSeat)="sendSeat($event)"
+>
+  <section>
+    <h2 class="mt-[5px] text-xl mb-[5px] font-black text-white">
+      Tipo de asiento
+    </h2>
+    @for(clase of clasesList; track clase.id){
+    <div class="flex items-center mb-2">
+      <span
+        class="w-[20px] h-[20px] inline-block rounded-full mr-[5px]"
+        [ngStyle]="{
+          'background-color': clase.clase.description
+        }"
+      ></span>
+      <div class="flex justify-between text-white font-black infoClassAvion">
+        <span>
+          {{ clase.clase.name }}
+        </span>
+        <span> Q{{ clase.precio }} </span>
+      </div>
+    </div>
+    }
+  </section>
+
+  <section class="text-white font-black">
+    <h2 class="mt-[5px] text-xl mb-[5px]">Mis asientos</h2>
+    @if(mySeats.length == 0) {
+    <div class="text-gray-400">No tienes asientos seleccionados</div>
+    } @if(mySeats.length > 0) {
+    <div>
+      <p class="text-xs mb-[5px]">
+        Nota: Los check no afectan a la compra, unicamente afecta a las
+        siguientes 2 opciones.
+      </p>
+      <section>
+        <button
+          class="mb-[5px]"
+          color="accent"
+          mat-raised-button
+          [mat-menu-trigger-for]="visualizeOpt"
+        >
+          Opciones de visualización
+        </button>
+        <mat-menu #visualizeOpt="matMenu">
+          <button mat-menu-item (click)="modeVisualization = 0">
+            Visualizar todos los asientos
+          </button>
+          <button mat-menu-item (click)="modeVisualization = 1">
+            Visualizar solo asientos disponibles
+          </button>
+          <button
+            mat-menu-item
+            (click)="modeVisualization = 2"
+            [disabled]="!validOption()"
+          >
+            Visualizar asientos seleccionados
+          </button>
+        </mat-menu>
+      </section>
+      <button
+        mat-raised-button
+        class="mb-[5px]"
+        color="accent"
+        (click)="vacateSeat()"
+        [disabled]="!validOption()"
+      >
+        Desocupar asientos
+      </button>
+    </div>
+    <table class="overflow-x-auto">
+      @for (item of mySeats; track $index) {
+      <tr>
+        <td class="text-left pr-[10px] pt-[5px]">{{ item.Codigo }}</td>
+        <td class="text-left pr-[10px] pt-[5px]">{{ item.clase.name }}</td>
+        <td class="text-left pr-[10px] pt-[5px]">Q{{ getPrice(item) }}</td>
+
+        <td class="text-left pr-[10px] pt-[5px]">
+          <div
+            class="bg-white flex justify-center items-center rounded-full p-[2px]"
+            [matTooltip]="item.Estado?.id == 93 ? 'Apartado' : 'Comprado'"
+          >
+            <mat-icon class="text-black">
+              {{
+                item.Estado?.id == 93
+                  ? "airline_seat_recline_normal"
+                  : "check_circle"
+              }}
+            </mat-icon>
+          </div>
+        </td>
+        <td>
+          <input
+            type="checkbox"
+            [(ngModel)]="item.checked"
+            class="w-[20px] h-[20px] bg-white rounded-[5px] checked:bg-emerald-600"
+          />
+        </td>
+      </tr>
+      }
+      <tr class="border-t-2">
+        <td></td>
+        <td>Total:</td>
+        <td>Q{{ getTotal() }}</td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+
+    <div>
+      <button
+        class="w-full mt-[5px]"
+        mat-raised-button
+        (click)="finishSelect()"
+        [disabled]="!canFinailize()"
+      >
+        Finalizar compra
+      </button>
+    </div>
+    }
+  </section>
+  <section class="text-white">
+    <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Iconos</h2>
+    <div class="flex my-2 items-center">
+      <mat-icon class="mr-2">event_seat</mat-icon>
+      <p>Asiento libre</p>
+    </div>
+
+    <div class="flex my-2 items-center">
+      <mat-icon class="mr-2">block</mat-icon>
+      <p>Asiento no disponible</p>
+    </div>
+    <div class="flex my-2 items-center">
+      <mat-icon class="mr-2">airline_seat_recline_normal</mat-icon>
+      <p>Asiento apartado por usted mismo</p>
+    </div>
+    <div class="flex my-2 items-center">
+      <mat-icon class="mr-2">check_circle</mat-icon>
+      <p>Asiento comprado por usted mismo</p>
+    </div>
+  </section>
+  <button
+    mat-raised-button
+    color="warn"
+    class="w-full mt-4 mb-[20px]"
+    (click)="exit()"
+  >
+    Cancelar
+  </button>
+</app-seats-select>
