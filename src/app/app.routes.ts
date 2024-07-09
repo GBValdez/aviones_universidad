@@ -113,6 +113,7 @@ export const routes: Routes = [
         data: { isProtect: 20, roles: ['userNormal'] },
         title: 'Escanear boleto',
       },
+
       {
         path: 'searchFlight',
         loadComponent: () =>

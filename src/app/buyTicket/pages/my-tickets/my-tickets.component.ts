@@ -17,12 +17,6 @@ import {
 import { SeatsService } from '@plane/services/seats.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import { SeatsSelectComponent } from '@utils/components/seats-select/seats-select/seats-select.component';
-import { toDataURL } from 'qrcode';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-import { TDocumentDefinitions } from 'pdfmake/interfaces';
-import { setPdfMakeVfs } from './utils/custom';
-setPdfMakeVfs(pdfFonts.pdfMake.vfs);
 @Component({
   selector: 'app-my-tickets',
   standalone: true,
@@ -120,27 +114,10 @@ export class MyTicketsComponent implements OnInit {
   }
 
   downloadTicket() {
-    const qrCodeText = 'https://www.example.com';
-    toDataURL(qrCodeText, { width: 200, margin: 1 }, (err, url) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-
-      // Definir el documento PDF
-      const docDefinition: TDocumentDefinitions = {
-        content: [
-          {
-            text: 'Escanea el código QR:',
-            fontSize: 16,
-            margin: [0, 0, 0, 10],
-          },
-          { image: url, width: 200, height: 200 },
-        ],
-      };
-
-      // Crear y descargar el PDF
-      pdfMake.createPdf(docDefinition).download('documento-con-qr.pdf');
+    this.seatSvc.getTicketPdf(this.idFly).subscribe((res) => {
+      const blob = new Blob([res], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url);
     });
   }
 }

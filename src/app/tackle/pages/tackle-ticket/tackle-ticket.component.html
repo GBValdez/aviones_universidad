@@ -1,5 +1,10 @@
-<h2 class="text-white font-black text-2xl">Escaneando boleto</h2>
-<section class="rounded-[10px] overflow-hidden">
+<h2 class="text-white font-black text-2xl">
+  {{ ticketEncrypted != undefined ? "Boleto escaneado" : "Escaneando boleto" }}
+</h2>
+<section
+  class="rounded-[10px] overflow-hidden"
+  [ngClass]="{ hidden: ticketEncrypted != undefined }"
+>
   <zxing-scanner
     #scanner
     (camerasFound)="onCamerasFound($event)"
@@ -8,3 +13,53 @@
   >
   </zxing-scanner>
 </section>
+@if (ticketEncrypted!=undefined) {
+<mat-card>
+  <mat-card-content>
+    <h2 class="font-black text-2xl">Información del Cliente</h2>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Pasaporte:</h3>
+      <p>12312312</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Nombre:</h3>
+      <p>Gabriel Valdez</p>
+    </div>
+  </mat-card-content>
+</mat-card>
+<mat-card class="mt-[10px]">
+  <mat-card-content>
+    <h2 class="font-black text-2xl">Información del Vuelo</h2>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Código del vuelo:</h3>
+      <p>12312312</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Aeropuerto Origen:</h3>
+      <p>Gabriel Valdez</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Fecha de salida:</h3>
+      <p>Gabriel Valdez</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Aeropuerto Destino:</h3>
+      <p>Gabriel Valdez</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Fecha estimada de llegada:</h3>
+      <p>Gabriel Valdez</p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mt-[10px]">
+  <mat-card-content>
+    <h2 class="font-black text-2xl">Boletos</h2>
+    <div class="flex items-center">
+      <p>12312312</p>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+}
