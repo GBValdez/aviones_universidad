@@ -23,7 +23,9 @@
   <section class="text-white font-black">
     <h2 class="mt-[5px] text-xl mb-[5px]">Mis asientos</h2>
     @if(mySeats.length == 0) {
-    <div class="text-gray-400">No tienes asientos seleccionados</div>
+    <div class="text-gray-400">
+      No tienes asientos comprados o ya has abordado los que tenias
+    </div>
     } @if(mySeats.length > 0) {
     <div></div>
     <table class="overflow-x-auto w-full">
@@ -70,16 +72,16 @@
           Descargar boleto
         </button>
       </mat-menu>
-      <button
-        mat-raised-button
-        color="warn"
-        class="w-full mt-[10px]"
-        routerLink="/session/my-tickets"
-      >
-        Cerrar
-      </button>
     </section>
 
     }
+    <button
+      mat-raised-button
+      color="warn"
+      class="w-full mt-[10px]"
+      routerLink="/session/my-tickets"
+    >
+      Cerrar
+    </button>
   </section>
 </app-seats-select>

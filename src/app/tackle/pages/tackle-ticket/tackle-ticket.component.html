@@ -19,11 +19,11 @@
     <h2 class="font-black text-2xl">Información del Cliente</h2>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Pasaporte:</h3>
-      <p>12312312</p>
+      <p>{{ client!.noPasaporte }}</p>
     </div>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Nombre:</h3>
-      <p>Gabriel Valdez</p>
+      <p>{{ client!.nombre }}</p>
     </div>
   </mat-card-content>
 </mat-card>
@@ -32,32 +32,108 @@
     <h2 class="font-black text-2xl">Información del Vuelo</h2>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Código del vuelo:</h3>
-      <p>12312312</p>
+      <p>{{ fly!.codigo }}</p>
+    </div>
+    <div class="flex items-center">
+      <h3 class="font-black text-lg mr-2">Código del Avion:</h3>
+      <p>{{ fly!.avion.codigo }}</p>
     </div>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Aeropuerto Origen:</h3>
-      <p>Gabriel Valdez</p>
+      <p>
+        {{ fly!.aeropuertoOrigen.nombre }}, {{ fly!.aeropuertoOrigen.ciudad }} ,
+        {{ fly!.aeropuertoOrigen.localidad }} ,
+        {{ fly!.aeropuertoOrigen.pais.nombre }}
+      </p>
     </div>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Fecha de salida:</h3>
-      <p>Gabriel Valdez</p>
+      <p>{{ fly!.fechaSalida | date : "dd/MM/yyyy hh:mm a" }}</p>
     </div>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Aeropuerto Destino:</h3>
-      <p>Gabriel Valdez</p>
+      <p>
+        {{ fly!.aeropuertoDestino.nombre }},
+        {{ fly!.aeropuertoDestino.ciudad }} ,
+        {{ fly!.aeropuertoDestino.localidad }} ,
+        {{ fly!.aeropuertoDestino.pais.nombre }}
+      </p>
     </div>
     <div class="flex items-center">
       <h3 class="font-black text-lg mr-2">Fecha estimada de llegada:</h3>
-      <p>Gabriel Valdez</p>
+      <p>{{ fly?.fechaLlegada | date : "dd/MM/yyyy hh:mm a" }}</p>
     </div>
   </mat-card-content>
 </mat-card>
 
-<mat-card class="mt-[10px]">
+<mat-card class="mt-[10px] w-full overflow-x-auto">
   <mat-card-content>
     <h2 class="font-black text-2xl">Boletos</h2>
-    <div class="flex items-center">
-      <p>12312312</p>
+    <table mat-table [dataSource]="dataSource" matSort class="w-full">
+      <!-- Position Column -->
+      <ng-container matColumnDef="codigo">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          sortActionDescription="Ordenar por código"
+          class="text-lg font-black"
+        >
+          Código
+        </th>
+        <td mat-cell *matCellDef="let element">{{ element.asiento.codigo }}</td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="clase">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          sortActionDescription="Ordenar por clase"
+          class="text-lg font-black"
+        >
+          Clase
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.asiento.clase.name }}
+        </td>
+      </ng-container>
+
+      <!-- Weight Column -->
+      <ng-container matColumnDef="precio">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          sortActionDescription="Sort by weight"
+          class="text-lg font-black"
+        >
+          Precio
+        </th>
+        <td mat-cell *matCellDef="let element">Q{{ getPrice(element) }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mt-[10px] w-full">
+  <mat-card-content>
+    <div class="flex flex-wrap justify-end">
+      <button
+        mat-raised-button
+        color="warn"
+        class="m-[3px]"
+        (click)="cleanInfo()"
+      >
+        Cancelar
+      </button>
+      <button mat-raised-button class="m-[3px]" (click)="tackle()">
+        Abordar
+      </button>
     </div>
   </mat-card-content>
 </mat-card>

@@ -21,6 +21,7 @@ export interface seatPlaneCreation {
 export interface seatDto extends seatBaseDto {
   id: number;
   clase: catalogueInterface;
+  codigo: string;
 }
 
 export interface seatWithPlaneDto {

@@ -1,6 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import {
+  MatTable,
+  MatTableDataSource,
+  MatTableModule,
+} from '@angular/material/table';
 
 import {
   MAT_DIALOG_DATA,
@@ -15,6 +19,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { VueloService } from '@buyTicket/services/vuelo.service';
 import Swal from 'sweetalert2';
 import { ActivatedRoute, Router } from '@angular/router';
+import { boletoDto } from '@plane/interfaces/seats.interface';
 
 @Component({
   selector: 'app-selct-finish-modal',
