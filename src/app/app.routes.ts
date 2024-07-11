@@ -102,18 +102,6 @@ export const routes: Routes = [
         data: { isProtect: 20, roles: ['userNormal'] },
         title: 'Mis vuelos',
       },
-
-      {
-        path: 'tackle-ticket',
-        loadComponent: () =>
-          import(
-            '@tackleTicket/pages/tackle-ticket/tackle-ticket.component'
-          ).then((m) => m.TackleTicketComponent),
-        canActivate: [AuthGuard],
-        data: { isProtect: 20, roles: ['userNormal'] },
-        title: 'Escanear boleto',
-      },
-
       {
         path: 'searchFlight',
         loadComponent: () =>
@@ -188,6 +176,23 @@ export const routes: Routes = [
               isProtect: 20,
               roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
             },
+          },
+          {
+            path: 'tackle-ticket',
+            loadComponent: () =>
+              import(
+                '@tackleTicket/pages/tackle-ticket/tackle-ticket.component'
+              ).then((m) => m.TackleTicketComponent),
+            canActivate: [AuthGuard],
+            data: {
+              isProtect: 20,
+              roles: [
+                'AIRLINE-TACKLE',
+                'ADMINISTRATOR',
+                'ADMINISTRATOR_AIRLINE',
+              ],
+            },
+            title: 'Escanear boleto',
           },
         ],
       },

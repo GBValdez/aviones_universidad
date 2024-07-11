@@ -135,8 +135,11 @@ export class GeneralMenuComponent implements OnInit {
           {
             text: 'Abordar Vuelo',
             icon: 'flight_land',
-            click: '/session/tackle-ticket',
-            show: res?.roles.includes('userNormal'),
+            click: '/session/airline-section/tackle-ticket',
+            show:
+              res?.roles.includes('AIRLINE-TACKLE') ||
+              res?.roles.includes('ADMINISTRATOR_AIRLINE') ||
+              res?.roles.includes('ADMINISTRATOR'),
           },
         ],
       },

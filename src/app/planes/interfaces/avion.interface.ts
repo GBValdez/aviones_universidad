@@ -1,6 +1,7 @@
 import { catalogueInterface } from '@utils/commons.interface';
 import { seatDto } from './seats.interface';
 import { crewDto } from '@crew/pages/crew/interface/crew.interface';
+import { airlineDto } from '@airline/interface/airline.interface';
 
 export interface avionBaseDto {
   codigo: string;
@@ -14,7 +15,7 @@ export interface avionBaseDto {
 
 export interface avionDto extends avionBaseDto {
   id: number;
-  //   aerolinea: Aerolinea;
+  aerolinea: airlineDto;
   estado: catalogueInterface;
   marca: catalogueInterface;
   modelo: catalogueInterface;

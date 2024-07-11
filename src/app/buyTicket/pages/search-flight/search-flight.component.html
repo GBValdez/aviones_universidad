@@ -74,6 +74,11 @@
           <br />
           {{ vuelo.fechaLlegada | date : "dd/MM/yyyy hh:mm a" }}
         </div>
+        <div class="font-black">
+          Aerolínea:
+          <br />
+          {{ vuelo.avion.aerolinea.nombre }}
+        </div>
         @if(vuelo.fechaSalida<=currentDate){
         <div class="font-black">Vuelo no disponible</div>
         } @if(vuelo.fechaSalida>currentDate){
