@@ -49,6 +49,8 @@ import {
 } from '@plane/interfaces/seats.interface';
 import { PlaneService } from '@plane/services/plane.service';
 import { avionDto } from '@plane/interfaces/avion.interface';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-letter-input.directive';
 @Component({
   selector: 'app-plane-page',
   standalone: true,
@@ -70,6 +72,8 @@ import { avionDto } from '@plane/interfaces/avion.interface';
     InputAutocompleteComponent,
     ReactiveFormsModule,
     RouterModule,
+    MatTooltipModule,
+    OnlyNumberLetterInputDirective,
   ],
   templateUrl: './plane-page.component.html',
   styleUrl: './plane-page.component.scss',
@@ -93,6 +97,11 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   sectionsSelected: catalogueInterface[] = [];
   formSect: FormControl = new FormControl();
   secCurrent?: catalogueInterface;
+
+  formCode: FormGroup = this.fb.group({
+    code: ['', Validators.required],
+  });
+  focusForm: boolean = false;
   constructor(
     private fb: FormBuilder,
     private matSnack: MatSnackBar,
@@ -143,7 +152,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       return {
         ClaseId: idClase,
         posicion: `${seat.position.x}|${seat.position.y}`,
-        codigo: 'XD',
+        codigo: seat.Codigo!,
       };
     });
     const SEND_BODY: seatPlaneCreation = {
@@ -175,43 +184,48 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
-    switch (event.key.toUpperCase()) {
-      case 'A':
-        this.opt.set('navigation');
-        break;
-      case 'S':
-        if (this.secCurrent) this.opt.set('add');
-        else
-          this.matSnack.open('Selecciona una sección', 'Ok', {
-            duration: 2000,
-          });
-        break;
-      case 'D':
-        this.opt.set('move');
-        break;
-      case 'F':
-        this.opt.set('delete');
-        break;
-      case 'Q':
-        this.zoom.update((z) => z - 0.1);
-        break;
-      case 'W':
-        this.zoom.update((z) => z + 0.1);
-        break;
-      case 'E':
-        this.zoom.set(1);
-        break;
-      case 'R':
-        this.closeSidenav = !this.closeSidenav;
-        this.matSnack.open(
-          this.closeSidenav
-            ? "'Ocultar menú lateral'"
-            : 'Mostrar barra lateral',
-          'Ok',
-          { duration: 2000 }
-        );
-        break;
-    }
+    if (!this.focusForm)
+      switch (event.key.toUpperCase()) {
+        case 'A':
+          this.opt.set('navigation');
+          break;
+        case 'S':
+          if (this.secCurrent && this.formCode.valid) this.opt.set('add');
+          else
+            this.matSnack.open(
+              'Selecciona una sección y escribe un código',
+              'Ok',
+              {
+                duration: 2000,
+              }
+            );
+          break;
+        case 'D':
+          this.opt.set('move');
+          break;
+        case 'F':
+          this.opt.set('delete');
+          break;
+        case 'Q':
+          this.zoom.update((z) => z - 0.1);
+          break;
+        case 'W':
+          this.zoom.update((z) => z + 0.1);
+          break;
+        case 'E':
+          this.zoom.set(1);
+          break;
+        case 'R':
+          this.closeSidenav = !this.closeSidenav;
+          this.matSnack.open(
+            this.closeSidenav
+              ? "'Ocultar menú lateral'"
+              : 'Mostrar barra lateral',
+            'Ok',
+            { duration: 2000 }
+          );
+          break;
+      }
   }
   //Presionar
   pressTouch(event: TouchEvent) {
@@ -486,9 +500,13 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
       return;
     }
+    const code = this.formCode.get('code')!.value;
+    const sizeOfCode =
+      this.seats.filter((el) => el.Codigo!.startsWith(code)).length + 1;
     this.seats.push({
       position: this.setPosition(event),
       clase: this.secCurrent!,
+      Codigo: `${code}-${sizeOfCode}`,
     });
     this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
@@ -515,7 +533,12 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   }
   deletingSeat(seat: seatPosInterface) {
     if (this.opt() != 'delete') return;
+    const code = seat.Codigo?.split('-')[0];
     this.seats = this.seats.filter((s) => s != seat);
+    const seatsCode = this.seats.filter((el) => el.Codigo!.startsWith(code!));
+    seatsCode.forEach((el, index) => {
+      el.Codigo = `${code}-${index + 1}`;
+    });
     this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
 

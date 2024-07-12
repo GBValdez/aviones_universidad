@@ -1,7 +1,10 @@
 import { Route, Routes } from '@angular/router';
 import { AuthGuard } from '@auth/guards/auth.guard';
 import { catalogueData } from '@catalogues/catalogueData';
-import { planePageExitGuard } from '@plane/guard/plane-page-exit.guard';
+import {
+  planeActivateGuard,
+  planePageExitGuard,
+} from '@plane/guard/plane-page-exit.guard';
 
 const createRouteCatalogue = (title: string, name: string): Route => {
   return {
@@ -59,7 +62,8 @@ export const routes: Routes = [
       import('@plane/pages/plane-page/plane-page.component').then(
         (m) => m.PlanePageComponent
       ),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, planeActivateGuard],
+    canDeactivate: [planePageExitGuard],
     data: { isProtect: 20, roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'] },
     title: 'Avión',
   },

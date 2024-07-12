@@ -61,7 +61,7 @@
         class="m-[2px]"
         (click)="opt.set('add')"
         [color]="opt() == 'add' ? 'primary' : 'light'"
-        [disabled]="!secCurrent"
+        [disabled]="!secCurrent || !formCode.valid"
       >
         <mat-icon> add </mat-icon>
       </button>
@@ -104,7 +104,23 @@
         <mat-icon> refresh </mat-icon>
       </button>
     </section>
-
+    <section>
+      <form [formGroup]="formCode">
+        <h2 class="text-gray-100 font-black text-xl mt-[5px]">Código</h2>
+        <mat-form-field class="w-full">
+          <mat-label>Código para el nuevo asiento</mat-label>
+          <input
+            appOnlyNumberLetterInput
+            matInput
+            formControlName="code"
+            (focus)="focusForm = true"
+            (blur)="focusForm = false"
+            formControlName="code"
+          />
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      </form>
+    </section>
     <section>
       <h2 class="text-gray-100 font-black text-xl mt-[5px]">Clases</h2>
       <app-input-autocomplete
@@ -296,6 +312,7 @@
     ></canvas>
     @for (seat of seats; track $index) {
     <mat-icon
+      [matTooltip]="seat.Codigo!"
       (mouseenter)="deleteSeat(seat)"
       (mousedown)="mousedown($event, seat)"
       (touchstart)="touchStart(seat, $event)"
