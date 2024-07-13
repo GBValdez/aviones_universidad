@@ -1,4 +1,4 @@
 export const environment = {
-  api: 'http://localhost:5222',
-  key: 'sojfqowpfjwqpofjqwpofwqjfpqwjf',
+  api: import.meta.env.NG_APP_API_URL,
+  key: import.meta.env.NG_APP_KEY,
 };
