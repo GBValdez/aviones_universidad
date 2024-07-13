@@ -16,6 +16,7 @@ import { DatePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.service';
 import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-vuelo-home',
@@ -31,6 +32,7 @@ import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
     MatPaginatorModule,
     DatePipe,
     LocalTimezonePipe,
+    RouterModule,
   ],
   providers: [LocalTimezonePipe],
   templateUrl: './vuelo-home.component.html',

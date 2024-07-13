@@ -17,6 +17,7 @@
             placeholder="Código"
             formControlName="codigo"
             [maxLength]="10"
+            appOnlyNumberLetterInput
           />
           <mat-error> El campo es requerido </mat-error>
         </mat-form-field>
@@ -121,26 +122,51 @@
         <section formArrayName="vueloClases">
           <h2>Precios de los asientos</h2>
           @for (item of formClases.controls; track $index) {
-          <div [formGroup]="toFormGroup(item)">
-            <mat-form-field class="w-full">
-              <mat-label>{{
-                showNameSectionById(toFormGroup(item).get("claseId")?.value)
-              }}</mat-label>
-              <input
-                matInput
-                placeholder="Precio Q."
-                formControlName="precio"
-                [maxLength]="10"
-                appOnlyNumberInput
-              />
-              @if (toFormGroup(item).get("precio")?.hasError('required')) {
-              <mat-error> El campo es requerido </mat-error>
-              }@else{
-              <mat-error> El precio tiene que ser mayor a 0.01 </mat-error>
+          <mat-card [formGroup]="toFormGroup(item)" class="mt-[4px]">
+            <mat-card-header>
+              <mat-card-title>
+                {{
+                  showNameSectionById(toFormGroup(item).get("claseId")?.value)
+                }}
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-form-field class="w-full">
+                <mat-label>Precio</mat-label>
+                <input
+                  matInput
+                  placeholder="Precio Q."
+                  formControlName="precio"
+                  [maxLength]="10"
+                  appOnlyNumberInput
+                />
+                @if (toFormGroup(item).get("precio")?.hasError('required')) {
+                <mat-error> El campo es requerido </mat-error>
+                }@else{
+                <mat-error> El precio tiene que ser mayor a 0.01 </mat-error>
 
-              }
-            </mat-form-field>
-          </div>
+                }
+              </mat-form-field>
+              <mat-form-field class="w-full">
+                <mat-label>Cantidad de maletas máximas</mat-label>
+                <input
+                  matInput
+                  placeholder="Cantidad de maletas."
+                  formControlName="cantidadMaletasMax"
+                  [maxLength]="10"
+                  appOnlyNumberInput
+                />
+                @if
+                (toFormGroup(item).get("cantidadMaletasMax")?.hasError('required'))
+                {
+                <mat-error> El campo es requerido </mat-error>
+                }@else{
+                <mat-error> El precio tiene que ser mayor a 0 </mat-error>
+
+                }
+              </mat-form-field>
+            </mat-card-content>
+          </mat-card>
 
           }
         </section>

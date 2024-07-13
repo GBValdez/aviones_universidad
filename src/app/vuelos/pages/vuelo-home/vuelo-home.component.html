@@ -45,6 +45,15 @@
     </mat-card-header>
   </mat-card>
   <mat-menu #menu="matMenu" xPosition="after">
+    <button
+      mat-menu-item
+      [disabled]="!canOperation"
+      [routerLink]="'/session/passenger-per-flight/' + item.id"
+    >
+      <mat-icon>visibility</mat-icon>
+      <span>Ver pasajeros</span>
+    </button>
+
     <button [disabled]="!canOperation" mat-menu-item (click)="openForm(item)">
       <mat-icon>edit</mat-icon>
       <span>Editar</span>

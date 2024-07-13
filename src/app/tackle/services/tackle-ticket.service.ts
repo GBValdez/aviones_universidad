@@ -2,7 +2,10 @@ import { AirlineSectSvcService } from '@airlineSection/services/AirlineSectSvc.s
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@env/environment';
-import { ticketCompleteDto } from '@plane/interfaces/seats.interface';
+import {
+  ticketBodyDto,
+  ticketCompleteDto,
+} from '@plane/interfaces/seats.interface';
 import { fixedQueryParams } from '@utils/utils';
 
 @Injectable({
@@ -24,7 +27,7 @@ export class TackleTicketService {
       { params }
     );
   }
-  completeTicket(ticketEncrypted: string) {
+  completeTicket(ticketEncrypted: string, tickets: ticketBodyDto[]) {
     let params: any = {
       AerolineaId: this.airlineSect.getCurrentAirline()?.id,
     };
@@ -32,7 +35,7 @@ export class TackleTicketService {
 
     return this.http.post<any>(
       `${this.url}/completeTackleTicket/${ticketEncrypted}`,
-      {},
+      tickets,
       {
         params,
       }

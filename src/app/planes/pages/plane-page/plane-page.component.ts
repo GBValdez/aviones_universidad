@@ -453,7 +453,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         this.seats = res.items.map((seat) => {
           const [x, y] = seat.posicion.split('|').map(Number);
           console.log(seat);
-          return { position: { x, y }, clase: seat.clase };
+          return { position: { x, y }, clase: seat.clase, Codigo: seat.codigo };
         });
       });
   }

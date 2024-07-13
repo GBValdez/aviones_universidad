@@ -63,7 +63,7 @@ export const routes: Routes = [
         (m) => m.PlanePageComponent
       ),
     canActivate: [AuthGuard, planeActivateGuard],
-    canDeactivate: [planePageExitGuard],
+    // canDeactivate: [planePageExitGuard],
     data: { isProtect: 20, roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'] },
     title: 'Avión',
   },
@@ -199,6 +199,18 @@ export const routes: Routes = [
             title: 'Escanear boleto',
           },
         ],
+      },
+      {
+        path: 'passenger-per-flight/:id',
+        loadComponent: () =>
+          import(
+            '@vuelo/pages/passanger-per-flight/passanger-per-flight.component'
+          ).then((m) => m.PassangerPerFlightComponent),
+        title: 'Pasajeros por vuelo',
+        data: {
+          isProtect: 20,
+          roles: ['ADMINISTRATOR', 'ADMINISTRATOR_AIRLINE'],
+        },
       },
       {
         path: 'catalogue/country',

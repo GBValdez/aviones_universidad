@@ -25,6 +25,7 @@ export interface vueloDtoCreation {
 export interface vueloClaseDto {
   id: number;
   clase: catalogueInterface;
+  cantidadMaletasMax: number;
   precio: number;
 }
 

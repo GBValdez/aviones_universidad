@@ -30,6 +30,7 @@ import { avionDto } from '@plane/interfaces/avion.interface';
 import { PlaneService } from '@plane/services/plane.service';
 import { catalogueInterface } from '@utils/commons.interface';
 import { OnlyNumberInputDirective } from '@utils/directivas/only-number-input.directive';
+import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-letter-input.directive';
 import { LocalTimezonePipe } from '@utils/pipes/local-timezone-pipe.pipe';
 import moment, { Moment } from 'moment';
 import { destinoDto } from 'src/app/destinations/interfaces/destino.interface';
@@ -50,6 +51,7 @@ import Swal from 'sweetalert2';
     MatDatepickerModule,
     MatSelectModule,
     OnlyNumberInputDirective,
+    OnlyNumberLetterInputDirective,
   ],
   templateUrl: './vuelo-form.component.html',
   styleUrl: './vuelo-form.component.scss',
@@ -193,9 +195,14 @@ export class VueloFormComponent {
             (x) => x.clase.id === section.id
           );
           const PRECIO = PREVIEW ? PREVIEW.precio : 0;
+          const CANTIDAD = PREVIEW ? PREVIEW.cantidadMaletasMax : 0;
           const CONTROL = this.fb.group({
             claseId: [section.id],
             precio: [PRECIO, [Validators.required, Validators.min(0.01)]],
+            cantidadMaletasMax: [
+              CANTIDAD,
+              [Validators.required, Validators.min(1)],
+            ],
           });
           const control = this.form.controls['vueloClases'] as FormArray;
           control.push(CONTROL);

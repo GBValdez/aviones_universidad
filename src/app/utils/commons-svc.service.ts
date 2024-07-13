@@ -16,7 +16,7 @@ export class CommonsSvcService<dto, dtoCreation> {
   set url(url: string) {
     this.urlBase = `${environment.api}/${url}`;
   }
-  private fixedQueryParams<queryParam>(opts?: pagOptions<queryParam>) {
+  protected fixedQueryParams<queryParam>(opts?: pagOptions<queryParam>) {
     if (!opts) return {};
 
     let PARAMS = {

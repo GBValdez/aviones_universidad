@@ -11,6 +11,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '@env/environment';
 import {
   boletoDto,
+  flyWithTicket,
   seatDto,
   seatWithPlaneDto,
 } from '@plane/interfaces/seats.interface';
@@ -18,6 +19,7 @@ import { AuthService } from '@auth/services/auth.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 import { paySeatInterface } from '@plane/interfaces/plane.interface';
+import { pagDto, pagOptions } from '@utils/commons.interface';
 @Injectable({
   providedIn: 'root',
 })
@@ -100,5 +102,17 @@ export class VueloService extends CommonsSvcService<
 
   getMyFlies(): Observable<vueloDto[]> {
     return this.http.get<vueloDto[]>(this.urlBase + '/getMyFlies');
+  }
+
+  getTicketsOfFly(
+    id: number,
+    opts?: pagOptions<null>
+  ): Observable<flyWithTicket> {
+    const PARAMS = this.fixedQueryParams<null>(opts);
+
+    return this.http.get<flyWithTicket>(
+      this.urlBase + '/getTicketsOfFly/' + id,
+      { params: PARAMS }
+    );
   }
 }

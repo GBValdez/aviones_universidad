@@ -313,6 +313,7 @@
     @for (seat of seats; track $index) {
     <mat-icon
       [matTooltip]="seat.Codigo!"
+      [matTooltipShowDelay]="1000"
       (mouseenter)="deleteSeat(seat)"
       (mousedown)="mousedown($event, seat)"
       (touchstart)="touchStart(seat, $event)"
