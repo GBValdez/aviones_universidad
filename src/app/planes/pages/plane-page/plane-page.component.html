@@ -83,6 +83,41 @@
       </button>
     </div>
     <section>
+      <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
+        Modo pincel
+      </h2>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        title="Punto"
+        [color]="modePincel() == 'point' ? 'primary' : 'light'"
+        (click)="modePincel.set('point')"
+        [disabled]="opt() == 'navigation'"
+      >
+        <mat-icon> fiber_manual_record </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        title="Linea"
+        [color]="modePincel() == 'line' ? 'primary' : 'light'"
+        (click)="modePincel.set('line')"
+        [disabled]="opt() == 'navigation'"
+      >
+        <mat-icon> show_chart </mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        class="m-[2px]"
+        title="Cuadro"
+        [color]="modePincel() == 'square' ? 'primary' : 'light'"
+        (click)="modePincel.set('square')"
+        [disabled]="opt() == 'navigation'"
+      >
+        <mat-icon> format_paint </mat-icon>
+      </button>
+    </section>
+    <section>
       <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Zoom</h2>
       <button
         (click)="zoom.set(zoom() + 0.1)"
@@ -179,7 +214,9 @@
     </h2>
 
     <div class="bg-white rounded-full">
-      <mat-checkbox [(ngModel)]="seeGrid"> Utilizar cuadricula </mat-checkbox>
+      <mat-checkbox (click)="reMakeCanvas()" [(ngModel)]="seeGrid">
+        Utilizar cuadricula
+      </mat-checkbox>
     </div>
 
     @if( seeGrid ){
@@ -305,7 +342,6 @@
       }"
     />
     <canvas
-      [ngClass]="{ visible: seeGrid, hidden: !seeGrid }"
       #canvas
       class="absolute left-0 top-0 pointer-events-none"
       style="z-index: 10"

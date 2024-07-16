@@ -39,3 +39,9 @@ export interface configSeatPlane {
   sizeWidth: number;
   img: string;
 }
+export interface dimSquareInterface {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}

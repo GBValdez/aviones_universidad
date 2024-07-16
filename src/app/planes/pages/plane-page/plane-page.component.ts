@@ -11,6 +11,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  dimSquareInterface,
   posInterface,
   seatPosInterface,
 } from '@plane/interfaces/plane.interface';
@@ -79,6 +80,7 @@ import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-le
   styleUrl: './plane-page.component.scss',
 })
 export class PlanePageComponent implements AfterViewInit, OnInit {
+  modePincel: WritableSignal<string> = signal('point');
   closeSidenav: boolean = false;
   seeGrid: boolean = true;
   fitToGrid: boolean = true;
@@ -88,7 +90,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   timeOutSize: any;
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
-  keepClicking: boolean = false;
+
   dragTouchSeat?: seatPosInterface;
   posOrigin?: posInterface;
   translatePos: posInterface = { x: 0, y: 0 };
@@ -113,22 +115,30 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     private avionSvc: PlaneService,
     private router: Router
   ) {
-    effect(() => {
-      switch (this.opt()) {
-        case 'add':
-          this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
-          break;
-        case 'move':
-          this.matSnack.open('Modo mover sillas', 'Ok', { duration: 2000 });
-          break;
-        case 'delete':
-          this.matSnack.open('Modo eliminar sillas', 'Ok', { duration: 2000 });
-          break;
-        case 'navigation':
-          this.matSnack.open('Modo navegación', 'Ok', { duration: 2000 });
-          break;
+    effect(
+      () => {
+        switch (this.opt()) {
+          case 'add':
+            this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
+            break;
+          case 'move':
+            this.matSnack.open('Modo mover sillas', 'Ok', { duration: 2000 });
+            break;
+          case 'delete':
+            this.matSnack.open('Modo eliminar sillas', 'Ok', {
+              duration: 2000,
+            });
+            break;
+          case 'navigation':
+            this.matSnack.open('Modo navegación', 'Ok', { duration: 2000 });
+            this.modePincel.set('point');
+            break;
+        }
+      },
+      {
+        allowSignalWrites: true,
       }
-    });
+    );
     effect(() => {
       matSnack.open(`Zoom: ${this.zoom()}`, 'Ok', { duration: 2000 });
     });
@@ -238,9 +248,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   }
 
   startInteraction(event: MouseEvent | Touch): void {
-    this.keepClicking = true;
-    this.addSeat(event);
-    this.navigationStart(event);
+    this.posOrigin = this.setPosition(event);
+    if (this.modePincel() == 'point') this.addSeat(event);
   }
 
   //Mover
@@ -257,7 +266,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     evt: MouseEvent | TouchEvent
   ): void {
     evt.preventDefault();
-    this.addSeat(event);
+    this.reMakeCanvas(this.setPosition(event));
+    if (this.modePincel() == 'point') this.addSeat(event);
     this.navigateMove(event);
     if (this.opt() != 'move') return;
     if (this.dragTouchSeat == undefined) return;
@@ -282,13 +292,16 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     }
   }
   endInteraction(event: MouseEvent | Touch): void {
-    this.keepClicking = false;
-    this.navigateEnd();
+    this.reMakeCanvas();
+    const endPos = this.setPosition(event);
+    this.endSquare(event, endPos);
+    this.posOrigin = undefined;
     if (this.opt() != 'move') return;
     if (this.dragTouchSeat == undefined) return;
     this.dragTouchSeat.position = this.setPosition(event);
     this.dragTouchSeat = undefined;
   }
+
   //Click o touch en silla
   mousedown(event: MouseEvent, seat: seatPosInterface) {
     if (event.button == 0) this.interactiveSeat(seat, event);
@@ -303,6 +316,40 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     if (this.opt() != 'move') return;
     this.dragTouchSeat = seat;
     event.preventDefault();
+  }
+
+  endSquare(event: MouseEvent | Touch, endPos: posInterface) {
+    if (this.modePincel() != 'square') return;
+    // console.log(pos);
+    if (this.opt() == 'add') {
+      const pos = this.makePosSquare(endPos);
+      pos.forEach((el) => this.addSeat(event, el));
+    }
+    if (this.opt() == 'delete') {
+      console.log('posOrigin', this.posOrigin);
+
+      const { height, width } = this.getCanvas;
+      const tam = this.sizePixelSize;
+      const SQUARE = this.makeCordSquare(endPos, tam, width, height);
+      this.seats = this.seats.filter((el) => {
+        let { x, y } = el.position;
+        x = (x / 100) * width;
+        y = (y / 100) * height;
+        return !(
+          x >= SQUARE.x &&
+          x <= SQUARE.x + SQUARE.width &&
+          y >= SQUARE.y &&
+          y <= SQUARE.y + SQUARE.height
+        );
+      });
+    }
+  }
+  endLine(event: MouseEvent | Touch, endPos: posInterface) {
+    if (this.modePincel() != 'line') return;
+    if (this.opt() == 'add') {
+      const pos = this.makeLineEq(endPos);
+      pos.forEach((el) => this.addSeat(event, el));
+    }
   }
 
   validatorOffset: ValidatorFn = (control) => {
@@ -364,7 +411,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   wScreen: number = window.innerWidth;
   hScreen: number = window.innerHeight;
 
-  reMakeCanvas() {
+  reMakeCanvas(posFinale?: posInterface) {
     this.form.updateValueAndValidity();
     if (this.form.valid && this.img && this.formDisplace.valid)
       setTimeout(() => {
@@ -374,21 +421,81 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         const { height, width } = this.getCanvas;
         this.ctx.clearRect(0, 0, width, height);
         const tam = (this.form.get('sizeSeat')!.value / 100) * width;
-        const { xDes, yDes } = this.formDisplace.value;
-        this.ctx.lineWidth = 0.5;
-        this.ctx.beginPath();
-        for (let y = -tam + yDes; y < height; y += tam) {
-          this.ctx.moveTo(0, y);
-          this.ctx.lineTo(width, y);
+        if (this.seeGrid) {
+          const { xDes, yDes } = this.formDisplace.value;
+          this.ctx.lineWidth = 0.5;
+          this.ctx.beginPath();
+          for (let y = -tam + yDes; y < height; y += tam) {
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(width, y);
+          }
+          for (let x = -tam + xDes; x < width; x += tam) {
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, height);
+          }
+          this.ctx.strokeStyle = '#000000';
+          this.ctx.stroke();
         }
-        for (let x = -tam + xDes; x < width; x += tam) {
-          this.ctx.moveTo(x, 0);
-          this.ctx.lineTo(x, height);
-        }
-        this.ctx.strokeStyle = '#000000';
 
-        this.ctx.stroke();
+        //Dibujar cuadrado
+        if (this.posOrigin && posFinale)
+          switch (this.modePincel()) {
+            case 'square':
+              this.ctx.fillStyle = '#28A0A7';
+              const SQUARE = this.makeCordSquare(posFinale, tam, width, height);
+              this.ctx.fillRect(
+                SQUARE.x,
+                SQUARE.y,
+                SQUARE.width,
+                SQUARE.height
+              );
+              break;
+
+            case 'line':
+              console.log('line');
+              this.ctx.beginPath();
+              this.ctx.moveTo(
+                (this.posOrigin.x / 100) * width,
+                (this.posOrigin.y / 100) * height
+              );
+              this.ctx.lineTo(
+                (posFinale.x / 100) * width,
+                (posFinale.y / 100) * height
+              );
+              this.ctx.strokeStyle = '#28A0A7'; // Establece el color de la línea
+              this.ctx.lineWidth = 3; // Asegúrate de que el ancho de la línea sea suficiente para verla
+              this.ctx.stroke(); // Dibuja la línea
+              break;
+
+            default:
+              break;
+          }
       }, 70);
+  }
+  makeCordSquare(
+    posFinale: posInterface,
+    tam: number,
+    width: number,
+    height: number
+  ): dimSquareInterface {
+    let xMin = this.posOrigin!.x / 100;
+    xMin *= width;
+    if (this.fitToGrid) xMin -= tam / 2;
+    let xMax = posFinale.x / 100;
+    xMax *= width;
+    xMax = xMax - xMin;
+    if (xMax < 0) xMax = tam;
+    xMax = Math.ceil(xMax / tam) * tam;
+
+    let yMin = this.posOrigin!.y / 100;
+    yMin *= height;
+    if (this.fitToGrid) yMin -= tam / 2;
+    let yMax = posFinale.y / 100;
+    yMax *= height;
+    yMax = yMax - yMin;
+    if (yMax < 0) yMax = tam;
+    yMax = Math.ceil(yMax / tam) * tam;
+    return { x: xMin, y: yMin, width: xMax, height: yMax };
   }
 
   resizePlane() {
@@ -476,20 +583,21 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   fitAtGrid(x: number, y: number) {
     if (!this.fitToGrid || !this.seeGrid) return { x, y };
     const container = this.container.nativeElement;
-    const tam =
-      (this.form.get('sizeSeat')!.value / 100) * container.clientWidth;
+    const tamPorc = this.form.get('sizeSeat')!.value / 100;
+    const tamX = tamPorc * container.clientWidth;
+    const tamY = tamPorc * container.clientHeight;
     const { xDes, yDes } = this.formDisplace.value;
-    x = Math.floor(x / tam) * tam + tam / 2;
+    x = Math.floor(x / tamX) * tamX + tamX / 2;
     x += xDes;
-    y = Math.floor(y / tam) * tam + tam / 2;
+    y = Math.floor(y / tamY) * tamY + tamY / 2;
     y += yDes;
     return { x, y };
   }
 
-  addSeat(event: MouseEvent | Touch) {
-    if (!this.keepClicking) return;
+  addSeat(event: MouseEvent | Touch, position?: posInterface) {
+    if (!this.posOrigin) return;
     if (this.opt() != 'add') return;
-    const pos = this.setPosition(event);
+    let pos = position != undefined ? position : this.setPosition(event);
     if (
       this.seats.find(
         (seat) => seat.position.x == pos.x && seat.position.y == pos.y
@@ -500,11 +608,17 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
       return;
     }
-    const code = this.formCode.get('code')!.value;
+    const code: string = this.formCode.get('code')!.value;
+    if (code.trim() == '') {
+      this.matSnack.open('Escribe un código para el asiento', 'Ok', {
+        duration: 2000,
+      });
+      return;
+    }
     const sizeOfCode =
       this.seats.filter((el) => el.Codigo!.startsWith(code)).length + 1;
     this.seats.push({
-      position: this.setPosition(event),
+      position: pos,
       clase: this.secCurrent!,
       Codigo: `${code}-${sizeOfCode}`,
     });
@@ -528,11 +642,12 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     return { x, y };
   }
   deleteSeat(seat: seatPosInterface) {
-    if (!this.keepClicking) return;
+    if (!this.posOrigin) return;
     this.deletingSeat(seat);
   }
   deletingSeat(seat: seatPosInterface) {
     if (this.opt() != 'delete') return;
+    if (this.modePincel() != 'point') return;
     const code = seat.Codigo?.split('-')[0];
     this.seats = this.seats.filter((s) => s != seat);
     const seatsCode = this.seats.filter((el) => el.Codigo!.startsWith(code!));
@@ -542,13 +657,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
 
-  navigationStart(event: MouseEvent | Touch) {
-    if (this.opt() != 'navigation') return;
-    this.posOrigin = this.setPosition(event);
-  }
-
   navigateMove(event: MouseEvent | Touch) {
-    if (this.opt() != 'navigation' || !this.keepClicking) return;
+    if (this.opt() != 'navigation' || !this.posOrigin) return;
     if (!this.posOrigin) return;
     const pos = this.setPosition(event);
     this.translatePos = {
@@ -556,10 +666,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       y: this.translatePos.y + pos.y - this.posOrigin.y,
     };
   }
-  navigateEnd() {
-    if (this.opt() != 'navigation') return;
-    this.posOrigin = undefined;
-  }
+
   refresh() {
     this.zoom.set(1);
     this.posOrigin = undefined;
@@ -602,5 +709,66 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       }
       this.seats = this.seats.filter((el) => el.clase.id !== item.id);
     }
+  }
+
+  makePosSquare(seat: posInterface): posInterface[] {
+    if (!this.posOrigin) return [];
+    const { height, width } = this.getCanvas;
+    const tam = this.sizePixelSize;
+    const final: posInterface[] = [];
+    const SQUARE = this.makeCordSquare(seat, tam, width, height);
+    SQUARE.x += tam / 2;
+    SQUARE.y += tam / 2;
+    SQUARE.width -= tam / 2;
+    SQUARE.height -= tam / 2;
+    for (let x = SQUARE.x; x < SQUARE.x + SQUARE.width; x += tam) {
+      for (let y = SQUARE.y; y < SQUARE.y + SQUARE.height; y += tam) {
+        let newPos: posInterface = { x, y };
+        newPos = {
+          x: (newPos.x * 100) / width,
+          y: (newPos.y * 100) / height,
+        };
+        // newPos = this.fitAtGrid(newPos.x, newPos.y);
+        final.push(newPos);
+      }
+    }
+    return final;
+  }
+  makeLineEq(pos: posInterface): posInterface[] {
+    if (!this.posOrigin) return [];
+    const { height, width } = this.getCanvas;
+    const tam = this.sizePixelSize;
+    const originReal: posInterface = {
+      x: (this.posOrigin.x / 100) * width,
+      y: (this.posOrigin.y / 100) * height,
+    };
+    const posReal: posInterface = {
+      x: (pos.x / 100) * width,
+      y: (pos.y / 100) * height,
+    };
+
+    const x = originReal.x - posReal.x;
+    const y = originReal.y - posReal.y;
+    const m = y / x;
+    const final: posInterface[] = [];
+    if (Math.abs(m) < 1) {
+      for (let i = originReal.x; i < posReal.x; i += tam) {
+        const y = m * (i - originReal.x) + originReal.y;
+        final.push({
+          x: (i * 100) / width,
+          y: (y * 100) / height,
+        });
+      }
+    } else {
+      for (let i = originReal.y; i < posReal.y; i += tam) {
+        const x = (i - originReal.y) / m + originReal.x;
+        final.push({
+          x: (x * 100) / width,
+          y: (i * 100) / height,
+        });
+      }
+    }
+
+    return final;
   }
 }
