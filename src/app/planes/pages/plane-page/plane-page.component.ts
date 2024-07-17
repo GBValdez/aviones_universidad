@@ -81,6 +81,7 @@ import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-le
   styleUrl: './plane-page.component.scss',
 })
 export class PlanePageComponent implements AfterViewInit, OnInit {
+  messageHelp: string = '';
   codeDict: codeDictionary[] = [];
   modePincel: WritableSignal<string> = signal('point');
   closeSidenav: boolean = false;
@@ -506,6 +507,11 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
             case 'square':
               this.ctx.fillStyle = '#28A0A7';
               const SQUARE = this.makeCordSquare(posFinale);
+              const HEIGHT_SQUARE = SQUARE.height / this.sizePixelSize;
+              const WIDTH_SQUARE = SQUARE.width / this.sizePixelSize;
+              this.messageHelp = `${WIDTH_SQUARE} X ${HEIGHT_SQUARE}   = ${
+                HEIGHT_SQUARE * WIDTH_SQUARE
+              }`;
               this.ctx.fillRect(
                 SQUARE.x,
                 SQUARE.y,
@@ -518,6 +524,16 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
               this.ctx.beginPath();
               const originPx = this.convertToPx(this.posOrigin);
               const posFinalePx = this.convertToPx(posFinale!);
+              let number = 0;
+              const M =
+                (posFinalePx.y - originPx.y) / (posFinalePx.x - originPx.x);
+              if (Math.abs(M) < 1)
+                number =
+                  Math.abs(posFinalePx.x - originPx.x) / this.sizePixelSize;
+              else
+                number =
+                  Math.abs(posFinalePx.y - originPx.y) / this.sizePixelSize;
+              this.messageHelp = `${Math.ceil(number)}`;
               this.ctx.moveTo(originPx.x, originPx.y);
               this.ctx.lineTo(posFinalePx.x, posFinalePx.y);
               this.ctx.strokeStyle = '#28A0A7'; // Establece el color de la línea
@@ -652,19 +668,14 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       });
       return;
     }
-    let codeCurrent = this.codeDict.find((el) => el.code == code);
-    if (codeCurrent == undefined) {
-      codeCurrent = { code, number: 0 };
-      this.codeDict.push(codeCurrent);
-    }
-
+    let codeCurrent = this.getCodeDict(code);
     let pos: posInterface[] =
       position != undefined ? position : [this.setPosition(event)];
-    pos.forEach((el) => {
+    for (const el of pos) {
       if (!this.validEmpty(el)) return;
       if (this.seats.length >= this.thisPlane.capacidadPasajeros) {
         Swal.fire('Error', 'Se ha alcanzado el limite de asientos', 'error');
-        return;
+        break;
       }
       codeCurrent!.number++;
       this.seats.push({
@@ -672,7 +683,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         clase: this.secCurrent!,
         Codigo: `${code}-${codeCurrent!.number}`,
       });
-    });
+    }
 
     this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
   }
@@ -717,7 +728,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     seat.forEach((el) => {
       const code = el.Codigo?.split('-')[0];
       if (!CODE_AFFECTED.includes(code!)) CODE_AFFECTED.push(code!);
-      this.codeDict.find((el) => el.code == code)!.number--;
+      let codeCurrent = this.getCodeDict(code!);
+      codeCurrent.number--;
       this.seats = this.seats.filter((s) => s != el);
     });
     CODE_AFFECTED.forEach((code) => {
@@ -788,8 +800,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
 
     const final: posInterface[] = [];
     const SQUARE = this.makeCordSquare(seat);
-    const tam = Math.ceil(this.sizePixelSize);
-    const mediaTam = Math.ceil(tam / 2);
+    const tam = this.sizePixelSize;
+    const mediaTam = tam / 2;
 
     SQUARE.x += mediaTam;
     SQUARE.y += mediaTam;
@@ -797,6 +809,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     SQUARE.height -= mediaTam;
     for (let x = SQUARE.x; x < SQUARE.x + SQUARE.width; x += tam) {
       for (let y = SQUARE.y; y < SQUARE.y + SQUARE.height; y += tam) {
+        //let newPos = this.fitAtGrid(x, y);
         const newPos = this.convertToPorc({ x, y });
         final.push(newPos);
       }
@@ -840,6 +853,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   }
 
   convertToPx(pos: posInterface): posInterface {
+    pos = JSON.parse(JSON.stringify(pos));
     const { height, width } = this.getCanvas;
     return {
       x: (pos.x / 100) * width,
@@ -847,10 +861,25 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     };
   }
   convertToPorc(pos: posInterface): posInterface {
+    pos = JSON.parse(JSON.stringify(pos));
     const { height, width } = this.getCanvas;
     return {
       x: (pos.x / width) * 100,
       y: (pos.y / height) * 100,
     };
+  }
+
+  countCodeSeats(code: string): number {
+    return this.seats.filter((el) => el.Codigo?.startsWith(code)).length;
+  }
+  getCodeDict(code: string): codeDictionary {
+    let codeCurrent: codeDictionary | undefined = this.codeDict.find(
+      (el) => el.code == code
+    );
+    if (codeCurrent) return codeCurrent;
+
+    codeCurrent = { code, number: this.countCodeSeats(code) };
+    this.codeDict.push(codeCurrent);
+    return codeCurrent;
   }
 }

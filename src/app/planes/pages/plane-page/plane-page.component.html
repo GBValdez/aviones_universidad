@@ -42,7 +42,25 @@
     >
       Insertar imagen
     </button> -->
-    <section></section>
+    <section>
+      <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">
+        Información
+      </h2>
+      <div>
+        <p
+          class="mt-[5px] text-gray-100 font-black text-base mb-[5px] flex flex-wrap items-center"
+        >
+          <span>Cantidad de asientos:</span>
+          <span class="ml-1"> {{ seats.length }}</span>
+        </p>
+        <p
+          class="mt-[5px] text-gray-100 font-black text-base mb-[5px] flex flex-wrap items-center"
+        >
+          <span>Nota:</span>
+          <span class="ml-1"> {{ messageHelp }}</span>
+        </p>
+      </div>
+    </section>
     @if (img) {
     <h2 class="mt-[5px] text-gray-100 font-black text-xl mb-[5px]">Acciones</h2>
     <div class="mt-[5px]">
@@ -357,6 +375,8 @@
       [ngClass]="{
         'cursor-move': opt() == 'move',
         'cursor-pointer': opt() == 'delete',
+        'pointer-events-none': opt() == 'navigation' || modePincel() != 'point',
+        'pointer-events-auto': opt() != 'navigation' && modePincel() == 'point'
       }"
       [ngStyle]="{
         left: seat.position.x + '%',
