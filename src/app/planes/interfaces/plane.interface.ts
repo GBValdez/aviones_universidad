@@ -45,3 +45,8 @@ export interface dimSquareInterface {
   width: number;
   height: number;
 }
+
+export interface codeDictionary {
+  code: string;
+  number: number;
+}
