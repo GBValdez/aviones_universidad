@@ -81,7 +81,7 @@ import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-le
   styleUrl: './plane-page.component.scss',
 })
 export class PlanePageComponent implements AfterViewInit, OnInit {
-  messageHelp: string = '';
+  messageHelp: string = 'Sin notas';
   codeDict: codeDictionary[] = [];
   modePincel: WritableSignal<string> = signal('point');
   closeSidenav: boolean = false;
@@ -94,7 +94,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
 
-  dragTouchSeat?: seatPosInterface;
+  dragTouchSeat?: seatPosInterface[];
   posOrigin?: posInterface;
   translatePos: posInterface = { x: 0, y: 0 };
   sizePixelSize: number = 10;
@@ -120,6 +120,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   ) {
     effect(
       () => {
+        this.dragTouchSeat = undefined;
         switch (this.opt()) {
           case 'add':
             this.matSnack.open('Modo añadir sillas', 'Ok', { duration: 2000 });
@@ -142,6 +143,20 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         allowSignalWrites: true,
       }
     );
+    effect(() => {
+      this.dragTouchSeat = undefined;
+      switch (this.modePincel()) {
+        case 'point':
+          this.matSnack.open('Pincel punto', 'Ok', { duration: 2000 });
+          break;
+        case 'square':
+          this.matSnack.open('Pincel cuadrado', 'Ok', { duration: 2000 });
+          break;
+        case 'line':
+          this.matSnack.open('Pincel línea', 'Ok', { duration: 2000 });
+          break;
+      }
+    });
     effect(() => {
       matSnack.open(`Zoom: ${this.zoom()}`, 'Ok', { duration: 2000 });
     });
@@ -274,13 +289,11 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     this.navigateMove(event);
     if (this.opt() != 'move') return;
     if (this.dragTouchSeat == undefined) return;
+    this.dragMoveSeat(event);
+    if (this.modePincel() != 'point') return;
     const newPos = this.setPosition(event);
-    if (
-      !this.seats.some(
-        (s) => s.position.x == newPos.x && s.position.y == newPos.y
-      )
-    ) {
-      this.dragTouchSeat.position = newPos;
+    if (this.validEmpty(newPos)) {
+      this.dragTouchSeat[0].position = newPos;
       this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
     }
   }
@@ -295,15 +308,19 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     }
   }
   endInteraction(event: MouseEvent | Touch): void {
-    //this.reMakeCanvas();
+    this.messageHelp = 'Sin notas';
     const endPos = this.setPosition(event);
-    this.endSquare(event, endPos);
-    this.endLine(event, endPos);
+    let endMove = false;
+    if (this.dragTouchSeat != undefined && this.opt() == 'move') {
+      this.dragTouchSeat = undefined;
+      endMove = true;
+    }
+    if (!endMove) {
+      this.endSquare(event, endPos);
+      this.endLine(event, endPos);
+    }
+
     this.posOrigin = undefined;
-    if (this.opt() != 'move') return;
-    if (this.dragTouchSeat == undefined) return;
-    this.dragTouchSeat.position = this.setPosition(event);
-    this.dragTouchSeat = undefined;
   }
 
   //Click o touch en silla
@@ -319,7 +336,8 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     if (this.opt() == 'delete' && this.modePincel() != 'point') return;
     this.deletingSeat([seat]);
     if (this.opt() != 'move') return;
-    this.dragTouchSeat = seat;
+    if (this.modePincel() != 'point') return;
+    this.dragTouchSeat = [seat];
     event.preventDefault();
   }
 
@@ -334,22 +352,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         break;
 
       case 'delete':
-        const SQUARE = this.makeCordSquare(endPos);
-        const seatDelete = this.seats.filter((el) => {
-          const { x, y } = this.convertToPx({
-            x: el.position.x,
-            y: el.position.y,
-          });
-          return (
-            x >= SQUARE.x &&
-            x <= SQUARE.x + SQUARE.width &&
-            y >= SQUARE.y &&
-            y <= SQUARE.y + SQUARE.height
-          );
-        });
-        this.deletingSeat(seatDelete);
-        break;
-      default:
+      case 'move':
+        const seatsDelete = this.detectSquare(endPos);
+        this.startMove(seatsDelete);
+        this.deletingSeat(seatsDelete);
         break;
     }
   }
@@ -362,58 +368,136 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         this.addSeat(event, pos);
         break;
       case 'delete':
-        const originPx: posInterface = this.convertToPx(this.posOrigin);
-        const endPx = this.convertToPx(endPos);
-        const delayX = endPx.x - originPx!.x;
-        const delayY = endPx.y - originPx!.y;
-        const slope = delayY / delayX;
-        const Max: posInterface = {
-          x: Math.max(originPx.x, endPx.x),
-          y: Math.max(originPx.y, endPx.y),
-        };
-        const Min: posInterface = {
-          x: Math.min(originPx.x, endPx.x),
-          y: Math.min(originPx.y, endPx.y),
-        };
-        const MAKE_EQ = (number: number, axis: 'x' | 'y'): posInterface => {
-          let x = number,
-            y = number;
-          if (axis == 'x') {
-            y = slope * (number - originPx!.x) + originPx!.y;
-          } else {
-            x = (number - originPx!.y) / slope + originPx!.x;
-            if (slope == 0) x = originPx!.x;
-          }
-          return { x, y };
-        };
-        const tam = this.sizePixelSize / 2;
-        const seats = this.seats.filter((el) => {
-          const pos = this.convertToPx(el.position);
-          const POINTS: posInterface[] = [];
-          POINTS.push(MAKE_EQ(pos.x + tam, 'x'));
-          POINTS.push(MAKE_EQ(pos.y + tam, 'y'));
-          POINTS.push(MAKE_EQ(pos.x - tam, 'x'));
-          POINTS.push(MAKE_EQ(pos.y - tam, 'y'));
-
-          return POINTS.some((point, index) => {
-            const R =
-              point.x >= pos.x - tam &&
-              point.x <= pos.x + tam &&
-              point.y >= pos.y - tam &&
-              point.y <= pos.y + tam &&
-              point.x >= Min.x &&
-              point.x <= Max.x &&
-              point.y >= Min.y &&
-              point.y <= Max.y;
-
-            return R;
-          });
-        });
+      case 'move':
+        const seats = this.detectLine(endPos);
+        this.startMove(seats);
         this.deletingSeat(seats);
         break;
       default:
         break;
     }
+  }
+  startMove(seats: seatPosInterface[]) {
+    if (this.opt() != 'move') return;
+    if (this.dragTouchSeat) return;
+    this.dragTouchSeat = seats;
+  }
+
+  dragMoveSeat(event: MouseEvent | Touch) {
+    if (!this.posOrigin) return;
+    if (this.modePincel() == 'point') return;
+
+    const newPos = this.setPosition(event);
+
+    let translate = {
+      x: newPos.x - this.posOrigin.x,
+      y: newPos.y - this.posOrigin.y,
+    };
+    this.posOrigin = newPos;
+
+    translate = this.convertToPx(translate);
+
+    const distance = Math.sqrt(translate.x ** 2 + translate.y ** 2);
+    if (distance === 0) {
+      console.warn(
+        'La distancia es 0, no se puede normalizar el vector de traslación.'
+      );
+      return;
+    }
+
+    translate.x = (translate.x / distance) * 3;
+    translate.y = (translate.y / distance) * 3;
+    let positions: Map<posInterface, posInterface> = new Map();
+    let complete = true;
+    for (const el of this.dragTouchSeat!) {
+      let pos = this.convertToPx(el.position);
+      pos.x += translate.x;
+      pos.y += translate.y;
+      pos = this.fitAtGrid(pos.x, pos.y);
+      pos = this.convertToPorc(pos);
+      if (this.validEmpty(pos)) {
+        positions.set(el.position, pos);
+      } else {
+        complete = false;
+        break;
+      }
+    }
+    if (complete) {
+      positions.forEach((value, key) => {
+        this.seats.find((el) => el.position == key)!.position = value;
+      });
+    }
+  }
+
+  detectSquare(endPos: posInterface): seatPosInterface[] {
+    const SQUARE = this.makeCordSquare(endPos);
+    const seats: seatPosInterface[] = this.seats.filter((el) => {
+      const { x, y } = this.convertToPx({
+        x: el.position.x,
+        y: el.position.y,
+      });
+      return (
+        x >= SQUARE.x &&
+        x <= SQUARE.x + SQUARE.width &&
+        y >= SQUARE.y &&
+        y <= SQUARE.y + SQUARE.height
+      );
+    });
+    return seats;
+  }
+  detectLine(endPos: posInterface): seatPosInterface[] {
+    const originPx: posInterface = this.convertToPx(this.posOrigin!);
+    const endPx = this.convertToPx(endPos);
+    const Max: posInterface = {
+      x: Math.max(originPx.x, endPx.x),
+      y: Math.max(originPx.y, endPx.y),
+    };
+    const Min: posInterface = {
+      x: Math.min(originPx.x, endPx.x),
+      y: Math.min(originPx.y, endPx.y),
+    };
+
+    const delayX = endPx.x - originPx!.x;
+    const delayY = endPx.y - originPx!.y;
+    const slope = delayY / delayX;
+
+    const MAKE_EQ = (number: number, axis: 'x' | 'y'): posInterface => {
+      let x = number,
+        y = number;
+      if (axis == 'x') {
+        y = slope * (number - originPx!.x) + originPx!.y;
+      } else {
+        x = (number - originPx!.y) / slope + originPx!.x;
+        if (slope == 0) x = originPx!.x;
+      }
+      return { x, y };
+    };
+    const tam = this.sizePixelSize / 2;
+    const seats = this.seats.filter((el) => {
+      const pos = this.convertToPx(el.position);
+      if (
+        pos.x + tam < Min.x ||
+        pos.x - tam > Max.x ||
+        pos.y + tam < Min.y ||
+        pos.y - tam > Max.y
+      )
+        return false;
+      const POINTS: posInterface[] = [];
+      POINTS.push(MAKE_EQ(pos.x + tam, 'x'));
+      POINTS.push(MAKE_EQ(pos.y + tam, 'y'));
+      POINTS.push(MAKE_EQ(pos.x - tam, 'x'));
+      POINTS.push(MAKE_EQ(pos.y - tam, 'y'));
+
+      return POINTS.some((point, index) => {
+        const R =
+          point.x >= pos.x - tam &&
+          point.x <= pos.x + tam &&
+          point.y >= pos.y - tam &&
+          point.y <= pos.y + tam;
+        return R;
+      });
+    });
+    return seats;
   }
 
   validatorOffset: ValidatorFn = (control) => {
@@ -502,16 +586,16 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         }
 
         //Dibujar cuadrado
-        if (this.posOrigin && posFinale)
+        if (this.posOrigin && posFinale && this.dragTouchSeat == undefined)
           switch (this.modePincel()) {
             case 'square':
               this.ctx.fillStyle = '#28A0A7';
               const SQUARE = this.makeCordSquare(posFinale);
               const HEIGHT_SQUARE = SQUARE.height / this.sizePixelSize;
               const WIDTH_SQUARE = SQUARE.width / this.sizePixelSize;
-              this.messageHelp = `${WIDTH_SQUARE} X ${HEIGHT_SQUARE}   = ${
-                HEIGHT_SQUARE * WIDTH_SQUARE
-              }`;
+              this.messageHelp = `${Math.round(WIDTH_SQUARE)} X ${Math.round(
+                HEIGHT_SQUARE
+              )}   = ${Math.round(HEIGHT_SQUARE) * Math.round(WIDTH_SQUARE)}`;
               this.ctx.fillRect(
                 SQUARE.x,
                 SQUARE.y,
@@ -527,13 +611,17 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
               let number = 0;
               const M =
                 (posFinalePx.y - originPx.y) / (posFinalePx.x - originPx.x);
-              if (Math.abs(M) < 1)
-                number =
-                  Math.abs(posFinalePx.x - originPx.x) / this.sizePixelSize;
-              else
-                number =
-                  Math.abs(posFinalePx.y - originPx.y) / this.sizePixelSize;
-              this.messageHelp = `${Math.ceil(number)}`;
+              if (Math.abs(M) < 1) {
+                number = (posFinalePx.x - originPx.x) / this.sizePixelSize;
+                number = Math.round(number);
+                posFinalePx.x = number * this.sizePixelSize + originPx.x;
+              } else {
+                number = (posFinalePx.y - originPx.y) / this.sizePixelSize;
+                number = Math.round(number);
+                posFinalePx.y = number * this.sizePixelSize + originPx.y;
+              }
+              number = Math.abs(number);
+              this.messageHelp = `Estimado: ${number}`;
               this.ctx.moveTo(originPx.x, originPx.y);
               this.ctx.lineTo(posFinalePx.x, posFinalePx.y);
               this.ctx.strokeStyle = '#28A0A7'; // Establece el color de la línea
@@ -690,15 +778,17 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
 
   validEmpty(pos: posInterface): boolean {
     const elReal = this.convertToPx(pos);
-    return !this.seats.some((seat) => {
+    const tam = Math.floor(this.sizePixelSize);
+    let seats = this.seats;
+    if (this.dragTouchSeat)
+      seats = seats.filter((el) => !this.dragTouchSeat!.includes(el));
+    return !seats.some((seat) => {
       const { x, y } = this.convertToPx(seat.position);
-      const tam = Math.floor(this.sizePixelSize);
-      return (
-        x > elReal.x - tam &&
-        x < elReal.x + tam &&
-        y > elReal.y - tam &&
-        y < elReal.y + tam
-      );
+      if (elReal.x - tam >= x) return false;
+      if (elReal.x + tam <= x) return false;
+      if (elReal.y - tam >= y) return false;
+      if (elReal.y + tam <= y) return false;
+      return true;
     });
   }
 
@@ -828,23 +918,38 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       let newPos = this.convertToPorc(this.fitAtGrid(x, y));
       final.push(newPos);
     };
-    const tam = Math.ceil(this.sizePixelSize);
+    const tam = this.sizePixelSize;
+    const mediaTam = tam / 2;
     if (Math.abs(slope) < 1) {
       const step = deltaX > 0 ? tam : -tam;
+      posReal.x = Math.ceil(deltaX / tam) * tam;
+      posReal.x += originReal.x;
+      if (!this.fitToGrid) {
+        posReal.x += mediaTam * -Math.sign(deltaX);
+        originReal.x += mediaTam * Math.sign(deltaX);
+      }
       for (
         let x = originReal.x;
         deltaX > 0 ? x <= posReal.x : x >= posReal.x;
         x += step
       ) {
+        console.log('xd');
         addPointToFinal(x, slope * (x - originReal.x) + originReal.y);
       }
     } else {
       const step = deltaY > 0 ? tam : -tam;
+      posReal.y = Math.ceil(deltaY / tam) * tam;
+      posReal.y += originReal.y;
+      if (!this.fitToGrid) {
+        posReal.y += mediaTam * -Math.sign(deltaY);
+        originReal.y += mediaTam * Math.sign(deltaY);
+      }
       for (
         let y = originReal.y;
         deltaY > 0 ? y <= posReal.y : y >= posReal.y;
         y += step
       ) {
+        console.log('yd');
         addPointToFinal((y - originReal.y) / slope + originReal.x, y);
       }
     }
@@ -855,10 +960,12 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   convertToPx(pos: posInterface): posInterface {
     pos = JSON.parse(JSON.stringify(pos));
     const { height, width } = this.getCanvas;
-    return {
-      x: (pos.x / 100) * width,
-      y: (pos.y / 100) * height,
-    };
+    const x = (pos.x / 100) * width;
+    const y = (pos.y / 100) * height;
+    if (isNaN(x) || isNaN(y)) {
+      console.warn('Conversión a píxeles fallida:', pos, { width, height });
+    }
+    return { x, y };
   }
   convertToPorc(pos: posInterface): posInterface {
     pos = JSON.parse(JSON.stringify(pos));
@@ -881,5 +988,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
     codeCurrent = { code, number: this.countCodeSeats(code) };
     this.codeDict.push(codeCurrent);
     return codeCurrent;
+  }
+  getOpacity(pos: seatPosInterface): number {
+    if (this.opt() != 'move') return 1;
+    if (this.dragTouchSeat == undefined) return 1;
+    return this.dragTouchSeat.includes(pos) ? 1 : 0.5;
   }
 }
