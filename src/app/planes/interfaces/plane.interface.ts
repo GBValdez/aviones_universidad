@@ -20,6 +20,11 @@ export interface posInterface {
   y: number;
 }
 
+export interface squarePosInterface {
+  init: posInterface;
+  end: posInterface;
+}
+
 export interface modalFinishSeatInterface {
   mySeats: mySeatPosInterface[];
   clases: vueloClaseDto[];

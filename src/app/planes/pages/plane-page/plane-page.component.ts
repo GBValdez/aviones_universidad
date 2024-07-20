@@ -15,6 +15,7 @@ import {
   dimSquareInterface,
   posInterface,
   seatPosInterface,
+  squarePosInterface,
 } from '@plane/interfaces/plane.interface';
 import { BtnUploadFileModule } from '@utils/btn-upload-file/btn-upload-file.module';
 import { MatIconModule } from '@angular/material/icon';
@@ -82,7 +83,7 @@ import { OnlyNumberLetterInputDirective } from '@utils/directivas/only-number-le
 })
 export class PlanePageComponent implements AfterViewInit, OnInit {
   messageHelp: string = 'Sin notas';
-  codeDict: codeDictionary[] = [];
+  private codeDict: codeDictionary[] = [];
   modePincel: WritableSignal<string> = signal('point');
   closeSidenav: boolean = false;
   seeGrid: boolean = true;
@@ -93,7 +94,6 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   timeOutSize: any;
   opt: WritableSignal<string> = signal('navigation');
   zoom: WritableSignal<number> = signal(1);
-
   dragTouchSeat?: seatPosInterface[];
   posOrigin?: posInterface;
   translatePos: posInterface = { x: 0, y: 0 };
@@ -102,6 +102,10 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   sectionsSelected: catalogueInterface[] = [];
   formSect: FormControl = new FormControl();
   secCurrent?: catalogueInterface;
+  timingMove?: any;
+  areasPermit: squarePosInterface[] = [
+    { init: { x: 45.5, y: 10 }, end: { x: 54, y: 75 } },
+  ];
 
   formCode: FormGroup = this.fb.group({
     code: ['', Validators.required],
@@ -187,6 +191,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       asientos: SEATS_CREATION,
       sizeSeat: this.form.get('sizeSeat')!.value,
     };
+    console.log(SEND_BODY);
     this.seatsSvc.saveSeats(SEND_BODY, this.idPlane).subscribe((res) => {
       this.localStorageSvc.removeItem('seats');
       this.localStorageSvc.removeItem('imgBackPlane');
@@ -384,6 +389,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
   }
 
   dragMoveSeat(event: MouseEvent | Touch) {
+    if (this.timingMove != undefined) return;
     if (!this.posOrigin) return;
     if (this.modePincel() == 'point') return;
 
@@ -405,8 +411,15 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       return;
     }
 
-    translate.x = (translate.x / distance) * 3;
-    translate.y = (translate.y / distance) * 3;
+    translate.x = translate.x / distance;
+    translate.y = translate.y / distance;
+    if (this.fitToGrid) {
+      translate.x = this.sizePixelSize * Math.sign(translate.x);
+      translate.y = this.sizePixelSize * Math.sign(translate.y);
+    } else {
+      translate.x *= 4;
+      translate.y *= 4;
+    }
     let positions: Map<posInterface, posInterface> = new Map();
     let complete = true;
     for (const el of this.dragTouchSeat!) {
@@ -426,7 +439,11 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       positions.forEach((value, key) => {
         this.seats.find((el) => el.position == key)!.position = value;
       });
+      this.localStorageSvc.setItem('seats', this.seats, 0.25 / 24);
     }
+    this.timingMove = setTimeout(() => {
+      this.timingMove = undefined;
+    }, 16);
   }
 
   detectSquare(endPos: posInterface): seatPosInterface[] {
@@ -568,8 +585,18 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         this.getCanvas.width = container.clientWidth;
         const { height, width } = this.getCanvas;
         this.ctx.clearRect(0, 0, width, height);
-        const tam = (this.form.get('sizeSeat')!.value / 100) * width;
+        if (this.areasPermit.length > 0) {
+          this.areasPermit.forEach((el) => {
+            const init = this.convertToPx(el.init);
+            const end = this.convertToPx(el.end);
+            this.ctx.fillStyle = 'rgba(178, 0, 0, 0.2)';
+            this.ctx.fillRect(init.x, init.y, end.x - init.x, end.y - init.y);
+          });
+        }
+
         if (this.seeGrid) {
+          const tam = (this.form.get('sizeSeat')!.value / 100) * width;
+
           const { xDes, yDes } = this.formDisplace.value;
           this.ctx.beginPath();
           this.ctx.lineWidth = 0.5;
@@ -589,7 +616,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         if (this.posOrigin && posFinale && this.dragTouchSeat == undefined)
           switch (this.modePincel()) {
             case 'square':
-              this.ctx.fillStyle = '#28A0A7';
+              this.ctx.fillStyle = 'rgba(40, 160, 167, 0.5)';
               const SQUARE = this.makeCordSquare(posFinale);
               const HEIGHT_SQUARE = SQUARE.height / this.sizePixelSize;
               const WIDTH_SQUARE = SQUARE.width / this.sizePixelSize;
@@ -624,7 +651,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
               this.messageHelp = `Estimado: ${number}`;
               this.ctx.moveTo(originPx.x, originPx.y);
               this.ctx.lineTo(posFinalePx.x, posFinalePx.y);
-              this.ctx.strokeStyle = '#28A0A7'; // Establece el color de la línea
+              this.ctx.strokeStyle = 'rgba(40, 160, 167, 0.5)'; // Establece el color de la línea
               this.ctx.lineWidth = 3; // Asegúrate de que el ancho de la línea sea suficiente para verla
               this.ctx.stroke(); // Dibuja la línea
               break;
@@ -710,7 +737,6 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
         });
         this.seats = res.items.map((seat) => {
           const [x, y] = seat.posicion.split('|').map(Number);
-          console.log(seat);
           return { position: { x, y }, clase: seat.clase, Codigo: seat.codigo };
         });
       });
@@ -725,6 +751,7 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
       })
       .subscribe((res) => {
         if (res.items.length == 0) return;
+        console.log('timano', res.items[0].tamAsientoPorc);
         this.form.get('sizeSeat')!.setValue(res.items[0].tamAsientoPorc);
         this.thisPlane = res.items[0];
         this.modifyTam();
@@ -778,10 +805,22 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
 
   validEmpty(pos: posInterface): boolean {
     const elReal = this.convertToPx(pos);
-    const tam = Math.floor(this.sizePixelSize);
+    // const tam = Math.floor(this.sizePixelSize);
+    const tam = this.form.get('sizeSeat')!.value;
     let seats = this.seats;
     if (this.dragTouchSeat)
       seats = seats.filter((el) => !this.dragTouchSeat!.includes(el));
+
+    const inArea = this.areasPermit.some((el) => {
+      console.log(el);
+      console.log(pos);
+      if (pos.x >= el.end.x) return false;
+      if (pos.x <= el.init.x) return false;
+      if (pos.y >= el.end.y) return false;
+      if (pos.y <= el.init.y) return false;
+      return true;
+    });
+    if (!inArea) return false;
     return !seats.some((seat) => {
       const { x, y } = this.convertToPx(seat.position);
       if (elReal.x - tam >= x) return false;
