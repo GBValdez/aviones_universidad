@@ -805,15 +805,12 @@ export class PlanePageComponent implements AfterViewInit, OnInit {
 
   validEmpty(pos: posInterface): boolean {
     const elReal = this.convertToPx(pos);
-    // const tam = Math.floor(this.sizePixelSize);
-    const tam = this.form.get('sizeSeat')!.value;
+    const tam = Math.floor(this.sizePixelSize);
     let seats = this.seats;
     if (this.dragTouchSeat)
       seats = seats.filter((el) => !this.dragTouchSeat!.includes(el));
 
     const inArea = this.areasPermit.some((el) => {
-      console.log(el);
-      console.log(pos);
       if (pos.x >= el.end.x) return false;
       if (pos.x <= el.init.x) return false;
       if (pos.y >= el.end.y) return false;
