@@ -74,17 +74,8 @@ export class BuyTicketComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.clientId = this.authSvc.getAuth()?.clientId || 0;
-    this.vueloSvc.startConnection().then(() => {
-      this.vueloSvc.joinGroup(this.idFly);
-      this.vueloSvc.addReceiveSeatSelection();
-    });
-    this.idFly = this.routerAct.snapshot.params['id'];
 
-    this.vueloSvc.getSeat().subscribe((res) => {
-      if (res) {
-        this.makeListSeats(res);
-      }
-    });
+    this.idFly = this.routerAct.snapshot.params['id'];
   }
   makeListSeats(tickets: boletoDto[]): void {
     this.seats.forEach((seat) => {
@@ -209,6 +200,16 @@ export class BuyTicketComponent implements AfterViewInit, OnInit, OnDestroy {
           );
         },
       };
+      this.vueloSvc.startConnection().then(() => {
+        this.vueloSvc.joinGroup(this.idFly);
+        this.vueloSvc.addReceiveSeatSelection();
+      });
+      this.vueloSvc.getSeat().subscribe((res) => {
+        if (res) {
+          console.log('amigo');
+          this.makeListSeats(res);
+        }
+      });
     });
   }
 
