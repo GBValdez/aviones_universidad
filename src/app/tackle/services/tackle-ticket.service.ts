@@ -5,6 +5,8 @@ import { environment } from '@env/environment';
 import {
   ticketBodyDto,
   ticketCompleteDto,
+  ticketDto,
+  ticketFinDto,
 } from '@plane/interfaces/seats.interface';
 import { fixedQueryParams } from '@utils/utils';
 
@@ -22,23 +24,23 @@ export class TackleTicketService {
       AerolineaId: this.airlineSect.getCurrentAirline()?.id,
     };
     params = fixedQueryParams(params);
-    return this.http.get<ticketCompleteDto>(
-      `${this.url}/getTackleTicket/${ticketEncrypted}`,
+    const DATA: ticketDto = {
+      ticket: ticketEncrypted,
+    };
+    return this.http.post<ticketCompleteDto>(
+      `${this.url}/getTackleTicket`,
+      DATA,
       { params }
     );
   }
-  completeTicket(ticketEncrypted: string, tickets: ticketBodyDto[]) {
+  completeTicket(body: ticketFinDto) {
     let params: any = {
       AerolineaId: this.airlineSect.getCurrentAirline()?.id,
     };
     params = fixedQueryParams(params);
 
-    return this.http.post<any>(
-      `${this.url}/completeTackleTicket/${ticketEncrypted}`,
-      tickets,
-      {
-        params,
-      }
-    );
+    return this.http.post<any>(`${this.url}/completeTackleTicket`, body, {
+      params,
+    });
   }
 }

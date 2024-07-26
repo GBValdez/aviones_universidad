@@ -17,14 +17,14 @@ export const catalogueData: CatalogueRoutesInterface[] = [
     title: 'Modelo Avion',
     name: 'MODELO_AV',
   },
-  {
-    title: 'Puestos',
-    name: 'PUESTOS',
-  },
-  {
-    title: 'Clases de asiento de avion',
-    name: 'CAA',
-  },
+  // {
+  //   title: 'Puestos',
+  //   name: 'PUESTOS',
+  // },
+  // {
+  //   title: 'Clases de asiento de avion',
+  //   name: 'CAA',
+  // },
   // {
   //   title: 'Estado de boleto',
   //   name: 'EB',
@@ -33,8 +33,8 @@ export const catalogueData: CatalogueRoutesInterface[] = [
     title: 'Zona horaria',
     name: 'ZHORARIA',
   },
-  {
-    title: 'Roles',
-    name: 'rol',
-  },
+  // {
+  //   title: 'Roles',
+  //   name: 'rol',
+  // },
 ];

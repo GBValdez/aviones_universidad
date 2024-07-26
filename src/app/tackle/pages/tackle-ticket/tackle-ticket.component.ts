@@ -156,7 +156,10 @@ export class TackleTicketComponent implements OnInit {
     if (alert.isConfirmed) {
       const DATA: ticketBodyDto[] = this.form.value;
       this.tackleSvc
-        .completeTicket(this.ticketEncrypted!, DATA)
+        .completeTicket({
+          ticketFinish: DATA,
+          ticket: this.ticketEncrypted!,
+        })
         .subscribe(() => {
           Swal.fire({
             text: 'Los boletos han sido abordados',

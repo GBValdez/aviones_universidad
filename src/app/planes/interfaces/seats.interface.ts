@@ -58,3 +58,12 @@ export interface flyWithTicket {
   vuelo: vueloDto;
   boletos: pagDto<boletoDto>;
 }
+
+export interface ticketDto {
+  ticket: string;
+}
+
+export interface ticketFinDto {
+  ticket: string;
+  ticketFinish: ticketBodyDto[];
+}
